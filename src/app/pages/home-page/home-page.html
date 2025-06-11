@@ -1,0 +1,46 @@
+<section class="tw:p-6 tw:space-y-8">
+  <h1 class="tw:text-3xl tw:font-bold tw:text-center">
+    Welcome to TeamConnect
+  </h1>
+
+  <p class="tw:text-center tw:text-gray-600 tw:text-lg">
+    Give feedback, grow together, and have fun as a remote team.
+  </p>
+
+  <div
+    class="tw:flex tw:gap-6 tw:grid-cols-1 sm:tw:grid-cols-2 lg:tw:grid-cols-3"
+  >
+    <!-- Feedback Card -->
+    <mat-card
+      routerLink="/feedback"
+      class="tw:cursor-pointer tw:transition-all tw:shadow-md hover:tw:shadow-xl tw:rounded-2xl tw:p-6 tw:bg-white tw:text-center tw:flex tw:flex-col tw:justify-between tw:h-full"
+    >
+      <h2 class="tw:text-xl tw:font-semibold tw:mb-2">Give Feedback</h2>
+      <p class="tw:text-gray-500">
+        Share appreciation or suggestions with your teammates.
+      </p>
+    </mat-card>
+
+    <!-- Personal Growth Card -->
+    <mat-card
+      routerLink="/growth"
+      class="tw:cursor-pointer tw:transition-all tw:shadow-md hover:tw:shadow-xl tw:rounded-2xl tw:p-6 tw:bg-white tw:text-center tw:flex tw:flex-col tw:justify-between tw:h-full"
+    >
+      <h2 class="tw:text-xl tw:font-semibold tw:mb-2">Personal Growth</h2>
+      <p class="tw:text-gray-500">
+        Track your progress and discover growth opportunities.
+      </p>
+    </mat-card>
+
+    <!-- Team Activities Card -->
+    <mat-card
+      routerLink="/activities"
+      class="tw:cursor-pointer tw:transition-all tw:shadow-md hover:tw:shadow-xl tw:rounded-2xl tw:p-6 tw:bg-white tw:text-center tw:flex tw:flex-col tw:justify-between tw:h-full"
+    >
+      <h2 class="tw:text-xl tw:font-semibold tw:mb-2">Team Activities</h2>
+      <p class="tw:text-gray-500">
+        Have fun with short games and bonding challenges.
+      </p>
+    </mat-card>
+  </div>
+</section>

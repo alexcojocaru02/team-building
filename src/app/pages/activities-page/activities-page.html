@@ -1,0 +1,33 @@
+<section class="tw:p-6 tw:space-y-6">
+  <div class="tw:flex tw:items-center tw:mb-4">
+    <button
+      mat-icnon-button
+      color="primary"
+      class="tw:mr-2"
+      routerLink="/"
+      type="button"
+    >
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <h2 class="tw:text-2xl tw:font-semibold tw:text-center tw:flex-1">
+      Send Feedback
+    </h2>
+  </div>
+
+  <div class="tw:grid tw:grid-cols-1 tw:grid-cols-2 tw:grid-cols-3 tw:gap-6">
+    <mat-card
+      *ngFor="let game of games"
+      class="tw:p-4 tw:rounded-2xl tw:shadow-md tw:flex tw:flex-col tw:justify-between"
+    >
+      <div class="tw:space-y-2">
+        <h3 class="tw:text-xl tw:font-semibold">{{ game.name }}</h3>
+        <p class="tw:text-sm tw:text-gray-600">{{ game.description }}</p>
+      </div>
+      <div class="tw:mt-4 tw:flex tw:justify-end">
+        <button mat-stroked-button color="primary" (click)="openGame(game.url)">
+          Play
+        </button>
+      </div>
+    </mat-card>
+  </div>
+</section>

@@ -1,0 +1,90 @@
+<mat-card
+  class="tw:p-6 tw:max-w-xl tw:mx-auto tw:px-4 tw:py-8 tw:space-y-6 tw:shadow-md tw:rounded-2xl"
+>
+  <div class="tw:flex tw:items-center tw:mb-4">
+    <button
+      mat-icnon-button
+      color="primary"
+      class="tw:mr-2"
+      routerLink="/"
+      type="button"
+    >
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <h2 class="tw:text-2xl tw:font-semibold tw:text-center tw:flex-1">
+      Send Feedback
+    </h2>
+  </div>
+
+  <form
+    [formGroup]="feedbackForm"
+    (ngSubmit)="submitFeedback()"
+    class="tw:space-y-4"
+  >
+    <!-- Select teammate -->
+    <mat-form-field appearance="fill" class="tw:w-full">
+      <mat-label>Select teammate</mat-label>
+      <mat-select formControlName="recipient">
+        <mat-option *ngFor="let user of users" [value]="user.id">
+          {{ user.name }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <!-- How often do you interact? -->
+    <mat-form-field appearance="fill" class="tw:w-full">
+      <mat-label>How often do you interact with this colleague?</mat-label>
+      <mat-select formControlName="interactionFrequency">
+        <mat-option value="daily">Daily</mat-option>
+        <mat-option value="weekly">Weekly</mat-option>
+        <mat-option value="monthly">Monthly</mat-option>
+        <mat-option value="rarely">Rarely</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <!-- Rate collaboration -->
+    <mat-form-field appearance="fill" class="tw:w-full">
+      <mat-label>How would you rate your collaboration?</mat-label>
+      <mat-select formControlName="collaborationRating">
+        <mat-option value="excellent">Excellent</mat-option>
+        <mat-option value="good">Good</mat-option>
+        <mat-option value="average">Average</mat-option>
+        <mat-option value="poor">Poor</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <!-- Strengths -->
+    <mat-form-field appearance="fill" class="tw:w-full">
+      <mat-label>What strengths have you noticed?</mat-label>
+      <textarea
+        matInput
+        rows="2"
+        formControlName="strengths"
+        placeholder="E.g. communication, reliability, creativity..."
+      ></textarea>
+    </mat-form-field>
+
+    <!-- Feedback message -->
+    <mat-form-field appearance="fill" class="tw:w-full">
+      <mat-label>Feedback message</mat-label>
+      <textarea
+        matInput
+        rows="4"
+        formControlName="message"
+        placeholder="Write your feedback here..."
+      ></textarea>
+    </mat-form-field>
+
+    <!-- Submit button -->
+    <div class="tw:flex tw:justify-end">
+      <button
+        mat-raised-button
+        color="primary"
+        type="submit"
+        [disabled]="feedbackForm.invalid"
+      >
+        Submit
+      </button>
+    </div>
+  </form>
+</mat-card>
