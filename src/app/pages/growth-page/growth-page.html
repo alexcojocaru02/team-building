@@ -1,0 +1,103 @@
+<section class="tw:p-6 tw:space-y-6">
+  <div class="tw:flex tw:items-center tw:mb-4">
+    <button
+      mat-icnon-button
+      color="primary"
+      class="tw:mr-2"
+      routerLink="/"
+      type="button"
+    >
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <h2 class="tw:text-2xl tw:font-semibold tw:text-center tw:flex-1">
+      My Growth
+    </h2>
+  </div>
+
+  <div class="tw:grid tw:grid-cols-1 tw:md:grid-cols-2 tw:gap-6">
+    <div class="tw:space-y-6">
+      <mat-card class="tw:p-6 tw:rounded-2xl tw:shadow tw:space-y-4">
+        <h3 class="tw:text-xl tw:font-semibold">My Growth Goals</h3>
+        <mat-selection-list [(ngModel)]="selectedGoals">
+          <mat-list-option *ngFor="let goal of goals" [value]="goal">
+            {{ goal }}
+          </mat-list-option>
+        </mat-selection-list>
+        <br />
+        <mat-form-field appearance="fill" class="tw:w-full">
+          <mat-label>New goal</mat-label>
+          <input matInput [(ngModel)]="newGoal" placeholder="e.g. Learn RxJS" />
+        </mat-form-field>
+        <button mat-raised-button color="primary" (click)="addGoal()">
+          Add Goal
+        </button>
+      </mat-card>
+    </div>
+    <div class="tw:space-y-6">
+      <mat-card
+        class="tw:p-6 tw:rounded-2xl tw:shadow tw:space-y-4"
+      >
+        <h3 class="tw:text-xl tw:font-semibold">
+          Feedback from Colleagues
+        </h3>
+
+        <div
+          *ngFor="let item of receivedFeedback"
+          class="tw:bg-gray-50 tw:rounded tw:p-4 tw:space-y-2"
+        >
+          <p class="tw:text-sm tw:text-gray-800">
+            <span class="tw:font-medium">From:</span>
+            {{ item.anonymous ? 'Anonymous' : item.from }}
+          </p>
+          <p class="tw:text-sm">
+            <span class="tw:font-medium">Interaction:</span> {{
+            item.interactionFrequency }}
+          </p>
+          <p class="tw:text-sm">
+            <span class="tw:font-medium">Collaboration:</span> {{
+            item.collaborationRating }}
+          </p>
+          <p class="tw:text-sm">
+            <span class="tw:font-medium">Strengths:</span> {{ item.strengths
+            }}
+          </p>
+          <p class="tw:text-sm tw:italic tw:mt-2">
+            "{{ item.message }}"
+          </p>
+        </div>
+      </mat-card>
+      <br />
+      <mat-card class="tw:p-6 tw:rounded-2xl tw:shadow tw:space-y-4">
+        <h3 class="tw:text-xl tw:font-semibold">Personal Impact</h3>
+
+        <!-- Progress Circle -->
+        <div class="tw:flex tw:items-center tw:gap-4">
+          <mat-progress-spinner
+            mode="determinate"
+            [value]="progressValue"
+            color="primary"
+            diameter="80"
+          ></mat-progress-spinner>
+          <div>
+            <p class="tw:text-sm">Overall Growth Progress</p>
+            <p class="tw:text-lg tw:font-semibold">{{ progressValue }}%</p>
+          </div>
+        </div>
+
+        <!-- Bar Chart Mock -->
+        <div>
+          <p class="tw:text-sm tw:mb-2">Impact Metrics</p>
+          <div *ngFor="let item of impactBars" class="tw:mb-2">
+            <p class="tw:text-xs tw:mb-1">{{ item.label }}</p>
+            <div class="tw:bg-gray-200 tw:h-4 tw:rounded">
+              <div
+                class="tw:bg-blue-500 tw:h-full tw:rounded-l"
+                [ngStyle]="{ width: item.value + '%' }"
+              ></div>
+            </div>
+          </div>
+        </div>
+      </mat-card>
+    </div>
+  </div>
+</section>
