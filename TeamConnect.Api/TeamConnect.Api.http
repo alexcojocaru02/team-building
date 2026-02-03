@@ -1,0 +1,6 @@
+@TeamConnect.Api_HostAddress = http://localhost:5217
+
+GET {{TeamConnect.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
