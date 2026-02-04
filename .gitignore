@@ -17,7 +17,7 @@ pnpm-debug.log*
 UI/dist
 UI/tmp
 UI/out-tsc
-UI/.angular
+UI/.angular/
 
 # Env files
 .env
