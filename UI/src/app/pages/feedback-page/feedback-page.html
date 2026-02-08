@@ -1,90 +1,132 @@
-<mat-card
-  class="tw:p-6 tw:max-w-xl tw:mx-auto tw:px-4 tw:py-8 tw:space-y-6 tw:shadow-md tw:rounded-2xl"
->
-  <div class="tw:flex tw:items-center tw:mb-4">
-    <button
-      mat-icnon-button
-      color="primary"
-      class="tw:mr-2"
-      routerLink="/"
-      type="button"
-    >
-      <mat-icon>arrow_back</mat-icon>
-    </button>
-    <h2 class="tw:text-2xl tw:font-semibold tw:text-center tw:flex-1">
-      Send Feedback
-    </h2>
-  </div>
+<section class="tw:min-h-screen tw:bg-gradient-to-br tw:from-blue-50 tw:to-indigo-100 tw:p-6">
+  <div class="tw:max-w-2xl tw:mx-auto">
+    <!-- Header -->
+    <div class="tw:flex tw:items-center tw:mb-8">
+      <button routerLink="/" class="tw:mr-2 tw:text-gray-600 hover:tw:text-gray-900">
+        ← Back
+      </button>
+      <h1 class="tw:text-3xl tw:font-bold tw:text-gray-800">Feedback</h1>
+    </div>
 
-  <form
-    [formGroup]="feedbackForm"
-    (ngSubmit)="submitFeedback()"
-    class="tw:space-y-4"
-  >
-    <!-- Select teammate -->
-    <mat-form-field appearance="fill" class="tw:w-full">
-      <mat-label>Select teammate</mat-label>
-      <mat-select formControlName="recipient">
-        <mat-option *ngFor="let user of users" [value]="user.id">
-          {{ user.name }}
-        </mat-option>
-      </mat-select>
-    </mat-form-field>
-
-    <!-- How often do you interact? -->
-    <mat-form-field appearance="fill" class="tw:w-full">
-      <mat-label>How often do you interact with this colleague?</mat-label>
-      <mat-select formControlName="interactionFrequency">
-        <mat-option value="daily">Daily</mat-option>
-        <mat-option value="weekly">Weekly</mat-option>
-        <mat-option value="monthly">Monthly</mat-option>
-        <mat-option value="rarely">Rarely</mat-option>
-      </mat-select>
-    </mat-form-field>
-
-    <!-- Rate collaboration -->
-    <mat-form-field appearance="fill" class="tw:w-full">
-      <mat-label>How would you rate your collaboration?</mat-label>
-      <mat-select formControlName="collaborationRating">
-        <mat-option value="excellent">Excellent</mat-option>
-        <mat-option value="good">Good</mat-option>
-        <mat-option value="average">Average</mat-option>
-        <mat-option value="poor">Poor</mat-option>
-      </mat-select>
-    </mat-form-field>
-
-    <!-- Strengths -->
-    <mat-form-field appearance="fill" class="tw:w-full">
-      <mat-label>What strengths have you noticed?</mat-label>
-      <textarea
-        matInput
-        rows="2"
-        formControlName="strengths"
-        placeholder="E.g. communication, reliability, creativity..."
-      ></textarea>
-    </mat-form-field>
-
-    <!-- Feedback message -->
-    <mat-form-field appearance="fill" class="tw:w-full">
-      <mat-label>Feedback message</mat-label>
-      <textarea
-        matInput
-        rows="4"
-        formControlName="message"
-        placeholder="Write your feedback here..."
-      ></textarea>
-    </mat-form-field>
-
-    <!-- Submit button -->
-    <div class="tw:flex tw:justify-end">
+    <!-- Tabs -->
+    <div class="tw:flex tw:gap-4 tw:mb-6">
       <button
-        mat-raised-button
-        color="primary"
-        type="submit"
-        [disabled]="feedbackForm.invalid"
+        (click)="activeTab.set('send')"
+        [class.tw:border-b-2]="activeTab() === 'send'"
+        [class.tw:border-blue-600]="activeTab() === 'send'"
+        [class.tw:text-blue-600]="activeTab() === 'send'"
+        class="tw:pb-2 tw:font-semibold tw:text-gray-600 tw:transition"
       >
-        Submit
+        Send Feedback
+      </button>
+      <button
+        (click)="activeTab.set('received')"
+        [class.tw:border-b-2]="activeTab() === 'received'"
+        [class.tw:border-blue-600]="activeTab() === 'received'"
+        [class.tw:text-blue-600]="activeTab() === 'received'"
+        class="tw:pb-2 tw:font-semibold tw:text-gray-600 tw:transition"
+      >
+        Received Feedback
       </button>
     </div>
-  </form>
-</mat-card>
+
+    <!-- Error Message -->
+    @if (errorMessage()) {
+      <div class="tw:mb-6 tw:p-4 tw:bg-red-50 tw:border tw:border-red-200 tw:rounded-lg">
+        <p class="tw:text-red-600">{{ errorMessage() }}</p>
+      </div>
+    }
+
+    <!-- Success Message -->
+    @if (successMessage()) {
+      <div class="tw:mb-6 tw:p-4 tw:bg-green-50 tw:border tw:border-green-200 tw:rounded-lg">
+        <p class="tw:text-green-600">{{ successMessage() }}</p>
+      </div>
+    }
+
+    <!-- Send Feedback Tab -->
+    @if (activeTab() === 'send') {
+      <div class="tw:bg-white tw:rounded-2xl tw:shadow-lg tw:p-6">
+        <h2 class="tw:text-lg tw:font-semibold tw:text-gray-800 tw:mb-4">Share feedback with a colleague</h2>
+        <form (ngSubmit)="submitFeedback()" class="tw:space-y-4">
+          <!-- Select recipient -->
+          <div>
+            <label class="tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:mb-1">
+              Select colleague
+            </label>
+            <select
+              [(ngModel)]="toUserId"
+              name="toUserId"
+              required
+              class="tw:w-full tw:px-4 tw:py-2 tw:border tw:border-gray-300 tw:rounded-lg tw:focus:ring-2 tw:focus:ring-blue-500 tw:focus:border-transparent tw:outline-none"
+            >
+              <option value="">-- Choose a colleague --</option>
+              @for (user of users(); track user.id) {
+                <option [value]="user.id">{{ user.email }}</option>
+              }
+            </select>
+          </div>
+
+          <!-- Feedback message -->
+          <div>
+            <label class="tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:mb-1">
+              Your feedback
+            </label>
+            <textarea
+              [(ngModel)]="feedbackMessage"
+              name="message"
+              placeholder="Share constructive feedback..."
+              rows="5"
+              required
+              class="tw:w-full tw:px-4 tw:py-3 tw:border tw:border-gray-300 tw:rounded-lg tw:focus:ring-2 tw:focus:ring-blue-500 tw:focus:border-transparent tw:outline-none tw:resize-none"
+            ></textarea>
+          </div>
+
+          <!-- Submit button -->
+          <div class="tw:flex tw:justify-end">
+            <button
+              type="submit"
+              [disabled]="isSubmitting() || !toUserId() || !feedbackMessage().trim()"
+              class="tw:px-6 tw:py-2 tw:bg-blue-600 tw:text-white tw:rounded-lg tw:font-semibold hover:tw:bg-blue-700 tw:transition tw:disabled:opacity-50 tw:disabled:cursor-not-allowed"
+            >
+              {{ isSubmitting() ? 'Sending...' : 'Send Feedback' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    }
+
+    <!-- Received Feedback Tab -->
+    @if (activeTab() === 'received') {
+      <div>
+        @if (isLoadingFeedback()) {
+          <div class="tw:flex tw:justify-center tw:py-12">
+            <div class="tw:text-gray-600">Loading feedback...</div>
+          </div>
+        }
+
+        @if (!isLoadingFeedback()) {
+          @if (receivedFeedback().length === 0) {
+            <div class="tw:bg-white tw:rounded-2xl tw:shadow-lg tw:p-8 tw:text-center">
+              <p class="tw:text-gray-500">No feedback received yet.</p>
+            </div>
+          }
+
+          <div class="tw:space-y-4">
+            @for (feedback of receivedFeedback(); track feedback.id) {
+              <div class="tw:bg-white tw:rounded-2xl tw:shadow-lg tw:p-6">
+                <div class="tw:flex tw:items-start tw:justify-between tw:mb-3">
+                  <div>
+                    <p class="tw:font-semibold tw:text-gray-900">From: {{ feedback.fromUserId }}</p>
+                    <p class="tw:text-sm tw:text-gray-500">{{ feedback.createdAt | date: 'short' }}</p>
+                  </div>
+                </div>
+                <p class="tw:text-gray-700">{{ feedback.message }}</p>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    }
+  </div>
+</section>

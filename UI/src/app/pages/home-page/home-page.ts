@@ -1,25 +1,19 @@
 import { Component, inject } from '@angular/core';
-import { MatCardModule } from '@angular/material/card';
-import { MatIconModule } from '@angular/material/icon';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
-import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-home-page',
-  imports: [
-    CommonModule,
-    MatCardModule,
-    RouterModule,
-    MatIconModule,
-    MatProgressSpinnerModule
-  ],
+  standalone: true,
+  imports: [CommonModule, RouterModule],
   templateUrl: './home-page.html',
   styleUrl: './home-page.scss'
 })
 export class HomePage {
-  authService = inject(AuthService);
+  private authService = inject(AuthService);
+
+  currentUser = this.authService.currentUser;
 
   logout(): void {
     this.authService.logout();

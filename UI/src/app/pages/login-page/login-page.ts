@@ -9,6 +9,7 @@ import { LoginDto, RegisterDto } from '../../models/auth.models';
   selector: 'app-login-page',
   templateUrl: './login-page.html',
   styleUrls: ['./login-page.scss'],
+  standalone: true,
   imports: [CommonModule, FormsModule],
 })
 export class LoginPage {
@@ -26,8 +27,7 @@ export class LoginPage {
 
   registerDto: RegisterDto = {
     email: '',
-    password: '',
-    name: ''
+    password: ''
   };
 
   toggleMode(): void {
@@ -53,10 +53,13 @@ export class LoginPage {
       this.authService.register(this.registerDto).subscribe({
         next: () => {
           this.isLoading.set(false);
+          this.errorMessage.set('');
+          // Optionally auto-login or show success message
+          this.isLoginMode.set(true);
         },
         error: (error) => {
           this.isLoading.set(false);
-          this.errorMessage.set(error.error || 'Registration failed. User may already exist.');
+          this.errorMessage.set(error.error?.message || 'Registration failed. User may already exist.');
         }
       });
     }

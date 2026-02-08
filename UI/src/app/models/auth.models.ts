@@ -1,20 +1,24 @@
-export interface LoginDto {
+export interface LoginRequestDto {
   email: string;
   password: string;
 }
 
-export interface RegisterDto {
+export interface RegisterRequestDto {
   email: string;
   password: string;
-  name?: string;
 }
 
-export interface AuthResponse {
+export interface AuthResponseDto {
   token: string;
 }
 
-export interface User {
+export interface UserDto {
   id: string;
   email: string;
-  name?: string;
 }
+
+// Aliases for backward compatibility
+export type LoginDto = LoginRequestDto;
+export type RegisterDto = RegisterRequestDto;
+export type AuthResponse = AuthResponseDto;
+export type User = UserDto;
