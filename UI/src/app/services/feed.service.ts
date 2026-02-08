@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 export interface CreateFeedPostDto {
   content: string;
@@ -19,7 +20,7 @@ export interface FeedPostDto {
 })
 export class FeedService {
   private http = inject(HttpClient);
-  private apiUrl = 'https://localhost:7241/api';
+  private apiUrl = environment.apiUrl;
 
   getPosts(): Observable<FeedPostDto[]> {
     return this.http.get<FeedPostDto[]>(`${this.apiUrl}/feed`);

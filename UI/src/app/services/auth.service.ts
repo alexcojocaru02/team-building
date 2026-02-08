@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, tap } from 'rxjs';
 import { LoginDto, RegisterDto, AuthResponse, User } from '../models/auth.models';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -11,8 +12,7 @@ export class AuthService {
   private http = inject(HttpClient);
   private router = inject(Router);
   
-  // Backend API endpoint
-  private apiUrl = 'https://localhost:7241/api';
+  private apiUrl = environment.apiUrl;
   
   private currentUserSignal = signal<User | null>(null);
   private tokenSignal = signal<string | null>(null);
