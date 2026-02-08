@@ -68,3 +68,81 @@ Use TypeScript best practices.
 Use async/await or RxJS observables cleanly.
 Prefer readable, maintainable code over clever optimizations.
 Add short comments when logic is non-obvious.
+
+
+
+====================================
+AUTH DTOs
+====================================
+
+export interface RegisterRequestDto {
+  email: string;
+  password: string;
+}
+
+export interface LoginRequestDto {
+  email: string;
+  password: string;
+}
+
+export interface AuthResponseDto {
+  token: string;
+}
+
+====================================
+USER DTOs
+====================================
+
+export interface UserDto {
+  id: string;
+  email: string;
+}
+
+====================================
+FEED DTOs
+====================================
+
+export interface CreateFeedPostDto {
+  content: string;
+}
+
+export interface FeedPostDto {
+  id: string;
+  content: string;
+  createdAt: string;
+
+  authorId: string;
+  authorEmail: string;
+}
+
+====================================
+FEEDBACK DTOs (Peer-to-peer)
+====================================
+
+export interface CreateFeedbackDto {
+  toUserId: string;
+  message: string;
+}
+
+export interface FeedbackDto {
+  id: string;
+  fromUserId: string;
+  toUserId: string;
+  message: string;
+  createdAt: string;
+}
+
+====================================
+DASHBOARD DTOs
+====================================
+
+export interface CohesionDashboardDto {
+  totalFeedbacks: number;
+  users: UserFeedbackStatsDto[];
+}
+
+export interface UserFeedbackStatsDto {
+  userId: string;
+  email: string;
+  feedbackReceived: number;
+}
