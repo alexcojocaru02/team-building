@@ -3,6 +3,7 @@ using TeamConnect.Api.Shared.DTOs;
 
 namespace TeamConnect.Api.Modules.Auth
 {
+    [Route("api/auth")]
     public class AuthController : ControllerBase
     {
         private readonly AuthService _auth;
