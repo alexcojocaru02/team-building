@@ -1,7 +1,9 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { AuthService } from '../../services/auth.service';
+import { ICONS } from '../../shared/icons';
 
 @Component({
   selector: 'app-home-page',
@@ -12,8 +14,15 @@ import { AuthService } from '../../services/auth.service';
 })
 export class HomePage {
   private authService = inject(AuthService);
+  private sanitizer = inject(DomSanitizer);
 
   currentUser = this.authService.currentUser;
+
+  icons = {
+    feed: this.sanitizer.bypassSecurityTrustHtml(ICONS.feed),
+    feedback: this.sanitizer.bypassSecurityTrustHtml(ICONS.feedback),
+    dashboard: this.sanitizer.bypassSecurityTrustHtml(ICONS.dashboard)
+  };
 
   logout(): void {
     this.authService.logout();

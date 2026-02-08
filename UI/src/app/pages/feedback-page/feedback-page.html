@@ -2,7 +2,7 @@
   <div class="tw:max-w-2xl tw:mx-auto">
     <!-- Header -->
     <div class="tw:flex tw:items-center tw:mb-8">
-      <button routerLink="/" class="tw:mr-2 tw:text-gray-600 hover:tw:text-gray-900">
+      <button routerLink="/" class="tw:mr-2 tw:text-gray-600 tw:hover:text-gray-900">
         ← Back
       </button>
       <h1 class="tw:text-3xl tw:font-bold tw:text-gray-800">Feedback</h1>
@@ -87,7 +87,7 @@
             <button
               type="submit"
               [disabled]="isSubmitting() || !toUserId() || !feedbackMessage().trim()"
-              class="tw:px-6 tw:py-2 tw:bg-blue-600 tw:text-white tw:rounded-lg tw:font-semibold hover:tw:bg-blue-700 tw:transition tw:disabled:opacity-50 tw:disabled:cursor-not-allowed"
+              class="tw:px-6 tw:py-2 tw:bg-blue-600 tw:text-white tw:rounded-lg tw:font-semibold tw:hover:bg-blue-700 tw:transition tw:disabled:opacity-50 tw:disabled:cursor-not-allowed"
             >
               {{ isSubmitting() ? 'Sending...' : 'Send Feedback' }}
             </button>

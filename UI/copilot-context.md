@@ -69,7 +69,8 @@ Use async/await or RxJS observables cleanly.
 Prefer readable, maintainable code over clever optimizations.
 Add short comments when logic is non-obvious.
 
-
+Aditional notes:
+Tailwind uses tw: prefix (eg: tw:grid)
 
 ====================================
 AUTH DTOs

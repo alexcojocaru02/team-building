@@ -11,21 +11,21 @@
       </div>
       <button
         (click)="logout()"
-        class="tw:px-6 tw:py-2 tw:bg-red-600 tw:text-white tw:rounded-lg tw:font-semibold hover:tw:bg-red-700 tw:transition"
+        class="tw:px-6 tw:py-2 tw:bg-red-600 tw:text-white tw:rounded-lg tw:font-semibold tw:hover:bg-red-700 tw:transition"
       >
         Logout
       </button>
     </div>
 
     <!-- Main Navigation Cards -->
-    <div class="tw:grid tw:grid-cols-1 md:tw:grid-cols-2 lg:tw:grid-cols-3 tw:gap-6">
+    <div class="tw:grid tw:grid-cols-1 tw:md:grid-cols-2 tw:lg:grid-cols-3 tw:gap-6">
       <!-- Feed Card -->
       <a
         routerLink="/feed"
-        class="tw:bg-white tw:rounded-2xl tw:shadow-lg hover:tw:shadow-xl tw:p-8 tw:transition tw:transform hover:tw:-translate-y-1 tw:cursor-pointer tw:flex tw:flex-col tw:justify-between tw:h-full"
+        class="tw:bg-white tw:rounded-2xl tw:shadow-lg tw:hover:shadow-xl tw:p-8 tw:transition tw:transform tw:hover:-translate-y-1 tw:cursor-pointer tw:flex tw:flex-col tw:justify-between tw:h-full"
       >
         <div>
-          <div class="tw:text-4xl tw:mb-4">📝</div>
+          <div class="tw:mb-4" [innerHTML]="icons.feed"></div>
           <h2 class="tw:text-2xl tw:font-bold tw:text-gray-900 tw:mb-2">Feed</h2>
           <p class="tw:text-gray-600">
             Share posts, updates, and stay connected with your team.
@@ -37,10 +37,10 @@
       <!-- Feedback Card -->
       <a
         routerLink="/feedback"
-        class="tw:bg-white tw:rounded-2xl tw:shadow-lg hover:tw:shadow-xl tw:p-8 tw:transition tw:transform hover:tw:-translate-y-1 tw:cursor-pointer tw:flex tw:flex-col tw:justify-between tw:h-full"
+        class="tw:bg-white tw:rounded-2xl tw:shadow-lg tw:hover:shadow-xl tw:p-8 tw:transition tw:transform tw:hover:-translate-y-1 tw:cursor-pointer tw:flex tw:flex-col tw:justify-between tw:h-full"
       >
         <div>
-          <div class="tw:text-4xl tw:mb-4">💬</div>
+          <div class="tw:mb-4" [innerHTML]="icons.feedback"></div>
           <h2 class="tw:text-2xl tw:font-bold tw:text-gray-900 tw:mb-2">Feedback</h2>
           <p class="tw:text-gray-600">
             Send constructive feedback and see what others think of you.
@@ -52,10 +52,10 @@
       <!-- Dashboard Card -->
       <a
         routerLink="/dashboard"
-        class="tw:bg-white tw:rounded-2xl tw:shadow-lg hover:tw:shadow-xl tw:p-8 tw:transition tw:transform hover:tw:-translate-y-1 tw:cursor-pointer tw:flex tw:flex-col tw:justify-between tw:h-full"
+        class="tw:bg-white tw:rounded-2xl tw:shadow-lg tw:hover:shadow-xl tw:p-8 tw:transition tw:transform tw:hover:-translate-y-1 tw:cursor-pointer tw:flex tw:flex-col tw:justify-between tw:h-full"
       >
         <div>
-          <div class="tw:text-4xl tw:mb-4">📊</div>
+          <div class="tw:mb-4" [innerHTML]="icons.dashboard"></div>
           <h2 class="tw:text-2xl tw:font-bold tw:text-gray-900 tw:mb-2">Cohesion Dashboard</h2>
           <p class="tw:text-gray-600">
             View team cohesion metrics and feedback statistics.
@@ -68,7 +68,7 @@
     <!-- Quick Stats Section -->
     <div class="tw:mt-12 tw:bg-white tw:rounded-2xl tw:shadow-lg tw:p-8">
       <h3 class="tw:text-xl tw:font-bold tw:text-gray-900 tw:mb-6">About TeamConnect</h3>
-      <div class="tw:grid tw:grid-cols-1 md:tw:grid-cols-3 tw:gap-6">
+      <div class="tw:grid tw:grid-cols-1 tw:md:grid-cols-3 tw:gap-6">
         <div>
           <p class="tw:text-gray-600 tw:text-sm">TeamConnect helps remote teams build stronger connections through transparent feedback and collaborative engagement.</p>
         </div>
