@@ -1,0 +1,128 @@
+<section class="tw:min-h-screen tw:bg-[radial-gradient(circle_at_top,_#e0f2fe,_#eef2ff_45%,_#f8fafc)] tw:px-4 tw:py-6 sm:tw:px-6 lg:tw:px-8">
+  <div class="tw:mx-auto tw:w-full tw:max-w-3xl">
+    <div class="tw:mb-6 tw:flex tw:items-center tw:justify-between">
+      <div class="tw:flex tw:items-center tw:gap-3">
+        <button
+          routerLink="/"
+          aria-label="Back to home"
+          class="tw:inline-flex tw:h-10 tw:w-10 tw:items-center tw:justify-center tw:rounded-xl tw:bg-white/80 tw:text-slate-600 tw:shadow-sm tw:ring-1 tw:ring-slate-200/70 tw:transition hover:tw:bg-white hover:tw:text-slate-900"
+        >
+          <svg class="tw:h-5 tw:w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+        <div>
+          <h1 class="tw:text-2xl tw:font-bold tw:tracking-tight tw:text-slate-900 sm:tw:text-3xl">Team Feed</h1>
+          <p class="tw:text-sm tw:text-slate-500">Share updates, wins, and blockers with your team</p>
+        </div>
+      </div>
+      <span class="tw:hidden sm:tw:inline-flex tw:rounded-full tw:bg-white/80 tw:px-3 tw:py-1 tw:text-xs tw:font-medium tw:text-slate-600 tw:ring-1 tw:ring-slate-200">
+        {{ posts().length }} posts
+      </span>
+    </div>
+
+    @if (errorMessage()) {
+      <div class="tw:mb-5 tw:rounded-2xl tw:border tw:border-rose-200 tw:bg-rose-50 tw:p-4 tw:text-rose-700 tw:shadow-sm">
+        {{ errorMessage() }}
+      </div>
+    }
+
+    <div class="tw:mb-6 tw:rounded-3xl tw:bg-white/90 tw:p-5 tw:shadow-lg tw:shadow-slate-200/50 tw:ring-1 tw:ring-slate-200/70">
+      <div class="tw:mb-4 tw:flex tw:items-center tw:gap-3">
+        <div
+          class="tw:flex tw:h-10 tw:w-10 tw:items-center tw:justify-center tw:rounded-full tw:text-sm tw:font-semibold tw:text-white"
+          [style.background-color]="getAvatarColor(currentUser()?.fullName || currentUser()?.email)"
+        >
+          {{ getInitials(currentUser()?.fullName || currentUser()?.email) }}
+        </div>
+        <div>
+          <p class="tw:text-sm tw:font-semibold tw:text-slate-800">{{ currentUser()?.fullName || 'You' }}</p>
+          <p class="tw:text-xs tw:text-slate-500">What is new today?</p>
+        </div>
+      </div>
+
+      <form (ngSubmit)="submitPost()" class="tw:space-y-3">
+        <textarea
+          [(ngModel)]="newPostContent"
+          name="content"
+          rows="4"
+          maxlength="500"
+          placeholder="Share an update, ask for help, or celebrate a win..."
+          class="tw:w-full tw:rounded-2xl tw:border tw:border-slate-200 tw:bg-slate-50 tw:px-4 tw:py-3 tw:text-slate-800 placeholder:tw:text-slate-400 tw:outline-none tw:ring-0 tw:transition focus:tw:border-sky-400 focus:tw:bg-white focus:tw:shadow-[0_0_0_4px_rgba(14,165,233,0.15)] tw:resize-none"
+          required
+        ></textarea>
+
+        <div class="tw:flex tw:items-center tw:justify-between">
+          <p class="tw:text-xs tw:text-slate-500">{{ newPostContent().length }}/500</p>
+          <button
+            type="submit"
+            [disabled]="isSubmitting() || !newPostContent().trim()"
+            class="tw:inline-flex tw:items-center tw:gap-2 tw:rounded-xl tw:bg-sky-600 tw:px-4 tw:py-2 tw:text-sm tw:font-semibold tw:text-white tw:transition hover:tw:bg-sky-700 disabled:tw:cursor-not-allowed disabled:tw:opacity-50"
+          >
+            <svg class="tw:h-4 tw:w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M13 5l7 7-7 7" />
+            </svg>
+            {{ isSubmitting() ? 'Posting...' : 'Post update' }}
+          </button>
+        </div>
+      </form>
+    </div>
+
+    @if (isLoading()) {
+      <div class="tw:space-y-4">
+        @for (i of [1, 2, 3]; track i) {
+          <div class="tw:animate-pulse tw:rounded-3xl tw:bg-white tw:p-5 tw:shadow tw:ring-1 tw:ring-slate-100">
+            <div class="tw:mb-4 tw:flex tw:items-center tw:gap-3">
+              <div class="tw:h-10 tw:w-10 tw:rounded-full tw:bg-slate-200"></div>
+              <div class="tw:flex-1 tw:space-y-2">
+                <div class="tw:h-3 tw:w-28 tw:rounded tw:bg-slate-200"></div>
+                <div class="tw:h-2 tw:w-20 tw:rounded tw:bg-slate-100"></div>
+              </div>
+            </div>
+            <div class="tw:space-y-2">
+              <div class="tw:h-3 tw:w-full tw:rounded tw:bg-slate-100"></div>
+              <div class="tw:h-3 tw:w-4/5 tw:rounded tw:bg-slate-100"></div>
+            </div>
+          </div>
+        }
+      </div>
+    }
+
+    @if (!isLoading() && posts().length === 0) {
+      <div class="tw:rounded-3xl tw:border tw:border-dashed tw:border-slate-300 tw:bg-white/80 tw:p-10 tw:text-center tw:shadow-sm">
+        <p class="tw:mb-2 tw:text-lg tw:font-semibold tw:text-slate-700">No posts yet</p>
+        <p class="tw:text-sm tw:text-slate-500">Start the conversation and help your team stay aligned.</p>
+      </div>
+    }
+
+    @if (!isLoading() && posts().length > 0) {
+      <div class="tw:space-y-4">
+        @for (post of posts(); track post.id) {
+          <article class="tw:rounded-3xl tw:bg-white tw:p-5 tw:shadow-md tw:shadow-slate-200/60 tw:ring-1 tw:ring-slate-200/60">
+            <div class="tw:mb-3 tw:flex tw:items-start tw:justify-between">
+              <div class="tw:flex tw:items-center tw:gap-3">
+                <div
+                  class="tw:flex tw:h-10 tw:w-10 tw:items-center tw:justify-center tw:rounded-full tw:text-sm tw:font-semibold tw:text-white"
+                  [style.background-color]="getAvatarColor(post.authorFullName || post.authorEmail || post.authorId)"
+                >
+                  {{ getInitials(post.authorFullName || post.authorEmail || post.authorId) }}
+                </div>
+                <div>
+                  <p class="tw:text-sm tw:font-semibold tw:text-slate-900">{{ post.authorFullName || post.authorEmail || post.authorId }}</p>
+                  <p class="tw:text-xs tw:text-slate-500">{{ post.createdAt | date: 'medium' }}</p>
+                </div>
+              </div>
+            </div>
+
+            <p class="tw:whitespace-pre-wrap tw:text-[15px] tw:leading-6 tw:text-slate-700">{{ post.content }}</p>
+
+            <div class="tw:mt-4 tw:flex tw:items-center tw:gap-2 tw:border-t tw:border-slate-100 tw:pt-3">
+              <button type="button" class="tw:rounded-lg tw:px-3 tw:py-1.5 tw:text-xs tw:font-medium tw:text-slate-600 tw:hover:tw:bg-slate-100">Like</button>
+              <button type="button" class="tw:rounded-lg tw:px-3 tw:py-1.5 tw:text-xs tw:font-medium tw:text-slate-600 tw:hover:tw:bg-slate-100">Comment</button>
+            </div>
+          </article>
+        }
+      </div>
+    }
+  </div>
+</section>
