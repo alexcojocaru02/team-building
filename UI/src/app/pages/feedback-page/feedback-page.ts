@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { FeedbackService, CreateFeedbackDto, FeedbackDto } from '../../services/feedback.service';
 import { AuthService } from '../../services/auth.service';
+import { UsersService, UserSummaryDto } from '../../services/users.service';
 
 @Component({
   selector: 'app-feedback-page',
@@ -15,6 +16,7 @@ import { AuthService } from '../../services/auth.service';
 export class FeedbackPage implements OnInit {
   private feedbackService = inject(FeedbackService);
   private authService = inject(AuthService);
+  private usersService = inject(UsersService);
 
   receivedFeedback = signal<FeedbackDto[]>([]);
   isLoadingFeedback = signal(true);
@@ -28,15 +30,24 @@ export class FeedbackPage implements OnInit {
   toUserId = signal('');
   feedbackMessage = signal('');
 
-  // Mock users list - in real app, would come from API
-  users = signal([
-    { id: '1', email: 'user1@example.com' },
-    { id: '2', email: 'user2@example.com' },
-    { id: '3', email: 'user3@example.com' },
-  ]);
+  users = signal<UserSummaryDto[]>([]);
 
   ngOnInit(): void {
+    this.loadUsers();
     this.loadReceivedFeedback();
+  }
+
+  loadUsers(): void {
+    this.usersService.getUsers().subscribe({
+      next: (data) => {
+        const currentUserId = this.authService.currentUser()?.id;
+        this.users.set(data.filter(u => u.id !== currentUserId));
+      },
+      error: (error) => {
+        this.errorMessage.set('Failed to load users');
+        console.error('Error loading users:', error);
+      }
+    });
   }
 
   loadReceivedFeedback(): void {
