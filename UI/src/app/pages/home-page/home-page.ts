@@ -1,25 +1,28 @@
 import { Component, inject } from '@angular/core';
-import { MatCardModule } from '@angular/material/card';
-import { MatIconModule } from '@angular/material/icon';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { RouterModule } from '@angular/router';
-import { AuthService } from '../../services/auth.service';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { AuthService } from '../../services/auth.service';
+import { ICONS } from '../../shared/icons';
 
 @Component({
   selector: 'app-home-page',
-  imports: [
-    CommonModule,
-    MatCardModule,
-    RouterModule,
-    MatIconModule,
-    MatProgressSpinnerModule
-  ],
+  standalone: true,
+  imports: [CommonModule, RouterModule],
   templateUrl: './home-page.html',
   styleUrl: './home-page.scss'
 })
 export class HomePage {
-  authService = inject(AuthService);
+  private authService = inject(AuthService);
+  private sanitizer = inject(DomSanitizer);
+
+  currentUser = this.authService.currentUser;
+
+  icons = {
+    feed: this.sanitizer.bypassSecurityTrustHtml(ICONS.feed),
+    feedback: this.sanitizer.bypassSecurityTrustHtml(ICONS.feedback),
+    dashboard: this.sanitizer.bypassSecurityTrustHtml(ICONS.dashboard)
+  };
 
   logout(): void {
     this.authService.logout();

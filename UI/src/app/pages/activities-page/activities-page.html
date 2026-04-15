@@ -1,33 +1,73 @@
-<section class="tw:p-6 tw:space-y-6">
-  <div class="tw:flex tw:items-center tw:mb-4">
-    <button
-      mat-icnon-button
-      color="primary"
-      class="tw:mr-2"
-      routerLink="/"
-      type="button"
-    >
-      <mat-icon>arrow_back</mat-icon>
-    </button>
-    <h2 class="tw:text-2xl tw:font-semibold tw:text-center tw:flex-1">
-      Water Cooler Games
-    </h2>
-  </div>
+<section class="tw:min-h-screen tw:bg-gradient-to-br tw:from-blue-50 tw:to-indigo-100 tw:p-6">
+  <div class="tw:max-w-2xl tw:mx-auto">
+    <!-- Header -->
+    <div class="tw:flex tw:items-center tw:mb-8">
+      <button routerLink="/" class="tw:mr-4 tw:p-2 tw:rounded-lg tw:text-gray-600 tw:hover:text-gray-900 tw:hover:bg-white tw:transition" aria-label="Back to home">
+        <svg class="tw:w-6 tw:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+        </svg>
+      </button>
+      <h1 class="tw:text-3xl tw:font-bold tw:text-gray-800">Feed</h1>
+    </div>
 
-  <div class="tw:grid tw:grid-cols-1 tw:grid-cols-2 tw:grid-cols-3 tw:gap-6">
-    <mat-card
-      *ngFor="let game of games"
-      class="tw:p-4 tw:rounded-2xl tw:shadow-md tw:flex tw:flex-col tw:justify-between"
-    >
-      <div class="tw:space-y-2">
-        <h3 class="tw:text-xl tw:font-semibold">{{ game.name }}</h3>
-        <p class="tw:text-sm tw:text-gray-600">{{ game.description }}</p>
+    <!-- Error Message -->
+    @if (errorMessage()) {
+      <div class="tw:mb-6 tw:p-4 tw:bg-red-50 tw:border tw:border-red-200 tw:rounded-lg">
+        <p class="tw:text-red-600">{{ errorMessage() }}</p>
       </div>
-      <div class="tw:mt-4 tw:flex tw:justify-end">
-        <button mat-stroked-button color="primary" (click)="openGame(game.url)">
-          Play
-        </button>
+    }
+
+    <!-- Create Post Form -->
+    <div class="tw:bg-white tw:rounded-2xl tw:shadow-lg tw:p-6 tw:mb-6">
+      <h2 class="tw:text-lg tw:font-semibold tw:text-gray-800 tw:mb-4">Share your thoughts</h2>
+      <form (ngSubmit)="submitPost()" class="tw:space-y-4">
+        <textarea
+          [(ngModel)]="newPostContent"
+          name="content"
+          placeholder="What's on your mind?"
+          rows="3"
+          class="tw:w-full tw:px-4 tw:py-3 tw:border tw:border-gray-300 tw:rounded-lg tw:focus:ring-2 tw:focus:ring-blue-500 tw:focus:border-transparent tw:outline-none tw:resize-none"
+          required
+        ></textarea>
+        <div class="tw:flex tw:justify-end">
+          <button
+            type="submit"
+            [disabled]="isSubmitting() || !newPostContent().trim()"
+            class="tw:px-6 tw:py-2 tw:bg-blue-600 tw:text-white tw:rounded-lg tw:font-semibold tw:hover:bg-blue-700 tw:transition tw:disabled:opacity-50 tw:disabled:cursor-not-allowed"
+          >
+            {{ isSubmitting() ? 'Posting...' : 'Post' }}
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Loading State -->
+    @if (isLoading()) {
+      <div class="tw:flex tw:justify-center tw:py-12">
+        <div class="tw:text-gray-600">Loading posts...</div>
       </div>
-    </mat-card>
+    }
+
+    <!-- Posts List -->
+    @if (!isLoading()) {
+      @if (posts().length === 0) {
+        <div class="tw:bg-white tw:rounded-2xl tw:shadow-lg tw:p-8 tw:text-center">
+          <p class="tw:text-gray-500">No posts yet. Be the first to share!</p>
+        </div>
+      }
+      <div class="tw:space-y-4">
+        @for (post of posts(); track post.id) {
+          <div class="tw:bg-white tw:rounded-2xl tw:shadow-lg tw:p-6">
+            <div class="tw:flex tw:items-start tw:justify-between tw:mb-3">
+              <div>
+                <p class="tw:font-semibold tw:text-gray-900">{{ post.authorId }}</p>
+                <p class="tw:text-sm tw:text-gray-500">{{ post.createdAt | date: 'short' }}</p>
+              </div>
+            </div>
+            <p class="tw:text-gray-700">{{ post.content }}</p>
+          </div>
+        }
+      </div>
+    }
   </div>
 </section>

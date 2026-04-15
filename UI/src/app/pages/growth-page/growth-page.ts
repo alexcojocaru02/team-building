@@ -1,74 +1,45 @@
 import { CommonModule } from '@angular/common';
-import { Component, ViewEncapsulation } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
-import { MatListModule } from '@angular/material/list';
-import { MatIconModule } from '@angular/material/icon';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { DashboardService, CohesionDashboardDto } from '../../services/dashboard.service';
 
 @Component({
-  selector: 'app-growth-page',
-  imports: [
-    CommonModule,
-    FormsModule,
-    MatCardModule,
-    MatFormFieldModule,
-    MatIconModule,
-    MatButtonModule,
-    MatProgressSpinnerModule,
-    MatInputModule,
-    MatButtonModule,
-    MatListModule,
-    MatSelectModule,
-    RouterModule,
-  ],
+  selector: 'app-cohesion-dashboard',
+  standalone: true,
+  imports: [CommonModule, RouterModule],
   templateUrl: './growth-page.html',
   styleUrl: './growth-page.scss',
 })
-export class GrowthPage {
-  goals: string[] = [
-    'Improve communication in meetings',
-    'Complete a course on leadership',
-  ];
-  selectedGoals: string[] = [];
-  newGoal: string = '';
-  progressValue = 68;
+export class CohesionDashboard implements OnInit {
+  private dashboardService = inject(DashboardService);
 
-  impactBars = [
-    { label: 'Team Collaboration', value: 80 },
-    { label: 'Communication', value: 65 },
-    { label: 'Reliability', value: 75 },
-  ];
+  cohesionData = signal<CohesionDashboardDto | null>(null);
+  isLoading = signal(true);
+  errorMessage = signal('');
 
-  receivedFeedback = [
-    {
-      from: 'Andrei M.',
-      anonymous: false,
-      interactionFrequency: 'Weekly',
-      collaborationRating: 'Excellent',
-      strengths: 'Responsiveness, clarity, ownership',
-      message: 'Always quick to answer and very helpful with reviews!',
-    },
-    {
-      from: '',
-      anonymous: true,
-      interactionFrequency: 'Monthly',
-      collaborationRating: 'Good',
-      strengths: 'Empathy, support',
-      message: 'Appreciated your help last sprint!',
-    },
-  ];
+  ngOnInit(): void {
+    this.loadCohesionData();
+  }
 
-  addGoal() {
-    const trimmed = this.newGoal.trim();
-    if (trimmed) {
-      this.goals.push(trimmed);
-      this.newGoal = '';
-    }
+  loadCohesionData(): void {
+    this.isLoading.set(true);
+    this.errorMessage.set('');
+
+    this.dashboardService.getCohesionData().subscribe({
+      next: (data) => {
+        this.cohesionData.set(data);
+        this.isLoading.set(false);
+      },
+      error: (error) => {
+        this.errorMessage.set('Failed to load cohesion data');
+        this.isLoading.set(false);
+        console.error('Error loading cohesion data:', error);
+      }
+    });
+  }
+
+  // Helper method to calculate percentage for progress bars
+  getPercentage(userFeedback: number, total: number): number {
+    return total > 0 ? Math.round((userFeedback / total) * 100) : 0;
   }
 }

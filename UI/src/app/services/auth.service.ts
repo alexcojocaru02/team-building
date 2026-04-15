@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, tap } from 'rxjs';
 import { LoginDto, RegisterDto, AuthResponse, User } from '../models/auth.models';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -11,8 +12,7 @@ export class AuthService {
   private http = inject(HttpClient);
   private router = inject(Router);
   
-  // Update this URL to match your API endpoint
-  private apiUrl = 'https://localhost:7241';
+  private apiUrl = environment.apiUrl;
   
   private currentUserSignal = signal<User | null>(null);
   private tokenSignal = signal<string | null>(null);
@@ -33,10 +33,7 @@ export class AuthService {
     const params = new URLSearchParams();
     params.set('Email', dto.email);
     params.set('Password', dto.password);
-    if (dto.name) {
-      params.set('Name', dto.name);
-    }
-    return this.http.post<AuthResponse>(`${this.apiUrl}/register?${params.toString()}`, {}).pipe(
+    return this.http.post<AuthResponse>(`${this.apiUrl}/auth/register?${params.toString()}`, {}).pipe(
       tap(response => this.handleAuthSuccess(response))
     );
   }
@@ -45,7 +42,7 @@ export class AuthService {
     const params = new URLSearchParams();
     params.set('Email', dto.email);
     params.set('Password', dto.password);
-    return this.http.post<AuthResponse>(`${this.apiUrl}/login?${params.toString()}`, {}).pipe(
+    return this.http.post<AuthResponse>(`${this.apiUrl}/auth/login?${params.toString()}`, {}).pipe(
       tap(response => this.handleAuthSuccess(response))
     );
   }
@@ -74,8 +71,7 @@ export class AuthService {
       const payload = JSON.parse(atob(token.split('.')[1]));
       const user: User = {
         id: payload.sub || payload.nameid,
-        email: payload.email,
-        name: payload.name || payload.unique_name
+        email: payload.email
       };
       this.currentUserSignal.set(user);
     } catch (error) {
@@ -84,3 +80,4 @@ export class AuthService {
     }
   }
 }
+
