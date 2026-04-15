@@ -44,7 +44,34 @@ namespace TeamConnect.Api.Modules.Feedback
             };
 
             await _context.Feedbacks.InsertOneAsync(feedback);
-            return Ok(feedback);
+
+            var userIds = new[] { feedback.FromUserId, feedback.ToUserId }
+                .Distinct()
+                .ToList();
+
+            var users = await _context.Users
+                .Find(u => userIds.Contains(u.Id))
+                .Project(u => new { u.Id, u.Email })
+                .ToListAsync();
+
+            var userEmailsById = users.ToDictionary(u => u.Id, u => u.Email);
+
+            var result = new FeedbackResponseDto
+            {
+                Id = feedback.Id,
+                FromUserId = feedback.FromUserId,
+                ToUserId = feedback.ToUserId,
+                Message = feedback.Message,
+                CreatedAt = feedback.CreatedAt,
+                FromUserEmail = userEmailsById.TryGetValue(feedback.FromUserId, out var fromEmail)
+                    ? fromEmail
+                    : "Unknown",
+                ToUserEmail = userEmailsById.TryGetValue(feedback.ToUserId, out var toEmail)
+                    ? toEmail
+                    : "Unknown"
+            };
+
+            return Ok(result);
         }
 
         // feedback primit de userul curent
@@ -58,7 +85,34 @@ namespace TeamConnect.Api.Modules.Feedback
                 .SortByDescending(f => f.CreatedAt)
                 .ToListAsync();
 
-            return Ok(feedbacks);
+            var userIds = feedbacks
+                .SelectMany(f => new[] { f.FromUserId, f.ToUserId })
+                .Distinct()
+                .ToList();
+
+            var users = await _context.Users
+                .Find(u => userIds.Contains(u.Id))
+                .Project(u => new { u.Id, u.Email })
+                .ToListAsync();
+
+            var userEmailsById = users.ToDictionary(u => u.Id, u => u.Email);
+
+            var result = feedbacks.Select(f => new FeedbackResponseDto
+            {
+                Id = f.Id,
+                FromUserId = f.FromUserId,
+                ToUserId = f.ToUserId,
+                Message = f.Message,
+                CreatedAt = f.CreatedAt,
+                FromUserEmail = userEmailsById.TryGetValue(f.FromUserId, out var fromEmail)
+                    ? fromEmail
+                    : "Unknown",
+                ToUserEmail = userEmailsById.TryGetValue(f.ToUserId, out var toEmail)
+                    ? toEmail
+                    : "Unknown"
+            });
+
+            return Ok(result);
         }
 
     }
