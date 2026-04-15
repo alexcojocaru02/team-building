@@ -37,6 +37,8 @@ export class FeedPage implements OnInit {
   errorMessage = signal('');
   newPostContent = signal('');
   isSubmitting = signal(false);
+  commentDrafts: Record<string, string> = {};
+  expandedComments: Record<string, boolean> = {};
 
   currentUser = this.authService.currentUser;
 
@@ -80,6 +82,75 @@ export class FeedPage implements OnInit {
         console.error('Error creating post:', error);
       }
     });
+  }
+
+  toggleLike(post: FeedPostDto): void {
+    const request = post.likedByCurrentUser
+      ? this.feedService.unlikePost(post.id)
+      : this.feedService.likePost(post.id);
+
+    request.subscribe({
+      next: (stats) => {
+        this.posts.update(posts =>
+          posts.map(currentPost =>
+            currentPost.id === post.id
+              ? {
+                  ...currentPost,
+                  likesCount: stats.likesCount,
+                  likedByCurrentUser: stats.likedByCurrentUser,
+                }
+              : currentPost
+          )
+        );
+      },
+      error: (error) => {
+        this.errorMessage.set('Failed to update like');
+        console.error('Error updating like:', error);
+      }
+    });
+  }
+
+  submitComment(post: FeedPostDto): void {
+    const content = this.getCommentDraft(post.id).trim();
+    if (!content) return;
+
+    this.feedService.addComment(post.id, { content }).subscribe({
+      next: (comment) => {
+        this.posts.update(posts =>
+          posts.map(currentPost =>
+            currentPost.id === post.id
+              ? {
+                  ...currentPost,
+                  commentsCount: currentPost.commentsCount + 1,
+                  recentComments: [...currentPost.recentComments, comment].slice(-3),
+                }
+              : currentPost
+          )
+        );
+
+        this.setCommentDraft(post.id, '');
+      },
+      error: (error) => {
+        this.errorMessage.set('Failed to add comment');
+        console.error('Error creating comment:', error);
+      }
+    });
+  }
+
+  getCommentDraft(postId: string): string {
+    return this.commentDrafts[postId] ?? '';
+  }
+
+  setCommentDraft(postId: string, value: string): void {
+    this.commentDrafts[postId] = value;
+  }
+
+  isCommentThreadVisible(postId: string): boolean {
+    return this.expandedComments[postId] !== false;
+  }
+
+  toggleCommentThread(postId: string): void {
+    this.expandedComments[postId] = !this.isCommentThreadVisible(postId);
   }
 
   getInitials(value: string | null | undefined): string {
