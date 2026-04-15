@@ -5,6 +5,7 @@ import { environment } from '../../environments/environment';
 
 export interface UserSummaryDto {
   id: string;
+  fullName?: string;
   email: string;
   role: string;
 }

@@ -31,6 +31,7 @@ export class AuthService {
 
   register(dto: RegisterDto): Observable<AuthResponse> {
     const params = new URLSearchParams();
+    params.set('FullName', dto.fullName);
     params.set('Email', dto.email);
     params.set('Password', dto.password);
     return this.http.post<AuthResponse>(`${this.apiUrl}/auth/register?${params.toString()}`, {}).pipe(
@@ -71,6 +72,7 @@ export class AuthService {
       const payload = JSON.parse(atob(token.split('.')[1]));
       const user: User = {
         id: payload.sub || payload.nameid,
+        fullName: payload.unique_name || payload.name,
         email: payload.email
       };
       this.currentUserSignal.set(user);

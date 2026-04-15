@@ -22,7 +22,7 @@ namespace TeamConnect.Api.Modules.Users
         {
             var users = await _context.Users
                 .Find(_ => true)
-                .Project(u => new { u.Id, u.Email, u.Role })
+                .Project(u => new { u.Id, u.FullName, u.Email, u.Role })
                 .ToListAsync();
 
             return Ok(users);
