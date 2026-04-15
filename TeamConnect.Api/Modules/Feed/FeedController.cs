@@ -31,7 +31,22 @@ public class FeedController : ControllerBase
         };
 
         await _context.FeedPosts.InsertOneAsync(post);
-        return Ok(post);
+
+        var author = await _context.Users
+            .Find(u => u.Id == userId)
+            .Project(u => new { u.Email })
+            .FirstOrDefaultAsync();
+
+        var result = new FeedPostResponseDto
+        {
+            Id = post.Id,
+            Content = post.Content,
+            CreatedAt = post.CreatedAt,
+            AuthorId = post.AuthorId,
+            AuthorEmail = author?.Email ?? "Unknown"
+        };
+
+        return Ok(result);
     }
 
     [HttpGet]
@@ -52,9 +67,11 @@ public class FeedController : ControllerBase
             .Project(u => new { u.Id, u.Email })
             .ToListAsync();
 
+        var authorEmailsById = users.ToDictionary(u => u.Id, u => u.Email);
+
         var result = posts.Select(p =>
         {
-            var author = users.FirstOrDefault(u => u.Id == p.AuthorId);
+            var hasAuthorEmail = authorEmailsById.TryGetValue(p.AuthorId, out var authorEmail);
 
             return new FeedPostResponseDto
             {
@@ -62,7 +79,7 @@ public class FeedController : ControllerBase
                 Content = p.Content,
                 CreatedAt = p.CreatedAt,
                 AuthorId = p.AuthorId,
-                AuthorEmail = author?.Email ?? "Unknown"
+                AuthorEmail = hasAuthorEmail ? authorEmail : "Unknown"
             };
         });
 
