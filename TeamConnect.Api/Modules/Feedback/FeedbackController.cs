@@ -32,6 +32,9 @@ namespace TeamConnect.Api.Modules.Feedback
 
             var fromUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
+            if (string.IsNullOrWhiteSpace(fromUserId))
+                return Unauthorized();
+
             if (fromUserId == dto.ToUserId)
                 return BadRequest("You cannot send feedback to yourself");
 
@@ -43,8 +46,6 @@ namespace TeamConnect.Api.Modules.Feedback
                 CreatedAt = DateTime.UtcNow
             };
 
-            await _context.Feedbacks.InsertOneAsync(feedback);
-
             var userIds = new[] { feedback.FromUserId, feedback.ToUserId }
                 .Distinct()
                 .ToList();
@@ -55,6 +56,8 @@ namespace TeamConnect.Api.Modules.Feedback
                 .ToListAsync();
 
             var usersById = users.ToDictionary(u => u.Id);
+
+            await _context.Feedbacks.InsertOneAsync(feedback);
 
             var result = new FeedbackResponseDto
             {

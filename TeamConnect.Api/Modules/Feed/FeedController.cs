@@ -23,6 +23,16 @@ public class FeedController : ControllerBase
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
+        if (string.IsNullOrWhiteSpace(userId))
+        {
+            return Unauthorized();
+        }
+
+        var author = await _context.Users
+            .Find(u => u.Id == userId)
+            .Project(u => new { u.Email, u.FullName })
+            .FirstOrDefaultAsync();
+
         var post = new FeedPost
         {
             AuthorId = userId,
@@ -31,11 +41,6 @@ public class FeedController : ControllerBase
         };
 
         await _context.FeedPosts.InsertOneAsync(post);
-
-        var author = await _context.Users
-            .Find(u => u.Id == userId)
-            .Project(u => new { u.Email, u.FullName })
-            .FirstOrDefaultAsync();
 
         var result = new FeedPostResponseDto
         {
@@ -80,7 +85,7 @@ public class FeedController : ControllerBase
                 Content = p.Content,
                 CreatedAt = p.CreatedAt,
                 AuthorId = p.AuthorId,
-                AuthorFullName = hasAuthor ? author.FullName : null,
+                AuthorFullName = hasAuthor ? author?.FullName : null,
                 AuthorEmail = hasAuthor ? author.Email : "Unknown"
             };
         });
