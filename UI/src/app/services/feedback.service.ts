@@ -11,8 +11,10 @@ export interface CreateFeedbackDto {
 export interface FeedbackDto {
   id: string;
   fromUserId: string;
+  fromUserFullName?: string;
   fromUserEmail?: string;
   toUserId: string;
+  toUserFullName?: string;
   toUserEmail?: string;
   message: string;
   createdAt: string;

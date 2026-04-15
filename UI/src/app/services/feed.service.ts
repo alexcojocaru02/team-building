@@ -12,6 +12,7 @@ export interface FeedPostDto {
   content: string;
   createdAt: string;
   authorId: string;
+  authorFullName?: string;
   authorEmail?: string;
 }
 

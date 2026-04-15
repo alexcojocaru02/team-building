@@ -23,6 +23,16 @@ public class FeedController : ControllerBase
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
+        if (string.IsNullOrWhiteSpace(userId))
+        {
+            return Unauthorized();
+        }
+
+        var author = await _context.Users
+            .Find(u => u.Id == userId)
+            .Project(u => new { u.Email, u.FullName })
+            .FirstOrDefaultAsync();
+
         var post = new FeedPost
         {
             AuthorId = userId,
@@ -32,17 +42,13 @@ public class FeedController : ControllerBase
 
         await _context.FeedPosts.InsertOneAsync(post);
 
-        var author = await _context.Users
-            .Find(u => u.Id == userId)
-            .Project(u => new { u.Email })
-            .FirstOrDefaultAsync();
-
         var result = new FeedPostResponseDto
         {
             Id = post.Id,
             Content = post.Content,
             CreatedAt = post.CreatedAt,
             AuthorId = post.AuthorId,
+            AuthorFullName = author?.FullName,
             AuthorEmail = author?.Email ?? "Unknown"
         };
 
@@ -64,14 +70,14 @@ public class FeedController : ControllerBase
 
         var users = await _context.Users
             .Find(u => authorIds.Contains(u.Id))
-            .Project(u => new { u.Id, u.Email })
+            .Project(u => new { u.Id, u.Email, u.FullName })
             .ToListAsync();
 
-        var authorEmailsById = users.ToDictionary(u => u.Id, u => u.Email);
+        var authorsById = users.ToDictionary(u => u.Id);
 
         var result = posts.Select(p =>
         {
-            var hasAuthorEmail = authorEmailsById.TryGetValue(p.AuthorId, out var authorEmail);
+            var hasAuthor = authorsById.TryGetValue(p.AuthorId, out var author);
 
             return new FeedPostResponseDto
             {
@@ -79,7 +85,8 @@ public class FeedController : ControllerBase
                 Content = p.Content,
                 CreatedAt = p.CreatedAt,
                 AuthorId = p.AuthorId,
-                AuthorEmail = hasAuthorEmail ? authorEmail : "Unknown"
+                AuthorFullName = hasAuthor ? author?.FullName : null,
+                AuthorEmail = hasAuthor ? author.Email : "Unknown"
             };
         });
 

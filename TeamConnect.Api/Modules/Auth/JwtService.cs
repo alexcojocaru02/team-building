@@ -20,6 +20,7 @@ namespace TeamConnect.Api.Modules.Auth
             var claims = new[]
             {
             new Claim(ClaimTypes.NameIdentifier, user.Id),
+            new Claim(ClaimTypes.Name, user.FullName ?? string.Empty),
             new Claim(ClaimTypes.Email, user.Email),
             new Claim(ClaimTypes.Role, user.Role)
         };

@@ -26,6 +26,7 @@ export class LoginPage {
   };
 
   registerDto: RegisterDto = {
+    fullName: '',
     email: '',
     password: ''
   };

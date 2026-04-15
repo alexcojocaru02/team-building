@@ -7,7 +7,9 @@ namespace TeamConnect.Api.Shared.DTOs
         public string ToUserId { get; set; }
         public string Message { get; set; }
         public DateTime CreatedAt { get; set; }
+        public string FromUserFullName { get; set; }
         public string FromUserEmail { get; set; }
+        public string ToUserFullName { get; set; }
         public string ToUserEmail { get; set; }
     }
 }

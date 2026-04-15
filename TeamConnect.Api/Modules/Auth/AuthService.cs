@@ -26,6 +26,9 @@ namespace TeamConnect.Api.Modules.Auth
 
             var user = new User
             {
+                FullName = string.IsNullOrWhiteSpace(dto.FullName)
+                    ? dto.Email
+                    : dto.FullName.Trim(),
                 Email = dto.Email,
                 PasswordHash = Hash(dto.Password),
                 Role = "User"

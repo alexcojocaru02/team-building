@@ -32,6 +32,9 @@ namespace TeamConnect.Api.Modules.Feedback
 
             var fromUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
+            if (string.IsNullOrWhiteSpace(fromUserId))
+                return Unauthorized();
+
             if (fromUserId == dto.ToUserId)
                 return BadRequest("You cannot send feedback to yourself");
 
@@ -43,18 +46,18 @@ namespace TeamConnect.Api.Modules.Feedback
                 CreatedAt = DateTime.UtcNow
             };
 
-            await _context.Feedbacks.InsertOneAsync(feedback);
-
             var userIds = new[] { feedback.FromUserId, feedback.ToUserId }
                 .Distinct()
                 .ToList();
 
             var users = await _context.Users
                 .Find(u => userIds.Contains(u.Id))
-                .Project(u => new { u.Id, u.Email })
+                .Project(u => new { u.Id, u.Email, u.FullName })
                 .ToListAsync();
 
-            var userEmailsById = users.ToDictionary(u => u.Id, u => u.Email);
+            var usersById = users.ToDictionary(u => u.Id);
+
+            await _context.Feedbacks.InsertOneAsync(feedback);
 
             var result = new FeedbackResponseDto
             {
@@ -63,11 +66,17 @@ namespace TeamConnect.Api.Modules.Feedback
                 ToUserId = feedback.ToUserId,
                 Message = feedback.Message,
                 CreatedAt = feedback.CreatedAt,
-                FromUserEmail = userEmailsById.TryGetValue(feedback.FromUserId, out var fromEmail)
-                    ? fromEmail
+                FromUserFullName = usersById.TryGetValue(feedback.FromUserId, out var fromUser)
+                    ? fromUser.FullName
+                    : null,
+                FromUserEmail = usersById.TryGetValue(feedback.FromUserId, out fromUser)
+                    ? fromUser.Email
                     : "Unknown",
-                ToUserEmail = userEmailsById.TryGetValue(feedback.ToUserId, out var toEmail)
-                    ? toEmail
+                ToUserFullName = usersById.TryGetValue(feedback.ToUserId, out var toUser)
+                    ? toUser.FullName
+                    : null,
+                ToUserEmail = usersById.TryGetValue(feedback.ToUserId, out toUser)
+                    ? toUser.Email
                     : "Unknown"
             };
 
@@ -92,10 +101,10 @@ namespace TeamConnect.Api.Modules.Feedback
 
             var users = await _context.Users
                 .Find(u => userIds.Contains(u.Id))
-                .Project(u => new { u.Id, u.Email })
+                .Project(u => new { u.Id, u.Email, u.FullName })
                 .ToListAsync();
 
-            var userEmailsById = users.ToDictionary(u => u.Id, u => u.Email);
+            var usersById = users.ToDictionary(u => u.Id);
 
             var result = feedbacks.Select(f => new FeedbackResponseDto
             {
@@ -104,11 +113,17 @@ namespace TeamConnect.Api.Modules.Feedback
                 ToUserId = f.ToUserId,
                 Message = f.Message,
                 CreatedAt = f.CreatedAt,
-                FromUserEmail = userEmailsById.TryGetValue(f.FromUserId, out var fromEmail)
-                    ? fromEmail
+                FromUserFullName = usersById.TryGetValue(f.FromUserId, out var fromUser)
+                    ? fromUser.FullName
+                    : null,
+                FromUserEmail = usersById.TryGetValue(f.FromUserId, out fromUser)
+                    ? fromUser.Email
                     : "Unknown",
-                ToUserEmail = userEmailsById.TryGetValue(f.ToUserId, out var toEmail)
-                    ? toEmail
+                ToUserFullName = usersById.TryGetValue(f.ToUserId, out var toUser)
+                    ? toUser.FullName
+                    : null,
+                ToUserEmail = usersById.TryGetValue(f.ToUserId, out toUser)
+                    ? toUser.Email
                     : "Unknown"
             });
 

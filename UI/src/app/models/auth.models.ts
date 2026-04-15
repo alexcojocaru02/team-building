@@ -4,6 +4,7 @@ export interface LoginRequestDto {
 }
 
 export interface RegisterRequestDto {
+  fullName: string;
   email: string;
   password: string;
 }
@@ -14,6 +15,7 @@ export interface AuthResponseDto {
 
 export interface UserDto {
   id: string;
+  fullName?: string;
   email: string;
 }
 
