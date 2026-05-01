@@ -9,6 +9,10 @@
         public string AuthorId { get; set; }
         public string AuthorFullName { get; set; }
         public string AuthorEmail { get; set; }
+        public int LikesCount { get; set; }
+        public int CommentsCount { get; set; }
+        public bool LikedByCurrentUser { get; set; }
+        public List<FeedPostCommentDto> RecentComments { get; set; } = new();
     }
 
 }

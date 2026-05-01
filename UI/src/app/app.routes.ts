@@ -1,7 +1,7 @@
 import { Routes } from '@angular/router';
 import { FeedbackPage } from './pages/feedback-page/feedback-page';
 import { HomePage } from './pages/home-page/home-page';
-import { FeedPage } from './pages/activities-page/activities-page';
+import { FeedPage } from './pages/feed-page/feed-page';
 import { CohesionDashboard } from './pages/growth-page/growth-page';
 import { LoginPage } from './pages/login-page/login-page';
 import { authGuard } from './guards/auth.guard';
