@@ -12,7 +12,7 @@ export const routes: Routes = [
     component: LoginPage,
   },
   {
-    path: '',
+    path: 'home',
     component: HomePage,
     canActivate: [authGuard],
   },
@@ -33,6 +33,6 @@ export const routes: Routes = [
   },
   {
     path: '**',
-    redirectTo: '',
+    redirectTo: 'home',
   },
 ];

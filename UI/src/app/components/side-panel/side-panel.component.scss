@@ -1,0 +1,5 @@
+:host { display:block; }
+
+/* Keep minimal CSS only for host display and any small overrides not covered by Tailwind. */
+.sidenav { z-index: 1000; }
+

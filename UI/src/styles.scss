@@ -10,3 +10,15 @@ body {
         border-right: none;
     }
 }
+
+:root {
+  --sidenav-collapsed: 62px;
+  --sidenav-expanded: 180px;
+  --sidenav-width: var(--sidenav-expanded);
+}
+
+.app-content {
+    margin-left: var(--sidenav-width);
+    transition: margin-left .18s ease;
+    min-height: 100vh;
+}
