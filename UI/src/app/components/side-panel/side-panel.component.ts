@@ -1,12 +1,11 @@
 import { Component } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
 
 @Component({
   standalone: true,
   selector: 'app-side-panel',
-  imports: [RouterModule, MatIconModule, MatButtonModule],
+  imports: [RouterModule, MatIconModule],
   templateUrl: './side-panel.component.html',
   styleUrls: ['./side-panel.component.scss']
 })
