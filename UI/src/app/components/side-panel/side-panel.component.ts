@@ -28,7 +28,7 @@ export class SidePanelComponent {
     }
   }
 
-  toggle() {
+  toggle(): void {
     this.collapsed = !this.collapsed;
     try { localStorage.setItem('sideCollapsed', String(this.collapsed)); } catch (e) {
       // Ignore write errors to localStorage (private browsing, disabled storage, or quota exceeded).
@@ -36,7 +36,7 @@ export class SidePanelComponent {
     this.updateCssVar();
   }
 
-  private updateCssVar() {
+  private updateCssVar(): void {
     const w = this.collapsed ? 'var(--sidenav-collapsed)' : 'var(--sidenav-expanded)';
     document.documentElement.style.setProperty('--sidenav-width', w);
   }
