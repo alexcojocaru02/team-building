@@ -5,34 +5,27 @@ import { FeedPage } from './pages/feed-page/feed-page';
 import { CohesionDashboard } from './pages/growth-page/growth-page';
 import { LoginPage } from './pages/login-page/login-page';
 import { authGuard } from './guards/auth.guard';
+import { MainLayoutComponent } from './layouts/main-layout.component';
+import { AuthLayoutComponent } from './layouts/auth-layout.component';
 
 export const routes: Routes = [
   {
-    path: 'login',
-    component: LoginPage,
-  },
-  {
     path: '',
-    component: HomePage,
-    canActivate: [authGuard],
+    component: MainLayoutComponent,
+    children: [
+      { path: '', redirectTo: 'home', pathMatch: 'full' },
+      { path: 'home', component: HomePage, canActivate: [authGuard] },
+      { path: 'feedback', component: FeedbackPage, canActivate: [authGuard] },
+      { path: 'feed', component: FeedPage, canActivate: [authGuard] },
+      { path: 'dashboard', component: CohesionDashboard, canActivate: [authGuard] },
+    ]
   },
   {
-    path: 'feedback',
-    component: FeedbackPage,
-    canActivate: [authGuard],
+    path: 'login',
+    component: AuthLayoutComponent,
+    children: [
+      { path: '', component: LoginPage },
+    ]
   },
-  {
-    path: 'feed',
-    component: FeedPage,
-    canActivate: [authGuard],
-  },
-  {
-    path: 'dashboard',
-    component: CohesionDashboard,
-    canActivate: [authGuard],
-  },
-  {
-    path: '**',
-    redirectTo: '',
-  },
+  { path: '**', redirectTo: 'home' },
 ];
