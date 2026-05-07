@@ -1,0 +1,111 @@
+<div class="tw:p-6 tw:max-w-2xl tw:mx-auto">
+  <h1 class="tw:text-3xl tw:font-bold tw:mb-6">My Profile</h1>
+  @if (profile(); as p) {
+  <div class="tw:bg-white tw:rounded-lg tw:shadow-md tw:p-6 tw:mb-6">
+    <div class="tw:flex tw:items-start tw:justify-between tw:mb-6">
+      <div class="tw:flex tw:items-center tw:gap-4">
+        @if (p.avatarUrl) {
+        <div class="tw:w-16 tw:h-16 tw:bg-gray-200 tw:rounded-full tw:overflow-hidden">
+          <img [src]="p.avatarUrl" alt="Avatar" class="tw:w-full tw:h-full tw:object-cover" />
+        </div>
+        } @else {
+        <div class="tw:w-16 tw:h-16 tw:bg-gray-300 tw:rounded-full tw:flex tw:items-center tw:justify-center">
+          <span class="tw:text-gray-600">No avatar</span>
+        </div>
+        }
+        <div>
+          <h2 class="tw:text-2xl tw:font-semibold">{{ p.fullName }}</h2>
+          <p class="tw:text-gray-600">{{ p.email }}</p>
+          <span class="tw:inline-block tw:px-3 tw:py-1 tw:bg-blue-100 tw:text-blue-800 tw:rounded-full tw:text-sm tw:mt-2">
+            {{ p.role }}
+          </span>
+        </div>
+      </div>
+      <button (click)="editProfile()" class="tw:px-4 tw:py-2 tw:bg-blue-600 tw:text-white tw:rounded hover:tw:bg-blue-700">
+        Edit Profile
+      </button>
+    </div>
+
+    <div class="tw:grid tw:grid-cols-2 tw:gap-4 tw:mb-6">
+      @if (p.department) {
+      <div>
+        <label class="tw:text-gray-600 tw:text-sm">Department</label>
+        <p class="tw:font-medium">{{ p.department }}</p>
+      </div>
+      }
+      @if (p.location) {
+      <div>
+        <label class="tw:text-gray-600 tw:text-sm">Location</label>
+        <p class="tw:font-medium">{{ p.location }}</p>
+      </div>
+      }
+      @if (p.timezone) {
+      <div>
+        <label class="tw:text-gray-600 tw:text-sm">Timezone</label>
+        <p class="tw:font-medium">{{ p.timezone }}</p>
+      </div>
+      }
+      @if (p.pronouns) {
+      <div>
+        <label class="tw:text-gray-600 tw:text-sm">Pronouns</label>
+        <p class="tw:font-medium">{{ p.pronouns }}</p>
+      </div>
+      }
+    </div>
+
+    @if (p.bio) {
+    <div class="tw:mb-6">
+      <label class="tw:text-gray-600 tw:text-sm tw:block tw:mb-2">Bio</label>
+      <p class="tw:text-gray-800">{{ p.bio }}</p>
+    </div>
+    }
+
+    @if (p.preferredWorkStyle) {
+    <div class="tw:mb-6">
+      <label class="tw:text-gray-600 tw:text-sm">Preferred Work Style</label>
+      <p class="tw:font-medium">{{ p.preferredWorkStyle }}</p>
+    </div>
+    }
+
+    @if ((p.hobbies?.length ?? 0) > 0) {
+    <div class="tw:mb-6">
+      <label class="tw:text-gray-600 tw:text-sm tw:block tw:mb-2">Hobbies & Interests</label>
+      <div class="tw:flex tw:flex-wrap tw:gap-2">
+        @for (hobby of p.hobbies; track hobby) {
+        <span class="tw:px-3 tw:py-1 tw:bg-green-100 tw:text-green-800 tw:rounded-full tw:text-sm">{{ hobby }}</span>
+        }
+      </div>
+    </div>
+    }
+
+    @if ((p.strengths?.length ?? 0) > 0) {
+    <div class="tw:mb-6">
+      <label class="tw:text-gray-600 tw:text-sm tw:block tw:mb-2">Strengths & Skills</label>
+      <div class="tw:flex tw:flex-wrap tw:gap-2">
+        @for (strength of p.strengths; track strength) {
+        <span class="tw:px-3 tw:py-1 tw:bg-yellow-100 tw:text-yellow-800 tw:rounded-full tw:text-sm">{{ strength }}</span>
+        }
+      </div>
+    </div>
+    }
+
+    @if (p.icebreaker) {
+    <div class="tw:mb-6">
+      <label class="tw:text-gray-600 tw:text-sm">Icebreaker / Fun Fact</label>
+      <p class="tw:font-medium">{{ p.icebreaker }}</p>
+    </div>
+    }
+
+    @if ((p.teamIds?.length ?? 0) > 0) {
+    <div class="tw:mb-6">
+      <label class="tw:text-gray-600 tw:text-sm tw:block tw:mb-2">Teams ({{ p.teamIds?.length ?? 0 }})</label>
+      <p class="tw:text-gray-700">You are a member of {{ p.teamIds?.length ?? 0 }} team(s). Visit the <a href="/teams" class="tw:text-blue-600 hover:tw:underline">Teams</a> page for details.</p>
+    </div>
+    }
+  </div>
+  } @else {
+  <div class="tw:text-center tw:py-12">
+    <p class="tw:text-gray-600">Loading profile...</p>
+  </div>
+  }
+</div>

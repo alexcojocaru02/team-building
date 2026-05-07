@@ -1,6 +1,13 @@
-import { Component } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
+import { AuthService } from '../../services/auth.service';
+
+type NavItem = {
+  icon: string;
+  label: string;
+  route: string;
+};
 
 @Component({
   standalone: true,
@@ -10,14 +17,27 @@ import { MatIconModule } from '@angular/material/icon';
   styleUrls: ['./side-panel.component.scss']
 })
 export class SidePanelComponent {
+  private authService = inject(AuthService);
+
   collapsed = false;
 
-  items = [
+  private baseItems: NavItem[] = [
     { icon: 'home', label: 'Home', route: '/home' },
     { icon: 'dynamic_feed', label: 'Feed', route: '/feed' },
     { icon: 'forum', label: 'Feedback', route: '/feedback' },
-    { icon: 'insights', label: 'Dashboard', route: '/dashboard' }
+    { icon: 'insights', label: 'Dashboard', route: '/dashboard' },
+    { icon: 'groups', label: 'Teams', route: '/teams' }
   ];
+
+  navItems = computed(() => {
+    const items: NavItem[] = [...this.baseItems];
+
+    if (this.authService.isAdmin()) {
+      items.push({ icon: 'admin_panel_settings', label: 'Admin', route: '/admin' });
+    }
+
+    return items;
+  });
 
   constructor() {
     try {

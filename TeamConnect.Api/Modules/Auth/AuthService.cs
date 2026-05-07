@@ -16,7 +16,7 @@ namespace TeamConnect.Api.Modules.Auth
             _context = context;
         }
 
-        public async Task<User> Register(RegisterDto dto)
+        public async Task<User?> Register(RegisterDto dto)
         {
             var existing = await _context.Users
                 .Find(u => u.Email == dto.Email)
@@ -31,14 +31,14 @@ namespace TeamConnect.Api.Modules.Auth
                     : dto.FullName.Trim(),
                 Email = dto.Email,
                 PasswordHash = Hash(dto.Password),
-                Role = "User"
+                Role = UserRoles.User
             };
 
             await _context.Users.InsertOneAsync(user);
             return user;
         }
 
-        public async Task<User> Login(LoginDto dto)
+        public async Task<User?> Login(LoginDto dto)
         {
             var hash = Hash(dto.Password);
             return await _context.Users

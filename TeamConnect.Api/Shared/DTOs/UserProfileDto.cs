@@ -1,21 +1,11 @@
-﻿using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Attributes;
-
-namespace TeamConnect.Api.Shared.Models
+namespace TeamConnect.Api.Shared.DTOs
 {
-    public class User
+    public class UserProfileDto
     {
-        [BsonId]
-        [BsonRepresentation(BsonType.ObjectId)]
         public string Id { get; set; } = string.Empty;
-
         public string FullName { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
-        public string PasswordHash { get; set; } = string.Empty;
-
-        // Stored as string for backward compatibility while we roll out role normalization.
-        public string Role { get; set; } = UserRoles.User;
-
+        public string Role { get; set; } = string.Empty;
         public List<string> TeamIds { get; set; } = new();
 
         // Interpersonal profile fields

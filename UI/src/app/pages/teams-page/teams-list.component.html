@@ -1,0 +1,93 @@
+<div class="tw:p-6">
+  <div class="tw:flex tw:justify-between tw:items-center tw:mb-6">
+    <h1 class="tw:text-3xl tw:font-bold">Teams</h1>
+    @if (isAdmin) {
+    <button (click)="showCreateForm = !showCreateForm" class="tw:px-4 tw:py-2 tw:bg-blue-600 tw:text-white tw:rounded hover:tw:bg-blue-700">
+      {{ showCreateForm ? 'Cancel' : 'Create Team' }}
+    </button>
+    }
+  </div>
+
+  @if (showCreateForm && isAdmin) {
+  <div class="tw:bg-white tw:rounded-lg tw:shadow-md tw:p-6 tw:mb-6">
+    <h2 class="tw:text-xl tw:font-semibold tw:mb-4">Create New Team</h2>
+    <div class="tw:mb-4">
+      <label class="tw:block tw:text-sm tw:font-medium tw:mb-2">Team Name</label>
+      <input type="text" [(ngModel)]="newTeam.name" name="teamName" placeholder="Enter team name" class="tw:w-full tw:px-3 tw:py-2 tw:border tw:border-gray-300 tw:rounded" />
+    </div>
+    <div class="tw:mb-4">
+      <label class="tw:block tw:text-sm tw:font-medium tw:mb-2">Description</label>
+      <textarea [(ngModel)]="newTeam.description" name="teamDescription" placeholder="Team description (optional)" class="tw:w-full tw:px-3 tw:py-2 tw:border tw:border-gray-300 tw:rounded" rows="3"></textarea>
+    </div>
+    @if (createMessage()) {
+    <p class="tw:text-sm tw:text-red-600 tw:mb-4">{{ createMessage() }}</p>
+    }
+    <div class="tw:flex tw:gap-2">
+      <button (click)="createTeam()" [disabled]="isCreatingTeam" class="tw:px-4 tw:py-2 tw:bg-green-600 tw:text-white tw:rounded hover:tw:bg-green-700 disabled:tw:bg-gray-400">
+        {{ isCreatingTeam ? 'Creating...' : 'Create' }}
+      </button>
+    </div>
+  </div>
+  }
+
+  @if (deleteMessage()) {
+  <div class="tw:mb-6 tw:rounded-lg tw:border tw:border-red-200 tw:bg-red-50 tw:px-4 tw:py-3 tw:text-sm tw:text-red-700">
+    {{ deleteMessage() }}
+  </div>
+  }
+
+  @if (isLoading()) {
+  <div class="tw:text-center tw:py-12">
+    <p class="tw:text-gray-600">Loading teams...</p>
+  </div>
+  } @else if (errorMessage()) {
+  <div class="tw:text-center tw:py-12 tw:text-red-600">
+    <p>{{ errorMessage() }}</p>
+  </div>
+  } @else if (teams().length) {
+  <div class="tw:grid tw:grid-cols-1 md:tw:grid-cols-2 tw:gap-6">
+    @for (team of teams(); track team.id) {
+    <div class="tw:bg-white tw:rounded-lg tw:shadow-md tw:p-6">
+      <div class="tw:flex tw:justify-between tw:items-start tw:mb-3">
+        <h2 class="tw:text-xl tw:font-semibold">{{ team.name }}</h2>
+        @if (team.ownerId === currentUserId) {
+        <span class="tw:px-2 tw:py-1 tw:bg-blue-100 tw:text-blue-800 tw:rounded tw:text-xs">Owner</span>
+        }
+        @if (team.ownerId && team.ownerId !== currentUserId) {
+        <span class="tw:px-2 tw:py-1 tw:bg-gray-100 tw:text-gray-800 tw:rounded tw:text-xs">Member</span>
+        }
+      </div>
+      
+      @if (team.description) {
+      <p class="tw:text-gray-600 tw:mb-3">{{ team.description }}</p>
+      }
+      
+      <div class="tw:mb-3">
+        <p class="tw:text-sm tw:text-gray-600"><strong>Members:</strong> {{ team.memberIds.length }}</p>
+        @if (team.createdAt) {
+        <p class="tw:text-sm tw:text-gray-600"><strong>Created:</strong> {{ team.createdAt | date: 'short' }}</p>
+        }
+      </div>
+
+      @if (isOwnerOrAdmin(team)) {
+      <div class="tw:flex tw:gap-2">
+        <button (click)="editTeam(team)" class="tw:px-3 tw:py-1 tw:bg-blue-500 tw:text-white tw:text-sm tw:rounded hover:tw:bg-blue-600">
+          Edit
+        </button>
+        <button (click)="manageMembers(team)" class="tw:px-3 tw:py-1 tw:bg-green-500 tw:text-white tw:text-sm tw:rounded hover:tw:bg-green-600">
+          Manage Members
+        </button>
+        <button *ngIf="isAdmin" (click)="requestDeleteTeam(team)" class="tw:px-3 tw:py-1 tw:bg-red-500 tw:text-white tw:text-sm tw:rounded hover:tw:bg-red-600">
+          {{ isDeletingTeamId() === team.id ? 'Deleting...' : 'Delete' }}
+        </button>
+      </div>
+      }
+    </div>
+    }
+  </div>
+  } @else {
+  <div class="tw:text-center tw:py-12">
+    <p class="tw:text-gray-600">No teams found.</p>
+  </div>
+  }
+</div>

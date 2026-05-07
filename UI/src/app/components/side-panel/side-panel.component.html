@@ -10,7 +10,7 @@
   </button>
 
   <nav class="tw:flex tw:flex-col tw:px-2 tw:gap-1" role="navigation" aria-label="Main">
-    @for (it of items; track it.label) {
+    @for (it of navItems(); track it.label) {
       <a [routerLink]="it.route"
          routerLinkActive="tw:bg-white/10"
          class="tw:flex tw:items-center tw:gap-3 tw:px-3 tw:py-2 tw:rounded-md tw:no-underline">

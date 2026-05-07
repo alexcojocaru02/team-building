@@ -1,12 +1,7 @@
-﻿using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Attributes;
-
-namespace TeamConnect.Api.Shared.Models
+namespace TeamConnect.Api.Shared.DTOs
 {
-    public class Team
+    public class TeamDetailDto
     {
-        [BsonId]
-        [BsonRepresentation(BsonType.ObjectId)]
         public string Id { get; set; } = string.Empty;
         public string Name { get; set; } = string.Empty;
         public string? OwnerId { get; set; }
