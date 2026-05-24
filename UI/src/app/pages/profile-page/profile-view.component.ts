@@ -2,6 +2,7 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { MatButtonModule } from '@angular/material/button';
 import { AuthService } from '../../services/auth.service';
 import { UsersService } from '../../services/users.service';
 import { UserDto } from '../../models/auth.models';
@@ -9,7 +10,7 @@ import { UserDto } from '../../models/auth.models';
 @Component({
   selector: 'app-profile-view',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, MatButtonModule],
   templateUrl: './profile-view.component.html',
   styleUrls: ['./profile-view.component.scss']
 })
@@ -37,5 +38,9 @@ export class ProfileViewComponent implements OnInit {
   editProfile() {
     // Navigate to edit page
     this.router.navigate(['/profile/edit']);
+  }
+
+  logout(): void {
+    this.authService.logout();
   }
 }

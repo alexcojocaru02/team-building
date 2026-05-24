@@ -13,39 +13,39 @@
 
     <div class="tw:mb-4">
       <label class="tw:block tw:text-sm tw:font-medium tw:mb-2">Avatar URL</label>
-      <input type="url" [(ngModel)]="formData().avatarUrl" name="avatarUrl" placeholder="https://..." class="tw:w-full tw:px-3 tw:py-2 tw:border tw:border-gray-300 tw:rounded" />
+      <input type="url" [ngModel]="formData().avatarUrl" (ngModelChange)="updateField('avatarUrl', $event)" name="avatarUrl" placeholder="https://..." class="tw:w-full tw:px-3 tw:py-2 tw:border tw:border-gray-300 tw:rounded" />
     </div>
 
     <div class="tw:mb-4">
       <label class="tw:block tw:text-sm tw:font-medium tw:mb-2">Bio</label>
-      <textarea [(ngModel)]="formData().bio" name="bio" placeholder="Tell us about yourself" class="tw:w-full tw:px-3 tw:py-2 tw:border tw:border-gray-300 tw:rounded" rows="3"></textarea>
+      <textarea [ngModel]="formData().bio" (ngModelChange)="updateField('bio', $event)" name="bio" placeholder="Tell us about yourself" class="tw:w-full tw:px-3 tw:py-2 tw:border tw:border-gray-300 tw:rounded" rows="3"></textarea>
     </div>
 
     <div class="tw:grid tw:grid-cols-2 tw:gap-4 tw:mb-4">
       <div>
         <label class="tw:block tw:text-sm tw:font-medium tw:mb-2">Department</label>
-        <input type="text" [(ngModel)]="formData().department" name="department" placeholder="e.g., Engineering" class="tw:w-full tw:px-3 tw:py-2 tw:border tw:border-gray-300 tw:rounded" />
+        <input type="text" [ngModel]="formData().department" (ngModelChange)="updateField('department', $event)" name="department" placeholder="e.g., Engineering" class="tw:w-full tw:px-3 tw:py-2 tw:border tw:border-gray-300 tw:rounded" />
       </div>
       <div>
         <label class="tw:block tw:text-sm tw:font-medium tw:mb-2">Location</label>
-        <input type="text" [(ngModel)]="formData().location" name="location" placeholder="e.g., New York, EST" class="tw:w-full tw:px-3 tw:py-2 tw:border tw:border-gray-300 tw:rounded" />
+        <input type="text" [ngModel]="formData().location" (ngModelChange)="updateField('location', $event)" name="location" placeholder="e.g., New York, EST" class="tw:w-full tw:px-3 tw:py-2 tw:border tw:border-gray-300 tw:rounded" />
       </div>
     </div>
 
     <div class="tw:grid tw:grid-cols-2 tw:gap-4 tw:mb-4">
       <div>
         <label class="tw:block tw:text-sm tw:font-medium tw:mb-2">Timezone</label>
-        <input type="text" [(ngModel)]="formData().timezone" name="timezone" placeholder="e.g., EST" class="tw:w-full tw:px-3 tw:py-2 tw:border tw:border-gray-300 tw:rounded" />
+        <input type="text" [ngModel]="formData().timezone" (ngModelChange)="updateField('timezone', $event)" name="timezone" placeholder="e.g., EST" class="tw:w-full tw:px-3 tw:py-2 tw:border tw:border-gray-300 tw:rounded" />
       </div>
       <div>
         <label class="tw:block tw:text-sm tw:font-medium tw:mb-2">Pronouns</label>
-        <input type="text" [(ngModel)]="formData().pronouns" name="pronouns" placeholder="e.g., he/him" class="tw:w-full tw:px-3 tw:py-2 tw:border tw:border-gray-300 tw:rounded" />
+        <input type="text" [ngModel]="formData().pronouns" (ngModelChange)="updateField('pronouns', $event)" name="pronouns" placeholder="e.g., he/him" class="tw:w-full tw:px-3 tw:py-2 tw:border tw:border-gray-300 tw:rounded" />
       </div>
     </div>
 
     <div class="tw:mb-4">
       <label class="tw:block tw:text-sm tw:font-medium tw:mb-2">Preferred Work Style</label>
-      <select [(ngModel)]="formData().preferredWorkStyle" name="preferredWorkStyle" class="tw:w-full tw:px-3 tw:py-2 tw:border tw:border-gray-300 tw:rounded">
+      <select [ngModel]="formData().preferredWorkStyle" (ngModelChange)="updateField('preferredWorkStyle', $event)" name="preferredWorkStyle" class="tw:w-full tw:px-3 tw:py-2 tw:border tw:border-gray-300 tw:rounded">
         <option value="">Select...</option>
         <option value="Asynchronous">Asynchronous</option>
         <option value="Synchronous">Synchronous</option>
@@ -65,14 +65,14 @@
 
     <div class="tw:mb-6">
       <label class="tw:block tw:text-sm tw:font-medium tw:mb-2">Icebreaker / Fun Fact</label>
-      <textarea [(ngModel)]="formData().icebreaker" name="icebreaker" placeholder="Share something interesting about yourself!" class="tw:w-full tw:px-3 tw:py-2 tw:border tw:border-gray-300 tw:rounded" rows="2"></textarea>
+      <textarea [ngModel]="formData().icebreaker" (ngModelChange)="updateField('icebreaker', $event)" name="icebreaker" placeholder="Share something interesting about yourself!" class="tw:w-full tw:px-3 tw:py-2 tw:border tw:border-gray-300 tw:rounded" rows="2"></textarea>
     </div>
 
     <div class="tw:flex tw:gap-2">
-      <button type="submit" [disabled]="isSaving()" class="tw:px-6 tw:py-2 tw:bg-blue-600 tw:text-white tw:rounded hover:tw:bg-blue-700 disabled:tw:bg-gray-400">
+      <button mat-flat-button color="primary" type="submit" [disabled]="isSaving()">
         {{ isSaving() ? 'Saving...' : 'Save Changes' }}
       </button>
-      <button type="button" (click)="router.navigate(['/profile'])" class="tw:px-6 tw:py-2 tw:bg-gray-300 tw:text-gray-800 tw:rounded hover:tw:bg-gray-400">Cancel</button>
+      <button mat-button type="button" (click)="router.navigate(['/profile'])">Cancel</button>
     </div>
 
     @if (saveMessage()) {

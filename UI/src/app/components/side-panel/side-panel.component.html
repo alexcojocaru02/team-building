@@ -3,7 +3,9 @@
   [style.width]="collapsed ? 'var(--sidenav-collapsed)' : 'var(--sidenav-expanded)'">
 
   <button
-    class="tw:self-end tw:m-3 tw:bg-white/5 tw:text-white tw:w-9 tw:h-9 tw:rounded-md tw:flex tw:items-center tw:justify-center"
+    mat-icon-button
+    type="button"
+    class="tw:self-end tw:m-3 tw:text-white"
     (click)="toggle()"
     aria-label="Toggle sidenav">
     <mat-icon class="tw:text-lg" aria-hidden="true">{{ collapsed ? 'chevron_right' : 'chevron_left' }}</mat-icon>

@@ -2,7 +2,7 @@
   <div class="tw:flex tw:justify-between tw:items-center tw:mb-6">
     <h1 class="tw:text-3xl tw:font-bold">Teams</h1>
     @if (isAdmin) {
-    <button (click)="showCreateForm = !showCreateForm" class="tw:px-4 tw:py-2 tw:bg-blue-600 tw:text-white tw:rounded hover:tw:bg-blue-700">
+    <button mat-flat-button color="primary" type="button" (click)="showCreateForm = !showCreateForm">
       {{ showCreateForm ? 'Cancel' : 'Create Team' }}
     </button>
     }
@@ -23,7 +23,7 @@
     <p class="tw:text-sm tw:text-red-600 tw:mb-4">{{ createMessage() }}</p>
     }
     <div class="tw:flex tw:gap-2">
-      <button (click)="createTeam()" [disabled]="isCreatingTeam" class="tw:px-4 tw:py-2 tw:bg-green-600 tw:text-white tw:rounded hover:tw:bg-green-700 disabled:tw:bg-gray-400">
+      <button mat-flat-button color="primary" type="button" (click)="createTeam()" [disabled]="isCreatingTeam">
         {{ isCreatingTeam ? 'Creating...' : 'Create' }}
       </button>
     </div>
@@ -71,13 +71,13 @@
 
       @if (isOwnerOrAdmin(team)) {
       <div class="tw:flex tw:gap-2">
-        <button (click)="editTeam(team)" class="tw:px-3 tw:py-1 tw:bg-blue-500 tw:text-white tw:text-sm tw:rounded hover:tw:bg-blue-600">
+        <button mat-button type="button" (click)="editTeam(team)">
           Edit
         </button>
-        <button (click)="manageMembers(team)" class="tw:px-3 tw:py-1 tw:bg-green-500 tw:text-white tw:text-sm tw:rounded hover:tw:bg-green-600">
+        <button mat-button type="button" (click)="manageMembers(team)">
           Manage Members
         </button>
-        <button *ngIf="isAdmin" (click)="requestDeleteTeam(team)" class="tw:px-3 tw:py-1 tw:bg-red-500 tw:text-white tw:text-sm tw:rounded hover:tw:bg-red-600">
+        <button *ngIf="isAdmin" mat-flat-button color="warn" type="button" (click)="requestDeleteTeam(team)" [disabled]="isDeletingTeamId() === team.id">
           {{ isDeletingTeamId() === team.id ? 'Deleting...' : 'Delete' }}
         </button>
       </div>

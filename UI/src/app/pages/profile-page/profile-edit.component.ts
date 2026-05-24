@@ -2,6 +2,7 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { MatButtonModule } from '@angular/material/button';
 import { AuthService } from '../../services/auth.service';
 import { UsersService } from '../../services/users.service';
 import { UpdateProfileDto, UserDto } from '../../models/auth.models';
@@ -9,7 +10,7 @@ import { UpdateProfileDto, UserDto } from '../../models/auth.models';
 @Component({
   selector: 'app-profile-edit',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, MatButtonModule],
   templateUrl: './profile-edit.component.html',
   styleUrls: ['./profile-edit.component.scss']
 })
@@ -38,6 +39,13 @@ export class ProfileEditComponent implements OnInit {
 
   get strengthsInput(): string {
     return (this.formData().strengths || []).join(', ');
+  }
+
+  updateField<K extends keyof UpdateProfileDto>(key: K, value: UpdateProfileDto[K]): void {
+    this.formData.set({
+      ...this.formData(),
+      [key]: value,
+    });
   }
 
   ngOnInit() {
@@ -70,22 +78,24 @@ export class ProfileEditComponent implements OnInit {
 
   updateHobbies(event: Event): void {
     const input = (event.target as HTMLInputElement).value;
-    const currentData = this.formData();
-    currentData.hobbies = input
+    this.formData.set({
+      ...this.formData(),
+      hobbies: input
       .split(',')
       .map(h => h.trim())
-      .filter(h => h.length > 0);
-    this.formData.set(currentData);
+      .filter(h => h.length > 0)
+    });
   }
 
   updateStrengths(event: Event): void {
     const input = (event.target as HTMLInputElement).value;
-    const currentData = this.formData();
-    currentData.strengths = input
+    this.formData.set({
+      ...this.formData(),
+      strengths: input
       .split(',')
       .map(s => s.trim())
-      .filter(s => s.length > 0);
-    this.formData.set(currentData);
+      .filter(s => s.length > 0)
+    });
   }
 
   onSubmit(): void {

@@ -1,5 +1,10 @@
 <div class="tw:p-6 tw:max-w-2xl tw:mx-auto">
-  <h1 class="tw:text-3xl tw:font-bold tw:mb-6">My Profile</h1>
+  <div class="tw:flex tw:items-center tw:justify-between tw:gap-4 tw:mb-6">
+    <h1 class="tw:text-3xl tw:font-bold">My Profile</h1>
+    <button mat-stroked-button color="warn" type="button" (click)="logout()">
+      Logout
+    </button>
+  </div>
   @if (profile(); as p) {
   <div class="tw:bg-white tw:rounded-lg tw:shadow-md tw:p-6 tw:mb-6">
     <div class="tw:flex tw:items-start tw:justify-between tw:mb-6">
@@ -21,7 +26,7 @@
           </span>
         </div>
       </div>
-      <button (click)="editProfile()" class="tw:px-4 tw:py-2 tw:bg-blue-600 tw:text-white tw:rounded hover:tw:bg-blue-700">
+      <button mat-flat-button color="primary" type="button" (click)="editProfile()">
         Edit Profile
       </button>
     </div>

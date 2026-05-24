@@ -2,6 +2,7 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
+import { MatButtonModule } from '@angular/material/button';
 import { AuthService } from '../../services/auth.service';
 import { UsersService } from '../../services/users.service';
 import { TeamDetailDto, CreateTeamDto } from '../../models/auth.models';
@@ -10,7 +11,7 @@ import { ConfirmDialogComponent } from './confirm-dialog.component';
 @Component({
   selector: 'app-teams-list',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, MatButtonModule],
   templateUrl: './teams-list.component.html',
   styleUrls: ['./teams-list.component.scss']
 })

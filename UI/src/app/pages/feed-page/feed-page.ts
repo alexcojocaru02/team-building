@@ -2,13 +2,14 @@ import { CommonModule } from '@angular/common';
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
+import { MatButtonModule } from '@angular/material/button';
 import { FeedService, FeedPostDto, CreateFeedPostDto } from '../../services/feed.service';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-feed-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, MatButtonModule],
   templateUrl: './feed-page.html',
   styleUrl: './feed-page.scss',
 })
