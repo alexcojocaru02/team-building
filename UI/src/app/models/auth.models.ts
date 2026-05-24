@@ -17,6 +17,47 @@ export interface UserDto {
   id: string;
   fullName?: string;
   email: string;
+  role?: string;
+  teamIds?: string[];
+  bio?: string;
+  avatarUrl?: string;
+  department?: string;
+  location?: string;
+  timezone?: string;
+  pronouns?: string;
+  preferredWorkStyle?: string;
+  hobbies?: string[];
+  strengths?: string[];
+  icebreaker?: string;
+  updatedAt?: string;
+}
+
+export interface UpdateProfileDto {
+  bio?: string;
+  avatarUrl?: string;
+  department?: string;
+  location?: string;
+  timezone?: string;
+  pronouns?: string;
+  preferredWorkStyle?: string;
+  hobbies?: string[];
+  strengths?: string[];
+  icebreaker?: string;
+}
+
+export interface TeamDetailDto {
+  id: string;
+  name: string;
+  ownerId?: string;
+  description?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  memberIds: string[];
+}
+
+export interface CreateTeamDto {
+  name: string;
+  description?: string;
 }
 
 // Aliases for backward compatibility

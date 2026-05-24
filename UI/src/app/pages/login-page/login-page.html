@@ -49,9 +49,11 @@
         </div>
 
         <button
+          mat-flat-button
+          color="primary"
           type="submit"
           [disabled]="isLoading()"
-          class="tw:w-full tw:bg-blue-600 tw:text-white tw:py-3 tw:rounded-lg tw:font-semibold tw:hover:bg-blue-700 tw:transition tw:disabled:opacity-50 tw:disabled:cursor-not-allowed"
+          class="tw:w-full tw:py-3 tw:font-semibold tw:disabled:opacity-50 tw:disabled:cursor-not-allowed"
         >
           {{ isLoading() ? 'Signing in...' : 'Sign In' }}
         </button>
@@ -105,9 +107,11 @@
         </div>
 
         <button
+          mat-flat-button
+          color="primary"
           type="submit"
           [disabled]="isLoading()"
-          class="tw:w-full tw:bg-blue-600 tw:text-white tw:py-3 tw:rounded-lg tw:font-semibold tw:hover:bg-blue-700 tw:transition tw:disabled:opacity-50 tw:disabled:cursor-not-allowed"
+          class="tw:w-full tw:py-3 tw:font-semibold tw:disabled:opacity-50 tw:disabled:cursor-not-allowed"
         >
           {{ isLoading() ? 'Creating account...' : 'Sign Up' }}
         </button>
@@ -119,9 +123,11 @@
       <p class="tw:text-gray-600">
         {{ isLoginMode() ? "Don't have an account?" : 'Already have an account?' }}
         <button
+          mat-button
+          color="primary"
           type="button"
           (click)="toggleMode()"
-          class="tw:text-blue-600 tw:font-semibold tw:hover:underline tw:ml-1"
+          class="tw:ml-1"
         >
           {{ isLoginMode() ? 'Sign Up' : 'Sign In' }}
         </button>

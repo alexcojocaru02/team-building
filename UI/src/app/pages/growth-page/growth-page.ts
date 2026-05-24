@@ -1,12 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { RouterModule } from '@angular/router';
+import { MatButtonModule } from '@angular/material/button';
 import { DashboardService, CohesionDashboardDto } from '../../services/dashboard.service';
 
 @Component({
   selector: 'app-cohesion-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, MatButtonModule],
   templateUrl: './growth-page.html',
   styleUrl: './growth-page.scss',
 })

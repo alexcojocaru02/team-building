@@ -2,13 +2,14 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { MatButtonModule } from '@angular/material/button';
 import { AuthService } from '../../services/auth.service';
 import { ICONS } from '../../shared/icons';
 
 @Component({
   selector: 'app-home-page',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, MatButtonModule],
   templateUrl: './home-page.html',
   styleUrl: './home-page.scss'
 })

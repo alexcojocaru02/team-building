@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using System.Text.Json;
 using System.Text;
 using TeamConnect.Api.Modules.Auth;
 using TeamConnect.Api.Shared.Services;
@@ -61,6 +62,7 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddSingleton<MongoDbContext>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<JwtService>();
+builder.Services.AddScoped<ProfileAndTeamMigrationRunner>();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -82,7 +84,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ClockSkew = TimeSpan.Zero
         };
 
-        // Helpful for diagnosing invalid_token causes — writes exception to console
+        // Helpful for diagnosing invalid_token causes ï¿½ writes exception to console
         options.Events = new JwtBearerEvents
         {
             OnAuthenticationFailed = ctx =>
@@ -105,9 +107,32 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 
 // Register Authorization
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
+    options.AddPolicy("AdminOrTeamOwner", policy => policy.RequireRole("Admin", "TeamOwner"));
+});
 
 var app = builder.Build();
+
+var migrationModeArg = args.FirstOrDefault(a => a.StartsWith("--migration-mode=", StringComparison.OrdinalIgnoreCase));
+if (!string.IsNullOrWhiteSpace(migrationModeArg))
+{
+    var mode = migrationModeArg.Split('=', 2)[1].Trim();
+    var versionArg = args.FirstOrDefault(a => a.StartsWith("--migration-version=", StringComparison.OrdinalIgnoreCase));
+    var version = !string.IsNullOrWhiteSpace(versionArg)
+        ? versionArg.Split('=', 2)[1].Trim()
+        : "2026-05-06-profile-team-v1";
+
+    using var scope = app.Services.CreateScope();
+    var runner = scope.ServiceProvider.GetRequiredService<ProfileAndTeamMigrationRunner>();
+
+    var report = await runner.RunAsync(version, mode);
+    var json = JsonSerializer.Serialize(report, new JsonSerializerOptions { WriteIndented = true });
+    Console.WriteLine(json);
+
+    return;
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

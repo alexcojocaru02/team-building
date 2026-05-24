@@ -3,14 +3,16 @@
   [style.width]="collapsed ? 'var(--sidenav-collapsed)' : 'var(--sidenav-expanded)'">
 
   <button
-    class="tw:self-end tw:m-3 tw:bg-white/5 tw:text-white tw:w-9 tw:h-9 tw:rounded-md tw:flex tw:items-center tw:justify-center"
+    mat-icon-button
+    type="button"
+    class="tw:self-end tw:m-3 tw:text-white"
     (click)="toggle()"
     aria-label="Toggle sidenav">
     <mat-icon class="tw:text-lg" aria-hidden="true">{{ collapsed ? 'chevron_right' : 'chevron_left' }}</mat-icon>
   </button>
 
   <nav class="tw:flex tw:flex-col tw:px-2 tw:gap-1" role="navigation" aria-label="Main">
-    @for (it of items; track it.label) {
+    @for (it of navItems(); track it.label) {
       <a [routerLink]="it.route"
          routerLinkActive="tw:bg-white/10"
          class="tw:flex tw:items-center tw:gap-3 tw:px-3 tw:py-2 tw:rounded-md tw:no-underline">

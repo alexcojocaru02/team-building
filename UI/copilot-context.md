@@ -6,7 +6,7 @@ The backend is an ASP.NET Core Web API (.NET 8) using JWT authentication and Mon
 The application supports remote teams and focuses on team cohesion.
 This is an academic project, not a commercial one.
 
-Backend base URL: https://localhost:7241/api
+Backend base URL (dev): http://localhost:5217/api
 
 Authentication:
 - JWT Bearer token

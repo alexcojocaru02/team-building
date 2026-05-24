@@ -1,0 +1,9 @@
+:host {
+  display: block;
+}
+
+@media (max-width: 640px) {
+  :host {
+    padding-bottom: 1rem;
+  }
+}

@@ -17,16 +17,18 @@ namespace TeamConnect.Api.Modules.Auth
 
         public string Generate(User user)
         {
+            var normalizedRole = UserRoles.Normalize(user.Role);
+
             var claims = new[]
             {
             new Claim(ClaimTypes.NameIdentifier, user.Id),
             new Claim(ClaimTypes.Name, user.FullName ?? string.Empty),
             new Claim(ClaimTypes.Email, user.Email),
-            new Claim(ClaimTypes.Role, user.Role)
+            new Claim(ClaimTypes.Role, normalizedRole)
         };
 
             var key = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(_config["Jwt:Key"])
+                Encoding.UTF8.GetBytes(_config["Jwt:Key"] ?? string.Empty)
             );
 
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);

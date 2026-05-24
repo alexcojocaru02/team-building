@@ -2,6 +2,7 @@ import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
+import { MatButtonModule } from '@angular/material/button';
 import { FeedbackService, CreateFeedbackDto, FeedbackDto } from '../../services/feedback.service';
 import { AuthService } from '../../services/auth.service';
 import { UsersService, UserSummaryDto } from '../../services/users.service';
@@ -9,7 +10,7 @@ import { UsersService, UserSummaryDto } from '../../services/users.service';
 @Component({
   selector: 'app-feedback-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, MatButtonModule],
   templateUrl: './feedback-page.html',
   styleUrl: './feedback-page.scss',
 })

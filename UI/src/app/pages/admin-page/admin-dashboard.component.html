@@ -1,0 +1,69 @@
+<div class="tw:p-6">
+  <h1 class="tw:text-3xl tw:font-bold tw:mb-6">Admin Dashboard</h1>
+
+  <div class="tw:flex tw:flex-row tw:gap-6 tw:mb-6">
+    <div class="tw:bg-white tw:rounded-lg tw:shadow tw:p-6 tw:flex-1">
+      <h3 class="tw:text-gray-600 tw:text-sm tw:font-medium">Total Users</h3>
+      <p class="tw:text-3xl tw:font-bold">{{ users().length }}</p>
+    </div>
+    <div class="tw:bg-white tw:rounded-lg tw:shadow tw:p-6 tw:flex-1">
+      <h3 class="tw:text-gray-600 tw:text-sm tw:font-medium">Total Teams</h3>
+      <p class="tw:text-3xl tw:font-bold">{{ teams().length }}</p>
+    </div>
+    <div class="tw:bg-white tw:rounded-lg tw:shadow tw:p-6 tw:flex-1">
+      <h3 class="tw:text-gray-600 tw:text-sm tw:font-medium">Teams Without Owner</h3>
+      <p class="tw:text-3xl tw:font-bold">{{ teamsWithoutOwner() }}</p>
+    </div>
+  </div>
+
+  <div class="tw:grid tw:grid-cols-1 lg:tw:grid-cols-2 tw:gap-6">
+    <!-- Users Section -->
+    <div class="tw:bg-white tw:rounded-lg tw:shadow-md tw:p-6">
+      <h2 class="tw:text-xl tw:font-semibold tw:mb-4">Users</h2>
+      <div class="tw:overflow-x-auto">
+        <table class="tw:w-full tw:text-left tw:text-sm">
+          <thead class="tw:border-b">
+            <tr>
+              <th class="tw:pb-2">Name</th>
+              <th class="tw:pb-2">Role</th>
+              <th class="tw:pb-2">Teams</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (user of users(); track user.id) {
+            <tr class="tw:border-b">
+              <td class="tw:py-2">{{ user.fullName }}</td>
+              <td class="tw:py-2">
+                <span [ngClass]="{'tw:bg-red-100 tw:text-red-800': user.role === 'Admin', 'tw:bg-blue-100 tw:text-blue-800': user.role === 'TeamOwner', 'tw:bg-gray-100 tw:text-gray-800': user.role === 'User'}" class="tw:px-2 tw:py-1 tw:rounded tw:text-xs tw:font-medium">
+                  {{ user.role }}
+                </span>
+              </td>
+              <td class="tw:py-2">-</td>
+            </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Teams Section -->
+    <div class="tw:bg-white tw:rounded-lg tw:shadow-md tw:p-6">
+      <h2 class="tw:text-xl tw:font-semibold tw:mb-4">Teams</h2>
+      <div class="tw:space-y-3 tw:max-h-96 tw:overflow-y-auto">
+        @for (team of teams(); track team.id) {
+        <div class="tw:p-3 tw:border tw:rounded">
+          <p class="tw:font-medium">{{ team.name }}</p>
+          <p class="tw:text-sm tw:text-gray-600">Owner: {{ team.ownerId ? team.ownerId : '❌ Unassigned' }}</p>
+          <p class="tw:text-sm tw:text-gray-600">Members: {{ team.memberIds.length }}</p>
+        </div>
+        }
+      </div>
+    </div>
+  </div>
+
+  @if (teamsWithoutOwner() > 0) {
+  <div class="tw:mt-6 tw:bg-yellow-50 tw:border tw:border-yellow-200 tw:rounded tw:p-4">
+    <p class="tw:text-yellow-800"><strong>⚠️ Action Required:</strong> {{ teamsWithoutOwner() }} team(s) do not have an assigned owner. Please manually assign admins to these teams.</p>
+  </div>
+  }
+</div>
