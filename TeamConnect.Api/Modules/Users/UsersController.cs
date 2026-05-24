@@ -69,15 +69,15 @@ namespace TeamConnect.Api.Modules.Users
             if (user == null)
                 return NotFound();
 
-            // Apply updates
-            if (!string.IsNullOrWhiteSpace(dto.Bio)) user.Bio = dto.Bio;
-            if (!string.IsNullOrWhiteSpace(dto.AvatarUrl)) user.AvatarUrl = dto.AvatarUrl;
-            if (!string.IsNullOrWhiteSpace(dto.Department)) user.Department = dto.Department;
-            if (!string.IsNullOrWhiteSpace(dto.Location)) user.Location = dto.Location;
-            if (!string.IsNullOrWhiteSpace(dto.Timezone)) user.Timezone = dto.Timezone;
-            if (!string.IsNullOrWhiteSpace(dto.Pronouns)) user.Pronouns = dto.Pronouns;
-            if (!string.IsNullOrWhiteSpace(dto.PreferredWorkStyle)) user.PreferredWorkStyle = dto.PreferredWorkStyle;
-            if (!string.IsNullOrWhiteSpace(dto.Icebreaker)) user.Icebreaker = dto.Icebreaker;
+            // Null means no change; empty/whitespace means clear the stored value.
+            if (dto.Bio != null) user.Bio = dto.Bio.Trim();
+            if (dto.AvatarUrl != null) user.AvatarUrl = dto.AvatarUrl.Trim();
+            if (dto.Department != null) user.Department = dto.Department.Trim();
+            if (dto.Location != null) user.Location = dto.Location.Trim();
+            if (dto.Timezone != null) user.Timezone = dto.Timezone.Trim();
+            if (dto.Pronouns != null) user.Pronouns = dto.Pronouns.Trim();
+            if (dto.PreferredWorkStyle != null) user.PreferredWorkStyle = dto.PreferredWorkStyle.Trim();
+            if (dto.Icebreaker != null) user.Icebreaker = dto.Icebreaker.Trim();
 
             if (dto.Hobbies != null) user.Hobbies = dto.Hobbies;
             if (dto.Strengths != null) user.Strengths = dto.Strengths;

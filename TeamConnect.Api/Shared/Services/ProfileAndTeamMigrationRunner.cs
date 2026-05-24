@@ -104,9 +104,18 @@ namespace TeamConnect.Api.Shared.Services
                     report.TeamsMissingOwner++;
                 }
 
+                var hasMissingMetadata = false;
                 foreach (var field in RequiredTeamFields)
                 {
-                    if (!team.Contains(field)) report.TeamsMissingMetadata++;
+                    if (!team.Contains(field))
+                    {
+                        hasMissingMetadata = true;
+                    }
+                }
+
+                if (hasMissingMetadata)
+                {
+                    report.TeamsMissingMetadata++;
                 }
 
                 if (!team.Contains("MemberIds") || !team["MemberIds"].IsBsonArray) continue;

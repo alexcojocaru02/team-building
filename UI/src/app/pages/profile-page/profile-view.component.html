@@ -104,7 +104,7 @@
     @if ((p.teamIds?.length ?? 0) > 0) {
     <div class="tw:mb-6">
       <label class="tw:text-gray-600 tw:text-sm tw:block tw:mb-2">Teams ({{ p.teamIds?.length ?? 0 }})</label>
-      <p class="tw:text-gray-700">You are a member of {{ p.teamIds?.length ?? 0 }} team(s). Visit the <a href="/teams" class="tw:text-blue-600 hover:tw:underline">Teams</a> page for details.</p>
+      <p class="tw:text-gray-700">You are a member of {{ p.teamIds?.length ?? 0 }} team(s). Visit the <a routerLink="/teams" class="tw:text-blue-600 hover:tw:underline">Teams</a> page for details.</p>
     </div>
     }
   </div>

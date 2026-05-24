@@ -28,7 +28,7 @@ Frontend:
 Backend:
 - Folder: TeamConnect.Api/
 - Typical command: dotnet run
-- Base API URL: https://localhost:7241/api
+- Base API URL (dev): http://localhost:5217/api (HTTPS also available at https://localhost:7241/api)
 
 ## Backend Overview (.NET 8)
 
@@ -118,7 +118,7 @@ Architecture rules:
 
 Environment:
 - UI/src/environments/environment.ts
-- apiUrl = https://localhost:7241/api
+- apiUrl = http://localhost:5217/api
 
 Tailwind note:
 - Tailwind utility prefix is tw: (example: tw:grid)

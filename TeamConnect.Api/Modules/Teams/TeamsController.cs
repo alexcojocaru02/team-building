@@ -24,13 +24,18 @@ namespace TeamConnect.Api.Modules.Teams
         [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> Create(CreateTeamDto dto)
         {
+            if (dto == null || string.IsNullOrWhiteSpace(dto.Name))
+                return BadRequest("Team name is required.");
+
             var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrWhiteSpace(currentUserId))
                 return Unauthorized();
 
+            var normalizedTeamName = dto.Name.Trim();
+
             var team = new Team
             {
-                Name = dto.Name,
+                Name = normalizedTeamName,
                 Description = dto.Description,
                 OwnerId = currentUserId,
                 CreatedAt = DateTime.UtcNow,
