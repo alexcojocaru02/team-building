@@ -76,14 +76,22 @@ namespace TeamConnect.Api.Modules.Teams
             if (!isAdmin && !isTeamOwner)
                 return Forbid();
 
-            // Check if user already in team
-            if (team.MemberIds.Contains(userId))
-                return BadRequest("User is already a member of this team");
-
             // Check if user exists
             var user = await _context.Users.Find(u => u.Id == userId).FirstOrDefaultAsync();
             if (user == null)
                 return BadRequest("User not found");
+
+            // Keep the operation idempotent so membership drift does not block a re-add.
+            if (team.MemberIds.Contains(userId))
+            {
+                var repairUser = Builders<User>.Update
+                    .AddToSet(u => u.TeamIds, teamId)
+                    .Set(u => u.UpdatedAt, DateTime.UtcNow);
+
+                await _context.Users.UpdateOneAsync(u => u.Id == userId, repairUser);
+
+                return Ok(new { message = "User added to team" });
+            }
 
             // Add to team
             var updateTeam = Builders<Team>.Update
@@ -122,6 +130,23 @@ namespace TeamConnect.Api.Modules.Teams
 
             if (!isAdmin && !isTeamOwner)
                 return Forbid();
+
+            // Check if user exists before mutating state.
+            var user = await _context.Users.Find(u => u.Id == userId).FirstOrDefaultAsync();
+            if (user == null)
+                return BadRequest("User not found");
+
+            // Keep the operation idempotent so membership drift does not block a remove.
+            if (!team.MemberIds.Contains(userId))
+            {
+                var repairUser = Builders<User>.Update
+                    .Pull(u => u.TeamIds, teamId)
+                    .Set(u => u.UpdatedAt, DateTime.UtcNow);
+
+                await _context.Users.UpdateOneAsync(u => u.Id == userId, repairUser);
+
+                return Ok(new { message = "User removed from team" });
+            }
 
             // Remove from team
             var updateTeam = Builders<Team>.Update

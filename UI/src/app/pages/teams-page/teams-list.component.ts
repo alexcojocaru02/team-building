@@ -1,36 +1,39 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { EMPTY, catchError, filter, finalize, switchMap, tap } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
 import { UsersService } from '../../services/users.service';
-import { TeamDetailDto, CreateTeamDto } from '../../models/auth.models';
+import { TeamDetailDto } from '../../models/auth.models';
 import { ConfirmDialogComponent } from './confirm-dialog.component';
+import { TeamEditDialogComponent, TeamEditDialogResult } from './team-edit-dialog.component';
+import { ManageMembersDialogComponent } from './manage-members-dialog.component';
 
 @Component({
   selector: 'app-teams-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatDialogModule, MatButtonModule],
+  imports: [CommonModule, MatDialogModule, MatButtonModule, MatSnackBarModule],
   templateUrl: './teams-list.component.html',
   styleUrls: ['./teams-list.component.scss']
 })
 export class TeamsListComponent implements OnInit {
   private authService = inject(AuthService);
   private dialog = inject(MatDialog);
+  private snackBar = inject(MatSnackBar);
   private usersService = inject(UsersService);
+  private destroyRef = inject(DestroyRef);
 
   teams = signal<TeamDetailDto[]>([]);
   currentUserId: string | null = null;
   isAdmin = false;
   isLoading = signal(true);
   errorMessage = signal('');
-  createMessage = signal('');
   deleteMessage = signal('');
   isDeletingTeamId = signal<string | null>(null);
-  showCreateForm = false;
-  isCreatingTeam = false;
-  newTeam: CreateTeamDto = { name: '' };
+  isCreatingTeam = signal(false);
 
   ngOnInit() {
     const currentUser = this.authService.currentUser();
@@ -45,7 +48,7 @@ export class TeamsListComponent implements OnInit {
     this.errorMessage.set('');
     this.deleteMessage.set('');
 
-    this.usersService.getAllTeams().subscribe({
+    this.usersService.getAllTeams().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (teams) => {
         this.teams.set(teams);
         this.isLoading.set(false);
@@ -59,37 +62,80 @@ export class TeamsListComponent implements OnInit {
   }
 
   createTeam() {
-    this.createMessage.set('');
-
-    if (!this.newTeam.name.trim()) {
-      this.createMessage.set('Please enter a team name.');
-      return;
-    }
-
-    this.isCreatingTeam = true;
-    this.usersService.createTeam(this.newTeam).subscribe({
-      next: (team) => {
-        this.teams.update(teams => [team, ...teams]);
-        this.newTeam = { name: '' };
-        this.showCreateForm = false;
-        this.isCreatingTeam = false;
-      },
-      error: (err) => {
-        console.error('Failed to create team:', err);
-        this.isCreatingTeam = false;
-        this.createMessage.set(this.getErrorMessage(err, 'Failed to create team.'));
+    const dialogRef = this.dialog.open(TeamEditDialogComponent, {
+      width: '520px',
+      data: {
+        team: { name: '', description: '' },
+        title: 'Create team',
+        confirmText: 'Create team'
       }
     });
+
+    dialogRef.afterClosed().pipe(
+      takeUntilDestroyed(this.destroyRef),
+      filter((result): result is TeamEditDialogResult => !!result),
+      tap(() => {
+        this.isCreatingTeam.set(true);
+      }),
+      switchMap((result) => this.usersService.createTeam(result).pipe(
+        tap({
+          next: (team) => {
+            this.teams.update(teams => [team, ...teams]);
+            this.showSnackBar(`Team "${team.name}" created successfully.`);
+          }
+        }),
+        catchError((err) => {
+          console.error('Failed to create team:', err);
+          this.showSnackBar(this.getErrorMessage(err, 'Failed to create team.'), true);
+          return EMPTY;
+        })
+      )),
+      finalize(() => {
+        this.isCreatingTeam.set(false);
+      })
+    ).subscribe();
   }
 
   editTeam(team: TeamDetailDto) {
-    // TODO: Implement edit team dialog
-    console.log('Edit team:', team);
+    const dialogRef = this.dialog.open(TeamEditDialogComponent, {
+      width: '520px',
+      data: {
+        team,
+        title: 'Edit team',
+        confirmText: 'Save changes'
+      }
+    });
+
+    dialogRef.afterClosed().pipe(takeUntilDestroyed(this.destroyRef)).subscribe((result: TeamEditDialogResult | undefined) => {
+      if (!result) {
+        return;
+      }
+
+      this.usersService.updateTeam(team.id, result).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+        next: (updatedTeam) => {
+          this.teams.update(teams => teams.map(item => item.id === updatedTeam.id ? updatedTeam : item));
+          this.showSnackBar(`Team "${updatedTeam.name}" updated successfully.`);
+        },
+        error: (err) => {
+          console.error('Failed to update team:', err);
+          this.showSnackBar(this.getErrorMessage(err, 'Failed to save changes.'), true);
+        }
+      });
+    });
   }
 
   manageMembers(team: TeamDetailDto) {
-    // TODO: Implement manage members dialog
-    console.log('Manage members for team:', team);
+    const dialogRef = this.dialog.open(ManageMembersDialogComponent, {
+      width: '760px',
+      maxWidth: '95vw',
+      data: { team }
+    });
+
+    dialogRef.afterClosed().pipe(takeUntilDestroyed(this.destroyRef)).subscribe((changed: boolean | undefined) => {
+      if (changed) {
+        this.loadTeams();
+      }
+    });
   }
 
   requestDeleteTeam(team: TeamDetailDto) {
@@ -105,7 +151,7 @@ export class TeamsListComponent implements OnInit {
       }
     });
 
-    dialogRef.afterClosed().subscribe((confirmed: boolean) => {
+    dialogRef.afterClosed().pipe(takeUntilDestroyed(this.destroyRef)).subscribe((confirmed: boolean) => {
       if (confirmed) {
         this.deleteTeam(team);
       }
@@ -114,7 +160,7 @@ export class TeamsListComponent implements OnInit {
 
   private deleteTeam(team: TeamDetailDto) {
     this.isDeletingTeamId.set(team.id);
-    this.usersService.deleteTeam(team.id).subscribe({
+    this.usersService.deleteTeam(team.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.teams.update(teams => teams.filter(t => t.id !== team.id));
         this.isDeletingTeamId.set(null);
@@ -140,6 +186,14 @@ export class TeamsListComponent implements OnInit {
     }
 
     return fallback;
+  }
+
+  private showSnackBar(message: string, isError = false): void {
+    this.snackBar.open(message, 'Dismiss', {
+      duration: isError ? 4500 : 2500,
+      horizontalPosition: 'end',
+      verticalPosition: 'top'
+    });
   }
 
   isOwnerOrAdmin(team: TeamDetailDto): boolean {

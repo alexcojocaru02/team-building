@@ -1,0 +1,80 @@
+<div class="tw:p-6 tw:max-w-full">
+  <div class="tw:mb-5">
+    <h2 class="tw:text-2xl tw:font-semibold">Manage members</h2>
+    <p class="tw:text-sm tw:text-slate-500">Add or remove people from {{ team.name }}.</p>
+  </div>
+
+  @if (isLoading()) {
+    <div class="tw:py-10 tw:text-center tw:text-slate-500">Loading users...</div>
+  } @else if (loadError()) {
+    <div class="tw:mb-4 tw:rounded-lg tw:border tw:border-red-200 tw:bg-red-50 tw:px-4 tw:py-3 tw:text-sm tw:text-red-700">
+      {{ loadError() }}
+    </div>
+  } @else {
+    <div class="tw:grid tw:grid-cols-1 lg:tw:grid-cols-2 tw:gap-6">
+      <section class="tw:rounded-xl tw:border tw:border-slate-200 tw:p-4">
+        <div class="tw:flex tw:items-center tw:justify-between tw:mb-3">
+          <h3 class="tw:text-lg tw:font-semibold">Current members</h3>
+          <span class="tw:text-sm tw:text-slate-500">{{ memberUsers().length }} total</span>
+        </div>
+
+        @if (memberUsers().length) {
+          <div class="tw:space-y-3">
+            @for (member of memberUsers(); track member.id) {
+              <div class="tw:flex tw:items-center tw:justify-between tw:gap-3 tw:rounded-lg tw:border tw:border-slate-200 tw:p-3">
+                <div>
+                  <p class="tw:font-medium">{{ displayName(member) }}</p>
+                  <p class="tw:text-sm tw:text-slate-500">{{ member.email }}</p>
+                </div>
+                <div class="tw:flex tw:items-center tw:gap-2">
+                  @if (member.id === team.ownerId) {
+                    <span class="app-pill app-pill--blue">Owner</span>
+                  }
+                  <button
+                    mat-button
+                    type="button"
+                    (click)="removeMember(member.id)"
+                    [disabled]="isUpdating() || member.id === team.ownerId"
+                  >
+                    Remove
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+        } @else {
+          <p class="tw:rounded-lg tw:bg-slate-50 tw:p-4 tw:text-sm tw:text-slate-600">No members found.</p>
+        }
+      </section>
+
+      <section class="tw:rounded-xl tw:border tw:border-slate-200 tw:p-4">
+        <h3 class="tw:text-lg tw:font-semibold tw:mb-3">Add member</h3>
+
+        @if (availableUsers().length) {
+          <mat-form-field appearance="outline" class="tw:w-full tw:mb-4">
+            <mat-label>Select user</mat-label>
+            <mat-select id="member-select" [(ngModel)]="selectedUserId" name="selectedUserId">
+              @for (user of availableUsers(); track user.id) {
+                <mat-option [value]="user.id">{{ displayName(user) }} ({{ user.email }})</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <div class="tw:flex tw:justify-end">
+            <button mat-flat-button color="primary" type="button" (click)="addMember()" [disabled]="isUpdating() || !selectedUserId">
+              {{ isUpdating() ? 'Updating...' : 'Add member' }}
+            </button>
+          </div>
+        } @else {
+          <p class="tw:rounded-lg tw:bg-slate-50 tw:p-4 tw:text-sm tw:text-slate-600">
+            All available users are already in this team.
+          </p>
+        }
+      </section>
+    </div>
+  }
+
+  <div class="tw:mt-6 tw:flex tw:justify-end">
+    <button mat-flat-button color="primary" type="button" (click)="close()">Done</button>
+  </div>
+</div>

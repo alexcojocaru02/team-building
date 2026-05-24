@@ -1,0 +1,34 @@
+<div class="tw:p-6 tw:max-w-full">
+  <h2 class="tw:text-2xl tw:font-semibold tw:mb-2">{{ title }}</h2>
+  <p class="tw:text-sm tw:text-slate-500 tw:mb-5">Update the team name and description.</p>
+
+  <mat-form-field appearance="outline" class="tw:w-full tw:mb-4">
+    <mat-label>Team name</mat-label>
+    <input matInput id="team-name" type="text" [(ngModel)]="teamName" name="teamName" placeholder="Enter team name" />
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="tw:w-full tw:mb-4">
+    <mat-label>Description</mat-label>
+    <textarea
+      matInput
+      id="team-description"
+      [(ngModel)]="teamDescription"
+      name="teamDescription"
+      rows="4"
+      placeholder="Optional team description"
+    ></textarea>
+  </mat-form-field>
+
+  @if (errorMessage) {
+    <div class="tw:mb-4 tw:rounded-lg tw:border tw:border-red-200 tw:bg-red-50 tw:px-4 tw:py-3 tw:text-sm tw:text-red-700">
+      {{ errorMessage }}
+    </div>
+  }
+
+  <div class="tw:flex tw:justify-end tw:gap-2">
+    <button mat-button type="button" (click)="cancel()">Cancel</button>
+    <button mat-flat-button color="primary" type="button" (click)="save()" [disabled]="isSaving">
+      {{ isSaving ? 'Saving...' : confirmText }}
+    </button>
+  </div>
+</div>

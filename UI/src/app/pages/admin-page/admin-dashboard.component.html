@@ -34,7 +34,7 @@
             <tr class="tw:border-b">
               <td class="tw:py-2">{{ user.fullName }}</td>
               <td class="tw:py-2">
-                <span [ngClass]="{'tw:bg-red-100 tw:text-red-800': user.role === 'Admin', 'tw:bg-blue-100 tw:text-blue-800': user.role === 'TeamOwner', 'tw:bg-gray-100 tw:text-gray-800': user.role === 'User'}" class="tw:px-2 tw:py-1 tw:rounded tw:text-xs tw:font-medium">
+                <span [ngClass]="{'app-pill--red': user.role === 'Admin', 'app-pill--blue': user.role === 'TeamOwner', 'app-pill--gray': user.role === 'User'}" class="app-pill">
                   {{ user.role }}
                 </span>
               </td>
