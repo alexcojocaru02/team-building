@@ -76,14 +76,22 @@ namespace TeamConnect.Api.Modules.Teams
             if (!isAdmin && !isTeamOwner)
                 return Forbid();
 
-            // Check if user already in team
-            if (team.MemberIds.Contains(userId))
-                return BadRequest("User is already a member of this team");
-
             // Check if user exists
             var user = await _context.Users.Find(u => u.Id == userId).FirstOrDefaultAsync();
             if (user == null)
                 return BadRequest("User not found");
+
+            // Keep the operation idempotent so membership drift does not block a re-add.
+            if (team.MemberIds.Contains(userId))
+            {
+                var repairUser = Builders<User>.Update
+                    .AddToSet(u => u.TeamIds, teamId)
+                    .Set(u => u.UpdatedAt, DateTime.UtcNow);
+
+                await _context.Users.UpdateOneAsync(u => u.Id == userId, repairUser);
+
+                return Ok(new { message = "User added to team" });
+            }
 
             // Add to team
             var updateTeam = Builders<Team>.Update
@@ -123,19 +131,39 @@ namespace TeamConnect.Api.Modules.Teams
             if (!isAdmin && !isTeamOwner)
                 return Forbid();
 
-            // Remove from team
-            var updateTeam = Builders<Team>.Update
-                .Pull(t => t.MemberIds, userId)
-                .Set(t => t.UpdatedAt, DateTime.UtcNow);
-            
-            await _context.Teams.UpdateOneAsync(t => t.Id == teamId, updateTeam);
+            var user = await _context.Users.Find(u => u.Id == userId).FirstOrDefaultAsync();
+            var userExists = user != null;
 
-            // Remove team from user's TeamIds
-            var updateUser = Builders<User>.Update
-                .Pull(u => u.TeamIds, teamId)
-                .Set(u => u.UpdatedAt, DateTime.UtcNow);
-            
-            await _context.Users.UpdateOneAsync(u => u.Id == userId, updateUser);
+            // Keep the operation idempotent so membership drift does not block a remove.
+            if (team.MemberIds.Contains(userId))
+            {
+                var updateTeam = Builders<Team>.Update
+                    .Pull(t => t.MemberIds, userId)
+                    .Set(t => t.UpdatedAt, DateTime.UtcNow);
+
+                await _context.Teams.UpdateOneAsync(t => t.Id == teamId, updateTeam);
+
+                if (userExists)
+                {
+                    var updateUser = Builders<User>.Update
+                        .Pull(u => u.TeamIds, teamId)
+                        .Set(u => u.UpdatedAt, DateTime.UtcNow);
+
+                    await _context.Users.UpdateOneAsync(u => u.Id == userId, updateUser);
+                }
+
+                return Ok(new { message = "User removed from team" });
+            }
+
+            if (userExists)
+            {
+                // Remove team from user's TeamIds when the team no longer references the user.
+                var updateUser = Builders<User>.Update
+                    .Pull(u => u.TeamIds, teamId)
+                    .Set(u => u.UpdatedAt, DateTime.UtcNow);
+
+                await _context.Users.UpdateOneAsync(u => u.Id == userId, updateUser);
+            }
 
             return Ok(new { message = "User removed from team" });
         }

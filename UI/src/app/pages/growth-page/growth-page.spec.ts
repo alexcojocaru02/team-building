@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { GrowthPage } from './growth-page';
+import { CohesionDashboard } from './growth-page';
 
-describe('GrowthPage', () => {
-  let component: GrowthPage;
-  let fixture: ComponentFixture<GrowthPage>;
+describe('CohesionDashboard', () => {
+  let component: CohesionDashboard;
+  let fixture: ComponentFixture<CohesionDashboard>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [GrowthPage]
+      imports: [CohesionDashboard]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(GrowthPage);
+    fixture = TestBed.createComponent(CohesionDashboard);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

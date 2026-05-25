@@ -2,33 +2,11 @@
   <div class="tw:flex tw:justify-between tw:items-center tw:mb-6">
     <h1 class="tw:text-3xl tw:font-bold">Teams</h1>
     @if (isAdmin) {
-    <button mat-flat-button color="primary" type="button" (click)="showCreateForm = !showCreateForm">
-      {{ showCreateForm ? 'Cancel' : 'Create Team' }}
+    <button mat-flat-button color="primary" type="button" (click)="createTeam()" [disabled]="isCreatingTeam()">
+      {{ isCreatingTeam() ? 'Creating...' : 'Create Team' }}
     </button>
     }
   </div>
-
-  @if (showCreateForm && isAdmin) {
-  <div class="tw:bg-white tw:rounded-lg tw:shadow-md tw:p-6 tw:mb-6">
-    <h2 class="tw:text-xl tw:font-semibold tw:mb-4">Create New Team</h2>
-    <div class="tw:mb-4">
-      <label class="tw:block tw:text-sm tw:font-medium tw:mb-2">Team Name</label>
-      <input type="text" [(ngModel)]="newTeam.name" name="teamName" placeholder="Enter team name" class="tw:w-full tw:px-3 tw:py-2 tw:border tw:border-gray-300 tw:rounded" />
-    </div>
-    <div class="tw:mb-4">
-      <label class="tw:block tw:text-sm tw:font-medium tw:mb-2">Description</label>
-      <textarea [(ngModel)]="newTeam.description" name="teamDescription" placeholder="Team description (optional)" class="tw:w-full tw:px-3 tw:py-2 tw:border tw:border-gray-300 tw:rounded" rows="3"></textarea>
-    </div>
-    @if (createMessage()) {
-    <p class="tw:text-sm tw:text-red-600 tw:mb-4">{{ createMessage() }}</p>
-    }
-    <div class="tw:flex tw:gap-2">
-      <button mat-flat-button color="primary" type="button" (click)="createTeam()" [disabled]="isCreatingTeam">
-        {{ isCreatingTeam ? 'Creating...' : 'Create' }}
-      </button>
-    </div>
-  </div>
-  }
 
   @if (deleteMessage()) {
   <div class="tw:mb-6 tw:rounded-lg tw:border tw:border-red-200 tw:bg-red-50 tw:px-4 tw:py-3 tw:text-sm tw:text-red-700">
@@ -51,10 +29,10 @@
       <div class="tw:flex tw:justify-between tw:items-start tw:mb-3">
         <h2 class="tw:text-xl tw:font-semibold">{{ team.name }}</h2>
         @if (team.ownerId === currentUserId) {
-        <span class="tw:px-2 tw:py-1 tw:bg-blue-100 tw:text-blue-800 tw:rounded tw:text-xs">Owner</span>
+        <span class="app-pill app-pill--blue">Owner</span>
         }
         @if (team.ownerId && team.ownerId !== currentUserId) {
-        <span class="tw:px-2 tw:py-1 tw:bg-gray-100 tw:text-gray-800 tw:rounded tw:text-xs">Member</span>
+        <span class="app-pill app-pill--gray">Member</span>
         }
       </div>
       

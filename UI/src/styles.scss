@@ -22,3 +22,39 @@ body {
     transition: margin-left .18s ease;
     min-height: 100vh;
 }
+
+.app-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9999px;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    line-height: 1;
+}
+
+.app-pill--blue {
+    background: rgb(219 234 254);
+    color: rgb(30 64 175);
+}
+
+.app-pill--gray {
+    background: rgb(243 244 246);
+    color: rgb(31 41 55);
+}
+
+.app-pill--red {
+    background: rgb(254 226 226);
+    color: rgb(153 27 27);
+}
+
+.app-pill--green {
+    background: rgb(220 252 231);
+    color: rgb(21 128 61);
+}
+
+.app-pill--yellow {
+    background: rgb(254 249 195);
+    color: rgb(161 98 7);
+}
