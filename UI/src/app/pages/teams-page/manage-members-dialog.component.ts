@@ -70,7 +70,7 @@ export class ManageMembersDialogComponent implements OnInit {
 
     this.isUpdating.set(true);
 
-    this.usersService.addTeamMember(this.team.id, userId).subscribe({
+    this.usersService.addTeamMember(this.team.id, userId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.memberIds.set([...this.memberIds(), userId]);
         this.hasChanges = true;
@@ -94,7 +94,7 @@ export class ManageMembersDialogComponent implements OnInit {
 
     this.isUpdating.set(true);
 
-    this.usersService.removeTeamMember(this.team.id, userId).subscribe({
+    this.usersService.removeTeamMember(this.team.id, userId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.memberIds.set(this.memberIds().filter(memberId => memberId !== userId));
         this.hasChanges = true;

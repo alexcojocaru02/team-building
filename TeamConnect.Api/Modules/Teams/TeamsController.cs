@@ -131,36 +131,39 @@ namespace TeamConnect.Api.Modules.Teams
             if (!isAdmin && !isTeamOwner)
                 return Forbid();
 
-            // Check if user exists before mutating state.
             var user = await _context.Users.Find(u => u.Id == userId).FirstOrDefaultAsync();
-            if (user == null)
-                return BadRequest("User not found");
+            var userExists = user != null;
 
             // Keep the operation idempotent so membership drift does not block a remove.
-            if (!team.MemberIds.Contains(userId))
+            if (team.MemberIds.Contains(userId))
             {
-                var repairUser = Builders<User>.Update
-                    .Pull(u => u.TeamIds, teamId)
-                    .Set(u => u.UpdatedAt, DateTime.UtcNow);
+                var updateTeam = Builders<Team>.Update
+                    .Pull(t => t.MemberIds, userId)
+                    .Set(t => t.UpdatedAt, DateTime.UtcNow);
 
-                await _context.Users.UpdateOneAsync(u => u.Id == userId, repairUser);
+                await _context.Teams.UpdateOneAsync(t => t.Id == teamId, updateTeam);
+
+                if (userExists)
+                {
+                    var updateUser = Builders<User>.Update
+                        .Pull(u => u.TeamIds, teamId)
+                        .Set(u => u.UpdatedAt, DateTime.UtcNow);
+
+                    await _context.Users.UpdateOneAsync(u => u.Id == userId, updateUser);
+                }
 
                 return Ok(new { message = "User removed from team" });
             }
 
-            // Remove from team
-            var updateTeam = Builders<Team>.Update
-                .Pull(t => t.MemberIds, userId)
-                .Set(t => t.UpdatedAt, DateTime.UtcNow);
-            
-            await _context.Teams.UpdateOneAsync(t => t.Id == teamId, updateTeam);
+            if (userExists)
+            {
+                // Remove team from user's TeamIds when the team no longer references the user.
+                var updateUser = Builders<User>.Update
+                    .Pull(u => u.TeamIds, teamId)
+                    .Set(u => u.UpdatedAt, DateTime.UtcNow);
 
-            // Remove team from user's TeamIds
-            var updateUser = Builders<User>.Update
-                .Pull(u => u.TeamIds, teamId)
-                .Set(u => u.UpdatedAt, DateTime.UtcNow);
-            
-            await _context.Users.UpdateOneAsync(u => u.Id == userId, updateUser);
+                await _context.Users.UpdateOneAsync(u => u.Id == userId, updateUser);
+            }
 
             return Ok(new { message = "User removed from team" });
         }
