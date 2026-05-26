@@ -73,12 +73,13 @@
       </div>
     }
 
-    @if (selectedTeamId()) {
+    @if (selectedTeamId() && canManageSelectedTeam()) {
       <div class="tw:mb-6 tw:rounded-3xl tw:bg-white tw:p-5 tw:shadow-lg tw:shadow-slate-200/50 tw:ring-1 tw:ring-slate-200/70">
         <div class="tw:flex tw:flex-wrap tw:items-center tw:justify-between tw:gap-3">
           <div>
             <h2 class="tw:text-xl tw:font-semibold tw:text-slate-900">Create activity</h2>
             <p class="tw:text-sm tw:text-slate-500">Use a prompt, poll, trivia item, or mini-challenge for {{ getTeamName(selectedTeamId()) }}</p>
+            <p class="tw:mt-1 tw:text-xs tw:text-slate-400">Only the team owner or an admin can create and close activities.</p>
           </div>
 
           <button mat-flat-button color="primary" type="button" (click)="openCreateActivityDialog()">
@@ -235,9 +236,11 @@
                       <button mat-flat-button color="primary" type="submit" class="tw:!rounded-2xl tw:!px-5 tw:!font-semibold">
                         {{ activity.hasCurrentUserResponded ? 'Update response' : 'Submit response' }}
                       </button>
-                      <button mat-stroked-button type="button" class="tw:!rounded-2xl tw:!px-5 tw:!font-semibold" (click)="completeActivity(activity)">
-                        Close
-                      </button>
+                      @if (canManageSelectedTeam()) {
+                        <button mat-stroked-button type="button" class="tw:!rounded-2xl tw:!px-5 tw:!font-semibold" (click)="completeActivity(activity)">
+                          Close
+                        </button>
+                      }
                     </div>
                   </div>
                 </form>

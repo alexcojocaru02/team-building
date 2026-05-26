@@ -1,6 +1,7 @@
 using MongoDB.Bson;
 using MongoDB.Driver;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using TeamConnect.Api.Shared.Models;
 
 namespace TeamConnect.Api.Shared.Services
@@ -167,10 +168,11 @@ namespace TeamConnect.Api.Shared.Services
                     var canonical = parsed.ToString();
                     if (!string.Equals(canonical, raw, StringComparison.Ordinal))
                     {
-                        await teamActivitiesCollection.UpdateOneAsync(
-                            Builders<BsonDocument>.Filter.Eq("_id", activity["_id"]),
-                            Builders<BsonDocument>.Update.Set("ActivityType", canonical),
-                            cancellationToken: ct);
+                        report.TeamActivityNormalizationPlan.Add(new TeamActivityNormalizationChange
+                        {
+                            Id = activity["_id"],
+                            ActivityType = canonical
+                        });
                         normalized++;
                     }
                     else
@@ -197,10 +199,11 @@ namespace TeamConnect.Api.Shared.Services
 
                     if (mapped != null)
                     {
-                        await teamActivitiesCollection.UpdateOneAsync(
-                            Builders<BsonDocument>.Filter.Eq("_id", activity["_id"]),
-                            Builders<BsonDocument>.Update.Set("ActivityType", mapped),
-                            cancellationToken: ct);
+                        report.TeamActivityNormalizationPlan.Add(new TeamActivityNormalizationChange
+                        {
+                            Id = activity["_id"],
+                            ActivityType = mapped
+                        });
                         normalized++;
                     }
                     else
@@ -250,8 +253,17 @@ namespace TeamConnect.Api.Shared.Services
 
         private async Task ApplyAsync(MigrationReport report, CancellationToken ct)
         {
+            var teamActivitiesCollection = _context.Database.GetCollection<BsonDocument>("TeamActivities");
             var usersCollection = _context.Database.GetCollection<BsonDocument>("Users");
             var teamsCollection = _context.Database.GetCollection<BsonDocument>("Teams");
+
+            foreach (var change in report.TeamActivityNormalizationPlan)
+            {
+                await teamActivitiesCollection.UpdateOneAsync(
+                    Builders<BsonDocument>.Filter.Eq("_id", change.Id),
+                    Builders<BsonDocument>.Update.Set("ActivityType", change.ActivityType),
+                    cancellationToken: ct);
+            }
 
             var users = await usersCollection.Find(FilterDefinition<BsonDocument>.Empty).ToListAsync(ct);
             var teams = await teamsCollection.Find(FilterDefinition<BsonDocument>.Empty).ToListAsync(ct);
@@ -419,5 +431,14 @@ namespace TeamConnect.Api.Shared.Services
         public int TeamActivitiesScanned { get; set; }
         public int TeamActivitiesNormalized { get; set; }
         public int TeamActivitiesSkipped { get; set; }
+
+        [JsonIgnore]
+        public List<TeamActivityNormalizationChange> TeamActivityNormalizationPlan { get; set; } = new();
+    }
+
+    public class TeamActivityNormalizationChange
+    {
+        public BsonValue Id { get; set; } = BsonNull.Value;
+        public string ActivityType { get; set; } = string.Empty;
     }
 }

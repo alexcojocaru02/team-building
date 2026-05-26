@@ -169,9 +169,13 @@ namespace TeamConnect.Api.Modules.TeamActivities
                 if (dto.SelectedOptionIndex.Value < 0 || dto.SelectedOptionIndex.Value >= activity.Options.Count)
                     return BadRequest("Selected option is invalid.");
             }
-            else if (string.IsNullOrWhiteSpace(dto.TextResponse))
+            else
             {
-                return BadRequest("A text response is required.");
+                if (dto.SelectedOptionIndex.HasValue)
+                    return BadRequest("SelectedOptionIndex is only valid for poll activities.");
+
+                if (string.IsNullOrWhiteSpace(dto.TextResponse))
+                    return BadRequest("A text response is required.");
             }
 
             var participation = new TeamActivityParticipation
@@ -193,7 +197,7 @@ namespace TeamConnect.Api.Modules.TeamActivities
 
             var filteredParticipations = new BsonDocument("$filter", new BsonDocument
             {
-                { "input", "$Participations" },
+                { "input", new BsonDocument("$ifNull", new BsonArray { "$Participations", new BsonArray() }) },
                 { "as", "existingParticipation" },
                 { "cond", new BsonDocument("$ne", new BsonArray { "$$existingParticipation.UserId", userIdFilterValue }) }
             });

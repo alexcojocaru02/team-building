@@ -63,11 +63,28 @@ export class TeamActivitiesPage implements OnInit {
   isSubmitting = signal(false);
   selectedTeamId = signal('');
   activityFilter = signal<ActivityFilter>('open');
+  private teamDataRequestId = 0;
 
   responseDrafts = signal<Record<string, string>>({});
   selectedPollOptions = signal<Record<string, number | null>>({});
   // Per-activity collapse state: true = collapsed
   activityCollapsed = signal<Record<string, boolean>>({});
+
+  selectedTeam = computed(() => {
+    const teamId = this.selectedTeamId();
+    return this.teams().find(team => team.id === teamId) ?? null;
+  });
+
+  canManageSelectedTeam = computed(() => {
+    const team = this.selectedTeam();
+    const currentUser = this.currentUser();
+
+    if (!team || !currentUser) {
+      return false;
+    }
+
+    return this.authService.isAdmin() || team.ownerId === currentUser.id;
+  });
 
   availableTeams = computed(() => {
     const profile = this.myProfile();
@@ -176,6 +193,8 @@ export class TeamActivitiesPage implements OnInit {
   }
 
   loadTeamData(teamId: string): void {
+    const requestId = ++this.teamDataRequestId;
+
     if (!teamId) {
       this.activities.set([]);
       this.summary.set(null);
@@ -187,6 +206,10 @@ export class TeamActivitiesPage implements OnInit {
 
     this.teamActivitiesService.getTeamActivities(teamId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (activities) => {
+        if (requestId !== this.teamDataRequestId) {
+          return;
+        }
+
         this.activities.set(activities);
         // Ensure we have a collapse flag for each activity and collapse items already answered by the current user.
         this.activityCollapsed.update(map => {
@@ -200,6 +223,10 @@ export class TeamActivitiesPage implements OnInit {
         this.isLoadingActivities.set(false);
       },
       error: (error) => {
+        if (requestId !== this.teamDataRequestId) {
+          return;
+        }
+
         this.isLoadingActivities.set(false);
         this.activities.set([]);
         this.showSnackBar(this.getErrorMessage(error, 'Failed to load activities.'), true);
@@ -208,8 +235,18 @@ export class TeamActivitiesPage implements OnInit {
     });
 
     this.teamActivitiesService.getTeamActivitySummary(teamId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: (summary) => this.summary.set(summary),
+      next: (summary) => {
+        if (requestId !== this.teamDataRequestId) {
+          return;
+        }
+
+        this.summary.set(summary);
+      },
       error: (error) => {
+        if (requestId !== this.teamDataRequestId) {
+          return;
+        }
+
         this.summary.set(null);
         this.showSnackBar(this.getErrorMessage(error, 'Failed to load activity summary.'), true);
         console.error('Error loading activity summary:', error);
