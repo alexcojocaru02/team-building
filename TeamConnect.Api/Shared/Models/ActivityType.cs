@@ -1,4 +1,3 @@
-using MongoDB.Bson;
 namespace TeamConnect.Api.Shared.Models
 {
     public enum ActivityType
