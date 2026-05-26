@@ -21,6 +21,7 @@ namespace TeamConnect.Api.Shared.Services
         public IMongoCollection<FeedPostLike> FeedPostLikes => _database.GetCollection<FeedPostLike>("FeedPostLikes");
         public IMongoCollection<FeedPostComment> FeedPostComments => _database.GetCollection<FeedPostComment>("FeedPostComments");
         public IMongoCollection<Feedback> Feedbacks => _database.GetCollection<Feedback>("Feedbacks");
+        public IMongoCollection<TeamActivity> TeamActivities => _database.GetCollection<TeamActivity>("TeamActivities");
         public IMongoCollection<SchemaMigrationRecord> SchemaMigrations => _database.GetCollection<SchemaMigrationRecord>("SchemaMigrations");
 
     }

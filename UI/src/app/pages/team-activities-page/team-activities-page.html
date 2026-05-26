@@ -1,0 +1,258 @@
+<section class="tw:min-h-screen tw:bg-[radial-gradient(circle_at_top,_#e0f2fe,_#eef2ff_45%,_#f8fafc)] tw:px-4 tw:py-6 sm:tw:px-6 lg:tw:px-8">
+  <div class="tw:mx-auto tw:w-full tw:max-w-3xl">
+    <div class="tw:mb-6 tw:flex tw:items-center tw:justify-between tw:gap-4">
+      <div class="tw:flex tw:items-center tw:gap-3">
+        <button mat-icon-button type="button" routerLink="/" aria-label="Back to home" class="tw:text-slate-600">
+          <svg class="tw:h-5 tw:w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+        <div>
+          <h1 class="tw:text-2xl tw:font-bold tw:tracking-tight tw:text-slate-900 sm:tw:text-3xl">Team Activities</h1>
+          <p class="tw:text-sm tw:text-slate-500">Async prompts, polls, and lightweight team challenges</p>
+        </div>
+      </div>
+
+      <div class="tw:flex tw:flex-wrap tw:items-center tw:justify-end tw:gap-3">
+        <span class="tw:hidden sm:tw:inline-flex tw:rounded-full tw:bg-white/80 tw:px-3 tw:py-1 tw:text-xs tw:font-medium tw:text-slate-600 tw:ring-1 tw:ring-slate-200">
+          {{ visibleActivities().length }} activities
+        </span>
+
+        @if (availableTeams().length > 0) {
+          <mat-form-field appearance="outline" class="tw:min-w-56 tw:w-full sm:tw:w-64">
+            <mat-label>Team</mat-label>
+            <mat-select [value]="selectedTeamId()" (selectionChange)="onTeamChange($event.value)">
+              @for (team of availableTeams(); track team.id) {
+                <mat-option [value]="team.id">{{ team.name }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        }
+      </div>
+    </div>
+
+    @if (summary()) {
+      <div class="tw:w-full">
+        <div class="tw:flex tw:items-center tw:justify-between tw:mb-3">
+          <div>
+            <p class="tw:text-sm tw:font-semibold tw:text-slate-700">Activity summary</p>
+            <p class="tw:text-xs tw:text-slate-500">Overview of team activity metrics</p>
+          </div>
+          <button mat-icon-button type="button" (click)="toggleSummary()" aria-label="Toggle summary">
+            <mat-icon>{{ summaryCollapsed() ? 'keyboard_arrow_down' : 'keyboard_arrow_up' }}</mat-icon>
+          </button>
+        </div>
+
+        @if (!summaryCollapsed()) {
+        <div class="tw:mb-6 tw:grid tw:w-full tw:grid-cols-2 tw:gap-4">
+          <div class="tw:h-full tw:rounded-3xl tw:bg-white tw:p-4 tw:shadow-lg tw:shadow-slate-200/50 tw:ring-1 tw:ring-slate-200/70">
+            <p class="tw:text-xs tw:uppercase tw:tracking-wide tw:text-slate-500">Participation rate</p>
+            <div class="tw:mt-2 tw:text-3xl tw:font-bold tw:text-slate-900">{{ summary()?.participationRate || 0 }}%</div>
+            <p class="tw:mt-1 tw:text-sm tw:text-slate-500">of team members have engaged</p>
+          </div>
+
+          <div class="tw:h-full tw:rounded-3xl tw:bg-white tw:p-4 tw:shadow-lg tw:shadow-slate-200/50 tw:ring-1 tw:ring-slate-200/70">
+            <p class="tw:text-xs tw:uppercase tw:tracking-wide tw:text-slate-500">Open activities</p>
+            <div class="tw:mt-2 tw:text-3xl tw:font-bold tw:text-slate-900">{{ summary()?.openActivities || 0 }}</div>
+            <p class="tw:mt-1 tw:text-sm tw:text-slate-500">waiting for responses</p>
+          </div>
+
+          <div class="tw:h-full tw:rounded-3xl tw:bg-white tw:p-4 tw:shadow-lg tw:shadow-slate-200/50 tw:ring-1 tw:ring-slate-200/70">
+            <p class="tw:text-xs tw:uppercase tw:tracking-wide tw:text-slate-500">Recent activity</p>
+            <div class="tw:mt-2 tw:text-3xl tw:font-bold tw:text-slate-900">{{ summary()?.recentActivitiesCount || 0 }}</div>
+            <p class="tw:mt-1 tw:text-sm tw:text-slate-500">created in the last 7 days</p>
+          </div>
+
+          <div class="tw:h-full tw:rounded-3xl tw:bg-white tw:p-4 tw:shadow-lg tw:shadow-slate-200/50 tw:ring-1 tw:ring-slate-200/70">
+            <p class="tw:text-xs tw:uppercase tw:tracking-wide tw:text-slate-500">Responses</p>
+            <div class="tw:mt-2 tw:text-3xl tw:font-bold tw:text-slate-900">{{ summary()?.totalResponses || 0 }}</div>
+            <p class="tw:mt-1 tw:text-sm tw:text-slate-500">submitted across all activities</p>
+          </div>
+        </div>
+        }
+      </div>
+    }
+
+    @if (selectedTeamId() && canManageSelectedTeam()) {
+      <div class="tw:mb-6 tw:rounded-3xl tw:bg-white tw:p-5 tw:shadow-lg tw:shadow-slate-200/50 tw:ring-1 tw:ring-slate-200/70">
+        <div class="tw:flex tw:flex-wrap tw:items-center tw:justify-between tw:gap-3">
+          <div>
+            <h2 class="tw:text-xl tw:font-semibold tw:text-slate-900">Create activity</h2>
+            <p class="tw:text-sm tw:text-slate-500">Use a prompt, poll, trivia item, or mini-challenge for {{ getTeamName(selectedTeamId()) }}</p>
+            <p class="tw:mt-1 tw:text-xs tw:text-slate-400">Only the team owner or an admin can create and close activities.</p>
+          </div>
+
+          <button mat-flat-button color="primary" type="button" (click)="openCreateActivityDialog()">
+            Create activity
+          </button>
+        </div>
+      </div>
+    }
+
+    <mat-button-toggle-group [value]="activityFilter()" (change)="setActivityFilter($event.value)" aria-label="Activity filter" class="tw:mb-4 tw:flex tw:flex-wrap">
+      <mat-button-toggle value="open">Open</mat-button-toggle>
+      <mat-button-toggle value="closed">Completed</mat-button-toggle>
+      <mat-button-toggle value="all">All</mat-button-toggle>
+    </mat-button-toggle-group>
+
+    @if (isLoadingActivities()) {
+      <div class="tw:space-y-4">
+        @for (i of [1, 2, 3]; track i) {
+          <div class="tw:animate-pulse tw:rounded-3xl tw:bg-white tw:p-5 tw:shadow tw:ring-1 tw:ring-slate-100">
+            <div class="tw:mb-4 tw:flex tw:items-center tw:justify-between tw:gap-3">
+              <div class="tw:flex tw:items-center tw:gap-3">
+                <div class="tw:h-10 tw:w-10 tw:rounded-full tw:bg-slate-200"></div>
+                <div class="tw:space-y-2">
+                  <div class="tw:h-3 tw:w-28 tw:rounded tw:bg-slate-200"></div>
+                  <div class="tw:h-2 tw:w-20 tw:rounded tw:bg-slate-100"></div>
+                </div>
+              </div>
+              <div class="tw:flex tw:gap-2">
+                <div class="tw:h-6 tw:w-16 tw:rounded-full tw:bg-slate-100"></div>
+                <div class="tw:h-6 tw:w-16 tw:rounded-full tw:bg-slate-100"></div>
+              </div>
+            </div>
+            <div class="tw:space-y-2">
+              <div class="tw:h-3 tw:w-full tw:rounded tw:bg-slate-100"></div>
+              <div class="tw:h-3 tw:w-4/5 tw:rounded tw:bg-slate-100"></div>
+              <div class="tw:h-3 tw:w-3/5 tw:rounded tw:bg-slate-100"></div>
+            </div>
+          </div>
+        }
+      </div>
+    }
+
+    @if (!isLoadingActivities() && visibleActivities().length === 0) {
+      <div class="tw:rounded-3xl tw:border tw:border-dashed tw:border-slate-300 tw:bg-white/80 tw:p-10 tw:text-center tw:shadow-sm">
+        <p class="tw:mb-2 tw:text-lg tw:font-semibold tw:text-slate-700">No activities yet</p>
+        <p class="tw:text-sm tw:text-slate-500">Create the first prompt or challenge to get the team talking.</p>
+      </div>
+    }
+
+    @if (!isLoadingActivities() && visibleActivities().length > 0) {
+      <div class="tw:space-y-4">
+        @for (activity of visibleActivities(); track activity.id) {
+          <article class="tw:rounded-3xl tw:bg-white tw:p-5 tw:shadow-md tw:shadow-slate-200/60 tw:ring-1 tw:ring-slate-200/60">
+            <div class="tw:mb-3 tw:flex tw:items-center tw:justify-between">
+              <div class="tw:flex tw:items-center tw:gap-3">
+                <h3 class="tw:text-lg tw:font-semibold tw:text-slate-900">{{ activity.title }}</h3>
+                <div class="tw:flex tw:items-center tw:gap-2 tw:ml-3">
+                  <mat-chip>{{ activity.activityType }}</mat-chip>
+                  <mat-chip color="primary">{{ activity.points }} pts</mat-chip>
+                  <mat-chip [color]="activity.status === 'Open' ? 'accent' : undefined" [class.open-status]="activity.status === 'Open'">{{ activity.status }}</mat-chip>
+                  <span class="tw-text-sm tw:ml-2 tw:px-2 tw:py-0.5 tw:rounded-full" [ngClass]="activity.hasCurrentUserResponded ? 'tw-bg-emerald-100 tw-text-emerald-700' : 'tw-bg-slate-100 tw-text-slate-600'">{{ activity.hasCurrentUserResponded ? 'Responded' : 'Pending' }}</span>
+                </div>
+              </div>
+
+              <div class="tw:flex tw:items-center tw:gap-2">
+                <button mat-icon-button type="button" aria-label="Toggle activity" (click)="toggleActivityCollapse(activity.id)">
+                  <mat-icon>{{ isActivityCollapsed(activity.id) ? 'keyboard_arrow_down' : 'keyboard_arrow_up' }}</mat-icon>
+                </button>
+              </div>
+            </div>
+
+            @if (!isActivityCollapsed(activity.id)) {
+            <div>
+              <div class="tw:flex tw:items-center tw:gap-3 tw:mb-3">
+                <div class="tw:flex tw:h-10 tw:w-10 tw:items-center tw:justify-center tw:rounded-full tw:text-sm tw:font-semibold tw:text-white" [style.background-color]="getAvatarColor(activity.createdByUserFullName || activity.createdByUserEmail || activity.createdByUserId)">
+                  {{ getInitials(activity.createdByUserFullName || activity.createdByUserEmail || activity.createdByUserId) }}
+                </div>
+                <div>
+                  <p class="tw:text-sm tw:font-semibold tw:text-slate-900">{{ activity.createdByUserFullName || activity.createdByUserEmail || activity.createdByUserId }}</p>
+                  <p class="tw:text-xs tw:text-slate-500">{{ activity.createdAt | date: 'medium' }}</p>
+                </div>
+              </div>
+
+              <p class="tw:mt-2 tw:whitespace-pre-wrap tw:text-[15px] tw:leading-6 tw:text-slate-700">{{ activity.description }}</p>
+
+              <div class="tw:mt-4 tw:grid tw:grid-cols-2 tw:gap-3 sm:tw:grid-cols-4">
+              <div class="tw:rounded-2xl tw:bg-slate-50 tw:p-3">
+                <p class="tw:text-[11px] tw:uppercase tw:tracking-wide tw:text-slate-500">Responses</p>
+                <p class="tw:mt-1 tw:text-lg tw:font-semibold tw:text-slate-900">{{ activity.responsesCount }}</p>
+              </div>
+              <div class="tw:rounded-2xl tw:bg-slate-50 tw:p-3">
+                <p class="tw:text-[11px] tw:uppercase tw:tracking-wide tw:text-slate-500">Participants</p>
+                <p class="tw:mt-1 tw:text-lg tw:font-semibold tw:text-slate-900">{{ activity.participantCount }}</p>
+              </div>
+              <div class="tw:rounded-2xl tw:bg-slate-50 tw:p-3">
+                <p class="tw:text-[11px] tw:uppercase tw:tracking-wide tw:text-slate-500">Due</p>
+                <p class="tw:mt-1 tw:text-sm tw:font-medium tw:text-slate-800">{{ activity.dueAt ? (activity.dueAt | date: 'medium') : 'No due date' }}</p>
+              </div>
+              <div class="tw:rounded-2xl tw:bg-slate-50 tw:p-3">
+                <p class="tw:text-[11px] tw:uppercase tw:tracking-wide tw:text-slate-500">Your status</p>
+                <p class="tw:mt-1 tw:text-sm tw:font-medium tw:text-slate-800">{{ activity.hasCurrentUserResponded ? 'Responded' : 'Pending' }}</p>
+              </div>
+            </div>
+            </div>
+            }
+
+            @if (activity.recentResponses.length > 0) {
+              <div class="tw:mt-4 tw:space-y-2 tw:border-t tw:border-slate-100 tw:pt-4">
+                <p class="tw:text-sm tw:font-semibold tw:text-slate-800">Recent responses</p>
+                <div class="tw:grid tw:grid-cols-1 tw:gap-2 md:tw:grid-cols-3">
+                  @for (response of activity.recentResponses; track response.userId + '-' + response.submittedAt) {
+                    <div class="tw:rounded-2xl tw:bg-slate-50 tw:px-3 tw:py-2 tw:text-sm tw:text-slate-700">
+                      <div class="tw:mb-1 tw:flex tw:items-center tw:gap-2">
+                        <span class="tw:font-semibold tw:text-slate-900">{{ response.userFullName || response.userEmail || response.userId }}</span>
+                        <span class="tw:text-[11px] tw:text-slate-400">{{ response.submittedAt | date: 'short' }}</span>
+                      </div>
+                      @if (response.textResponse) {
+                        <p class="tw:whitespace-pre-wrap tw:leading-5">{{ response.textResponse }}</p>
+                      } @else if (response.selectedOptionIndex !== null && response.selectedOptionIndex !== undefined) {
+                        <p class="tw:leading-5">Selected option #{{ response.selectedOptionIndex + 1 }}</p>
+                      }
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+
+            @if (activity.status === 'Open') {
+              <div class="tw:mt-4 tw:border-t tw:border-slate-100 tw:pt-4">
+                <form (ngSubmit)="submitResponse(activity)" class="tw:space-y-4">
+                  @if (activity.activityType.toLowerCase() === 'poll') {
+                    <mat-radio-group class="tw:grid tw:grid-cols-1 tw:gap-2" [value]="getSelectedPollOption(activity.id)" (change)="setSelectedPollOption(activity.id, $event.value)">
+                      @for (option of activity.options; track option; let index = $index) {
+                        <mat-radio-button [value]="index">{{ option }}</mat-radio-button>
+                      }
+                    </mat-radio-group>
+                  } @else {
+                    <mat-form-field appearance="outline" class="tw:w-full">
+                      <mat-label>Your response</mat-label>
+                      <textarea
+                        matInput
+                        [ngModel]="getResponseDraft(activity.id)"
+                        (ngModelChange)="setResponseDraft(activity.id, $event)"
+                        [name]="'response-' + activity.id"
+                        rows="3"
+                        placeholder="Share your answer or update..."
+                      ></textarea>
+                    </mat-form-field>
+                  }
+
+                  <div class="tw:flex tw:flex-wrap tw:items-center tw:justify-between tw:gap-3">
+                    <p class="tw:text-xs tw:text-slate-500">Save your answer anytime; the leader can close the activity when it is done.</p>
+                    <div class="tw:flex tw:gap-2">
+                      <button mat-flat-button color="primary" type="submit" class="tw:!rounded-2xl tw:!px-5 tw:!font-semibold">
+                        {{ activity.hasCurrentUserResponded ? 'Update response' : 'Submit response' }}
+                      </button>
+                      @if (canManageSelectedTeam()) {
+                        <button mat-stroked-button type="button" class="tw:!rounded-2xl tw:!px-5 tw:!font-semibold" (click)="completeActivity(activity)">
+                          Close
+                        </button>
+                      }
+                    </div>
+                  </div>
+                </form>
+              </div>
+            } @else {
+              <div class="tw:mt-4 tw:rounded-2xl tw:bg-emerald-50 tw:px-4 tw:py-3 tw:text-sm tw:text-emerald-700">
+                This activity is complete.
+              </div>
+            }
+          </article>
+        }
+      </div>
+    }
+  </div>
+</section>

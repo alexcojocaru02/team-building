@@ -30,6 +30,7 @@ export class SidePanelComponent implements OnInit, AfterViewInit {
     { icon: 'home', label: 'Home', route: '/home' },
     { icon: 'dynamic_feed', label: 'Feed', route: '/feed' },
     { icon: 'forum', label: 'Feedback', route: '/feedback' },
+    { icon: 'event_note', label: 'Activities', route: '/team-activities' },
     { icon: 'insights', label: 'Dashboard', route: '/dashboard' },
     { icon: 'groups', label: 'Teams', route: '/teams' }
   ];
