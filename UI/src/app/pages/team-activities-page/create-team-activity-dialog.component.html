@@ -1,0 +1,72 @@
+<div class="tw:p-6 tw:max-w-full">
+  <h2 class="tw:text-2xl tw:font-semibold tw:mb-2">Create activity</h2>
+  <p class="tw:text-sm tw:text-slate-500 tw:mb-5">Create an async activity for {{ teamName }}.</p>
+
+  <mat-form-field appearance="outline" class="tw:w-full tw:mb-4">
+    <mat-label>Title</mat-label>
+    <input matInput [(ngModel)]="activityTitle" name="title" type="text" placeholder="Weekly check-in prompt" />
+  </mat-form-field>
+  
+  <div class="tw:mb-4">
+    <div class="tw:flex tw:flex-row tw:gap-3">
+      <mat-form-field appearance="outline" class="tw:w-1/4 tw:min-w-0">
+        <mat-label>Activity type</mat-label>
+        <mat-select [(ngModel)]="activityType" name="activityType">
+          <mat-option value="prompt">Prompt</mat-option>
+          <mat-option value="poll">Poll</mat-option>
+          <mat-option value="mini-challenge">Mini-challenge</mat-option>
+          <mat-option value="trivia">Trivia</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="tw:w-1/2 tw:min-w-0">
+        <mat-label>Due date</mat-label>
+        <input #dueInput matInput [(ngModel)]="activityDueAt" name="dueAt" type="datetime-local" />
+        <button mat-icon-button matSuffix type="button" aria-label="Open date/time picker" (click)="openDateTimePicker(dueInput)">
+          <mat-icon>event</mat-icon>
+        </button>
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="tw:w-1/4 tw:min-w-0">
+        <mat-label>Points</mat-label>
+        <input matInput [(ngModel)]="activityPoints" name="points" type="number" min="1" />
+      </mat-form-field>
+    </div>
+  </div>
+
+  <mat-form-field appearance="outline" class="tw:w-full tw:mb-4">
+    <mat-label>Description</mat-label>
+    <textarea
+      matInput
+      [(ngModel)]="activityDescription"
+      name="description"
+      rows="4"
+      placeholder="Ask a question, define a challenge, or describe the activity..."
+    ></textarea>
+  </mat-form-field>
+
+  @if (activityType === 'poll') {
+    <mat-form-field appearance="outline" class="tw:w-full tw:mb-4">
+      <mat-label>Poll options</mat-label>
+      <textarea
+        matInput
+        [(ngModel)]="activityOptionsText"
+        name="options"
+        rows="3"
+        placeholder="Option 1\nOption 2\nOption 3"
+      ></textarea>
+    </mat-form-field>
+  }
+
+
+  @if (errorMessage) {
+    <div class="tw:mb-4 tw:rounded-lg tw:border tw:border-red-200 tw:bg-red-50 tw:px-4 tw:py-3 tw:text-sm tw:text-red-700">
+      {{ errorMessage }}
+    </div>
+  }
+
+  <div class="tw:flex tw:justify-end tw:gap-2">
+    <button mat-button type="button" (click)="cancel()">Cancel</button>
+    <button mat-flat-button color="primary" type="button" (click)="save()">
+      Create activity
+    </button>
+  </div>
+</div>
