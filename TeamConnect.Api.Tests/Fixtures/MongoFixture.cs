@@ -12,7 +12,7 @@ public class MongoFixture : IDisposable
     private readonly MongoDbRunner _runner;
     public MongoDbContext Context { get; }
 
-        public MongoFixture()
+    public MongoFixture()
     {
         _runner = MongoDbRunner.Start();
 
