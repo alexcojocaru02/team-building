@@ -1,5 +1,7 @@
 # TeamBuilding
 
+[![PR CI - Frontend & Backend Tests](https://github.com/alexcojocaru02/team-building/actions/workflows/ci.yml/badge.svg)](https://github.com/alexcojocaru02/team-building/actions/workflows/ci.yml)
+
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.0.1.
 
 ## Development server
