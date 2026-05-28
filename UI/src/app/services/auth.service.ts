@@ -39,20 +39,20 @@ export class AuthService {
   }
 
   register(dto: RegisterDto): Observable<AuthResponse> {
-    const params = new URLSearchParams();
-    params.set('FullName', dto.fullName);
-    params.set('Email', dto.email);
-    params.set('Password', dto.password);
-    return this.http.post<AuthResponse>(`${this.apiUrl}/auth/register?${params.toString()}`, {}).pipe(
+    return this.http.post<AuthResponse>(`${this.apiUrl}/auth/register`, {
+      fullName: dto.fullName,
+      email: dto.email,
+      password: dto.password,
+    }).pipe(
       tap(response => this.handleAuthSuccess(response))
     );
   }
 
   login(dto: LoginDto): Observable<AuthResponse> {
-    const params = new URLSearchParams();
-    params.set('Email', dto.email);
-    params.set('Password', dto.password);
-    return this.http.post<AuthResponse>(`${this.apiUrl}/auth/login?${params.toString()}`, {}).pipe(
+    return this.http.post<AuthResponse>(`${this.apiUrl}/auth/login`, {
+      email: dto.email,
+      password: dto.password,
+    }).pipe(
       tap(response => this.handleAuthSuccess(response))
     );
   }

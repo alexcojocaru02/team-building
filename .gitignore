@@ -80,3 +80,20 @@ pnpm-lock.yaml
 
 # Misc
 *.tgz
+
+### TeamConnect.Api - publish / deployment artifacts
+# Build output and packaged artifacts produced by CI or publish steps
+TeamConnect.Api/app.zip
+TeamConnect.Api/publish/
+
+# Visual Studio publish/profile metadata (usually environment-specific)
+TeamConnect.Api/Properties/PublishProfiles/
+TeamConnect.Api/Properties/ServiceDependencies/
+TeamConnect.Api/Properties/serviceDependencies.json
+
+# Tooling and generated API contracts
+TeamConnect.Api/dotnet-tools.json
+TeamConnect.Api/swagger.json
+
+# If you add any other TeamConnect.Api-specific generated files, add them here
+TeamConnect.Api/Properties/serviceDependencies.*

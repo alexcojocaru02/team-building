@@ -16,4 +16,17 @@
     <Folder Include="Controllers\" />
   </ItemGroup>
 
+  <Target Name="IncludeAngularDist" BeforeTargets="ComputeFilesToPublish">
+    <PropertyGroup>
+      <AngularDistDir>$(MSBuildThisFileDirectory)..\UI\dist\team-building\browser\</AngularDistDir>
+    </PropertyGroup>
+    <ItemGroup Condition="Exists('$(AngularDistDir)')">
+      <AngularDistFiles Include="$(AngularDistDir)**\*" />
+      <ResolvedFileToPublish Include="@(AngularDistFiles)">
+        <RelativePath>wwwroot\%(RecursiveDir)%(Filename)%(Extension)</RelativePath>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </ResolvedFileToPublish>
+    </ItemGroup>
+  </Target>
+
 </Project>
