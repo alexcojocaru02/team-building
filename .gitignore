@@ -75,6 +75,7 @@ secrets.json
 *.dll
 
 # Package manager artifacts
+package-lock.json
 pnpm-lock.yaml
 
 # Misc
