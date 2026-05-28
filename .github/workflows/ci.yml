@@ -1,4 +1,4 @@
-name: PR CI - Frontend & Backend Tests
+name: PR CI - Tests
 
 on:
   pull_request:
