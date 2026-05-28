@@ -6,6 +6,44 @@ This document describes the new profile management and team assignment features 
 
 ---
 
+## Email Notifications
+
+TeamConnect.Api can send notification emails for registration, team membership changes, feedback, and team activity creation.
+
+### Gmail SMTP Setup for Local Development
+
+Use your Gmail address as the sender and provide the app password through an environment variable instead of committing it to source control:
+
+```bash
+set Email__Smtp__Password=your-gmail-app-password
+set Email__Enabled=true
+```
+
+The dev config already points to Gmail SMTP using:
+
+- Host: `smtp.gmail.com`
+- Port: `587`
+- SSL: `true`
+- Username: `teamconnectapp1@gmail.com`
+- From address: `teamconnectapp1@gmail.com`
+
+### Local Smoke Test
+
+1. Start the API in development mode.
+2. Register a user or add a user to a team to trigger an email.
+3. Check the recipient inbox for the message.
+4. If Gmail rejects the send, verify the account has 2-step verification enabled and that the password is a Gmail app password, not the normal account password.
+
+### Production / Release
+
+The release environment should use `appsettings.Production.json` plus a secret environment variable for the Gmail app password:
+
+- `Email__Smtp__Password=your-gmail-app-password`
+
+The deployed app will read the same Gmail SMTP host, port, username, and sender address as local development.
+
+---
+
 ## Schema Changes
 
 ### User Model Extensions

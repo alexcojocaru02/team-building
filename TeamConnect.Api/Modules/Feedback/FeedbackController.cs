@@ -15,10 +15,12 @@ namespace TeamConnect.Api.Modules.Feedback
     public class FeedbackController : ControllerBase
     {
         private readonly MongoDbContext _context;
+        private readonly INotificationService? _notificationService;
 
-        public FeedbackController(MongoDbContext context)
+        public FeedbackController(MongoDbContext context, INotificationService? notificationService = null)
         {
             _context = context;
+            _notificationService = notificationService;
         }
 
         [HttpPost]
@@ -58,6 +60,11 @@ namespace TeamConnect.Api.Modules.Feedback
             var usersById = users.ToDictionary(u => u.Id);
 
             await _context.Feedbacks.InsertOneAsync(feedback);
+
+            if (_notificationService != null)
+            {
+                await _notificationService.SendFeedbackReceivedEmailAsync(fromUserId, feedback.ToUserId, feedback.Message);
+            }
 
             var result = new FeedbackResponseDto
             {

@@ -18,7 +18,8 @@
 
   <Target Name="IncludeAngularDist" BeforeTargets="ComputeFilesToPublish">
     <PropertyGroup>
-      <AngularDistDir>$(MSBuildThisFileDirectory)..\UI\dist\team-building\browser\</AngularDistDir>
+      <AngularProjectName Condition="'$(AngularProjectName)'==''">team-building</AngularProjectName>
+      <AngularDistDir Condition="'$(AngularDistDir)'==''">$(MSBuildThisFileDirectory)../UI/dist/$(AngularProjectName)/browser/</AngularDistDir>
     </PropertyGroup>
     <ItemGroup Condition="Exists('$(AngularDistDir)')">
       <AngularDistFiles Include="$(AngularDistDir)**\*" />

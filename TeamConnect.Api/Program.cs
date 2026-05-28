@@ -102,6 +102,8 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 builder.Services.AddSingleton<MongoDbContext>();
+builder.Services.AddScoped<IEmailSender, SmtpEmailSender>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<JwtService>();
 builder.Services.AddScoped<ProfileAndTeamMigrationRunner>();

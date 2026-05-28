@@ -14,10 +14,12 @@ namespace TeamConnect.Api.Modules.Teams
     public class TeamsController : ControllerBase
     {
         private readonly MongoDbContext _context;
+        private readonly INotificationService? _notificationService;
 
-        public TeamsController(MongoDbContext context)
+        public TeamsController(MongoDbContext context, INotificationService? notificationService = null)
         {
             _context = context;
+            _notificationService = notificationService;
         }
 
         [HttpPost]
@@ -106,6 +108,11 @@ namespace TeamConnect.Api.Modules.Teams
                 .Set(u => u.UpdatedAt, DateTime.UtcNow);
             
             await _context.Users.UpdateOneAsync(u => u.Id == userId, updateUser);
+
+            if (_notificationService != null)
+            {
+                await _notificationService.SendTeamMemberAddedEmailAsync(teamId, userId, currentUserId);
+            }
 
             return Ok(new { message = "User added to team" });
         }

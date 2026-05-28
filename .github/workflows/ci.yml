@@ -57,14 +57,18 @@ jobs:
       - name: Install dependencies
         run: npm ci
         working-directory: UI
-      - name: Install Chromium for headless tests
+      - name: Install Google Chrome stable for headless tests
         run: |
           sudo apt-get update
-          sudo apt-get install -y chromium-browser xvfb
-      - name: Run Angular unit tests (xvfb, no-sandbox)
+          sudo apt-get install -y wget gnupg2 xvfb
+          wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+          sudo sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list'
+          sudo apt-get update
+          sudo apt-get install -y google-chrome-stable
+      - name: Run Angular unit tests (xvfb, stable Chrome, no-sandbox)
         run: |
-          export CHROME_BIN=/usr/bin/chromium-browser
-          xvfb-run --auto-servernum --server-args='-screen 0 1280x720x24' npm run test --prefix UI -- --watch=false --browsers=ChromeHeadless --code-coverage --progress=false
+          export CHROME_BIN=/usr/bin/google-chrome-stable
+          xvfb-run --auto-servernum --server-args='-screen 0 1280x720x24' npm run test --prefix UI -- --watch=false --browsers=ChromeHeadlessNoSandbox --code-coverage --progress=false
         env:
           CI: true
       - name: Upload frontend coverage artifacts

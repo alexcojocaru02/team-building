@@ -10,10 +10,12 @@ namespace TeamConnect.Api.Modules.Auth
     public class AuthService
     {
         private readonly MongoDbContext _context;
+        private readonly INotificationService? _notificationService;
 
-        public AuthService(MongoDbContext context)
+        public AuthService(MongoDbContext context, INotificationService? notificationService = null)
         {
             _context = context;
+            _notificationService = notificationService;
         }
 
         public async Task<User?> Register(RegisterDto dto)
@@ -35,6 +37,12 @@ namespace TeamConnect.Api.Modules.Auth
             };
 
             await _context.Users.InsertOneAsync(user);
+
+            if (_notificationService != null)
+            {
+                await _notificationService.SendWelcomeEmailAsync(user.Id);
+            }
+
             return user;
         }
 

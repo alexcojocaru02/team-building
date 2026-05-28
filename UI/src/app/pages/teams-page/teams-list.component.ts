@@ -199,4 +199,8 @@ export class TeamsListComponent implements OnInit {
   isOwnerOrAdmin(team: TeamDetailDto): boolean {
     return this.isAdmin || team.ownerId === this.currentUserId;
   }
+
+  isCurrentUserMember(team: TeamDetailDto): boolean {
+    return !!this.currentUserId && team.memberIds.includes(this.currentUserId) && team.ownerId !== this.currentUserId;
+  }
 }
