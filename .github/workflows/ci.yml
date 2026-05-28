@@ -64,7 +64,7 @@ jobs:
       - name: Run Angular unit tests (xvfb, no-sandbox)
         run: |
           export CHROME_BIN=/usr/bin/chromium-browser
-          xvfb-run --auto-servernum --server-args='-screen 0 1280x720x24' npm run test --prefix UI -- --watch=false --browsers=ChromeHeadless --code-coverage --progress=false --no-sandbox --disable-dev-shm-usage
+          xvfb-run --auto-servernum --server-args='-screen 0 1280x720x24' npm run test --prefix UI -- --watch=false --browsers=ChromeHeadless --code-coverage --progress=false
         env:
           CI: true
       - name: Upload frontend coverage artifacts
