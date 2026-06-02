@@ -26,6 +26,7 @@ namespace TeamConnect.Api.Modules.Auth
             {
                 return Conflict(new ProblemDetails
                 {
+                    Status = StatusCodes.Status409Conflict,
                     Title = "User already exists",
                     Detail = "An account with that email is already registered."
                 });
