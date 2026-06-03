@@ -12,13 +12,6 @@ body {
 }
 
 .cdk-overlay-container .mat-mdc-select-panel {
-    /* Scoped to the overlay container to avoid global !important and to
-       only affect Material overlay panels.
-
-       Do not hard-code a white background here — that breaks dark/high-
-       contrast themes. Prefer theme tokens so overlays follow the active
-       Material theme. Use the MDC `--mdc-theme-surface` token with a
-       safe fallback for older environments. */
     background-color: var(--mdc-theme-surface, #ffffff);
 }
 
