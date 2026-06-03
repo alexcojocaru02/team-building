@@ -3,13 +3,13 @@ import { Page, APIRequestContext } from '@playwright/test';
 export const E2E_USER = {
   fullName: 'E2E Test User',
   email: 'e2e-user@teamconnect.test',
-  password: 'E2eTest@1234!',
+  password: 'Passw0rd',
 };
 
 export const E2E_ADMIN = {
   fullName: 'E2E Admin User',
   email: 'e2e-admin@teamconnect.test',
-  password: 'E2eAdmin@1234!',
+  password: 'Passw0rd',
 };
 
 const TIMEOUT = process.env['CI'] ? 60_000 : 30_000;
