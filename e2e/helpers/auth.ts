@@ -1,6 +1,5 @@
 import { Page, APIRequestContext } from '@playwright/test';
 
-// Useri ficsi reutilizati intre rulari — nu se sterg intre teste
 export const E2E_USER = {
   fullName: 'E2E Test User',
   email: 'e2e-user@teamconnect.test',
@@ -13,30 +12,29 @@ export const E2E_ADMIN = {
   password: 'E2eAdmin@1234!',
 };
 
-export async function ensureLoggedIn(
-  page: Page,
-  user = E2E_USER
-): Promise<void> {
-  await page.goto('/login');
+const TIMEOUT = 30_000;
 
-  // Incearca login — daca userul nu exista, il inregistreaza
+export async function ensureLoggedIn(page: Page, user = E2E_USER): Promise<void> {
+  await page.goto('/login');
   await page.fill('#login-email', user.email);
   await page.fill('#login-password', user.password);
   await page.click('button[type="submit"]');
 
-  // Asteapta fie home (succes) fie eroare (user inexistent)
-  await page.waitForTimeout(1000);
-  const url = page.url();
+  // Wait for either successful redirect or an error message
+  const result = await Promise.race([
+    page.waitForURL('**/home', { timeout: TIMEOUT }).then(() => 'success'),
+    page.waitForSelector('text=Invalid email or password', { timeout: TIMEOUT }).then(() => 'invalid'),
+  ]);
 
-  if (!url.includes('/home')) {
-    // Userul nu exista — inregistreaza-l (care face si auto-login)
+  if (result === 'invalid') {
+    // User doesn't exist yet — register (which auto-logs in)
     await page.goto('/login');
     await page.locator('p button:has-text("Sign Up")').click();
     await page.fill('#register-full-name', user.fullName);
     await page.fill('#register-email', user.email);
     await page.fill('#register-password', user.password);
     await page.click('button[type="submit"]');
-    await page.waitForURL('**/home', { timeout: 10000 });
+    await page.waitForURL('**/home', { timeout: TIMEOUT });
   }
 }
 
@@ -50,7 +48,6 @@ export async function getAuthToken(request: APIRequestContext, apiBaseUrl: strin
     return body.token as string;
   }
 
-  // Userul nu exista — inregistreaza-l
   const regResponse = await request.post(`${apiBaseUrl}/auth/register`, {
     data: { fullName: user.fullName, email: user.email, password: user.password },
   });
