@@ -1,6 +1,4 @@
 ﻿using MongoDB.Driver;
-using System.Security.Cryptography;
-using System.Text;
 using TeamConnect.Api.Shared.DTOs;
 using TeamConnect.Api.Shared.Models;
 using TeamConnect.Api.Shared.Services;
@@ -32,7 +30,7 @@ namespace TeamConnect.Api.Modules.Auth
                     ? dto.Email
                     : dto.FullName.Trim(),
                 Email = dto.Email,
-                PasswordHash = Hash(dto.Password),
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password),
                 Role = UserRoles.User
             };
 
@@ -48,17 +46,14 @@ namespace TeamConnect.Api.Modules.Auth
 
         public async Task<User?> Login(LoginDto dto)
         {
-            var hash = Hash(dto.Password);
-            return await _context.Users
-                .Find(u => u.Email == dto.Email && u.PasswordHash == hash)
+            var user = await _context.Users
+                .Find(u => u.Email == dto.Email)
                 .FirstOrDefaultAsync();
-        }
 
-        private string Hash(string input)
-        {
-            using var sha = SHA256.Create();
-            var bytes = sha.ComputeHash(Encoding.UTF8.GetBytes(input));
-            return Convert.ToBase64String(bytes);
+            if (user == null || !BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash))
+                return null;
+
+            return user;
         }
     }
 }
