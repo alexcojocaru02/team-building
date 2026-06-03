@@ -58,6 +58,17 @@ namespace TeamConnect.Api.Modules.Users
             }
         }
 
+        [HttpDelete("me")]
+        public async Task<IActionResult> DeleteMe()
+        {
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrWhiteSpace(currentUserId))
+                return Unauthorized();
+
+            var deleted = await _usersService.DeleteMe(currentUserId);
+            return deleted ? NoContent() : NotFound();
+        }
+
         [HttpPut("me")]
         public async Task<IActionResult> UpdateMyProfile(UpdateProfileDto dto)
         {

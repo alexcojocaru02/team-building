@@ -1,9 +1,14 @@
 <div class="tw:p-6 tw:max-w-2xl tw:mx-auto">
   <div class="tw:flex tw:items-center tw:justify-between tw:gap-4 tw:mb-6">
     <h1 class="tw:text-3xl tw:font-bold">My Profile</h1>
-    <button mat-stroked-button color="warn" type="button" (click)="logout()">
-      Logout
-    </button>
+    <div class="tw:flex tw:gap-2">
+      <button mat-stroked-button color="warn" type="button" (click)="logout()">
+        Logout
+      </button>
+      <button mat-flat-button color="warn" type="button" (click)="requestDeleteAccount()">
+        Delete account
+      </button>
+    </div>
   </div>
   @if (profile(); as p) {
   <div class="tw:bg-white tw:rounded-lg tw:shadow-md tw:p-6 tw:mb-6">

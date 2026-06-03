@@ -65,6 +65,25 @@ public class FeedController : ControllerBase
         return result == null ? NotFound() : Ok(result);
     }
 
+    [HttpDelete("{postId}")]
+    public async Task<IActionResult> DeletePost(string postId)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var userRole = User.FindFirstValue(ClaimTypes.Role) ?? string.Empty;
+        if (string.IsNullOrWhiteSpace(userId))
+            return Unauthorized();
+
+        try
+        {
+            var deleted = await _feedService.DeletePost(postId, userId, userRole);
+            return deleted ? NoContent() : NotFound();
+        }
+        catch (UnauthorizedAccessException)
+        {
+            return Forbid();
+        }
+    }
+
     [HttpPost("{postId}/comments")]
     public async Task<IActionResult> AddComment(string postId, CreateFeedPostCommentDto dto)
     {

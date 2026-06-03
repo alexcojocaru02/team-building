@@ -60,5 +60,12 @@ namespace TeamConnect.Api.Modules.Feed
 
         public Task InsertCommentAsync(FeedPostComment comment) =>
             _context.FeedPostComments.InsertOneAsync(comment);
+
+        public async Task DeletePostAsync(string postId)
+        {
+            await _context.FeedPostLikes.DeleteManyAsync(l => l.FeedPostId == postId);
+            await _context.FeedPostComments.DeleteManyAsync(c => c.FeedPostId == postId);
+            await _context.FeedPosts.DeleteOneAsync(p => p.Id == postId);
+        }
     }
 }

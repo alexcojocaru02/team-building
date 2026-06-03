@@ -53,6 +53,11 @@ coverage/
 *.coverage
 *.coveragexml
 
+# Playwright E2E
+e2e/playwright-report/
+e2e/test-results/
+e2e/.playwright-cache/
+
 # NuGet
 *.nupkg
 *.snupkg

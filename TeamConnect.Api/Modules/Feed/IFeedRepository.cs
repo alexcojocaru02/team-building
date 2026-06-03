@@ -17,5 +17,6 @@ namespace TeamConnect.Api.Modules.Feed
         Task<List<FeedPostComment>> GetRecentCommentsAsync(string postId, int limit);
         Task<long> CountCommentsAsync(string postId);
         Task InsertCommentAsync(FeedPostComment comment);
+        Task DeletePostAsync(string postId);
     }
 }

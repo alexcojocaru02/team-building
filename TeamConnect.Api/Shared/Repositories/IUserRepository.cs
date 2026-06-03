@@ -14,6 +14,7 @@ namespace TeamConnect.Api.Shared.Repositories
         Task RemoveFromTeamAsync(string userId, string teamId);
         Task RemoveTeamFromAllUsersAsync(string teamId);
         Task<bool> ExistsAsync(string id);
+        Task DeleteAsync(string id);
     }
 
     public sealed record UserSummary(string Id, string? FullName, string Email);

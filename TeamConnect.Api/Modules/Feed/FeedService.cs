@@ -87,6 +87,18 @@ namespace TeamConnect.Api.Modules.Feed
             return comments.OrderBy(c => c.CreatedAt).Select(c => MapComment(c, authorSummaries)).ToList();
         }
 
+        public async Task<bool> DeletePost(string postId, string requesterId, string requesterRole)
+        {
+            var post = await _feedRepository.FindPostByIdAsync(postId);
+            if (post == null) return false;
+
+            if (post.AuthorId != requesterId && requesterRole != UserRoles.Admin)
+                throw new UnauthorizedAccessException();
+
+            await _feedRepository.DeletePostAsync(postId);
+            return true;
+        }
+
         public async Task<FeedPostCommentDto?> AddComment(string postId, string content, string userId)
         {
             var post = await _feedRepository.FindPostByIdAsync(postId);

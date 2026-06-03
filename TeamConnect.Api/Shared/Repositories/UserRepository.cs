@@ -89,5 +89,8 @@ namespace TeamConnect.Api.Shared.Repositories
 
         public Task<bool> ExistsAsync(string id) =>
             _context.Users.Find(u => u.Id == id).AnyAsync();
+
+        public Task DeleteAsync(string id) =>
+            _context.Users.DeleteOneAsync(u => u.Id == id);
     }
 }

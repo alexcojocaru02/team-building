@@ -46,6 +46,15 @@ namespace TeamConnect.Api.Modules.Users
             return MapToProfileDto(user);
         }
 
+        public async Task<bool> DeleteMe(string id)
+        {
+            var user = await _userRepository.FindByIdAsync(id);
+            if (user == null) return false;
+
+            await _userRepository.DeleteAsync(id);
+            return true;
+        }
+
         private static UserProfileDto MapToProfileDto(User user) => new()
         {
             Id = user.Id,
