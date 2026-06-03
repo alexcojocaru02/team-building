@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Microsoft.Extensions.Configuration;
 using Mongo2Go;
 using MongoDB.Driver;
+using Microsoft.Extensions.Logging.Abstractions;
 using TeamConnect.Api.Shared.Services;
 
 namespace TeamConnect.Api.Tests.Fixtures;
@@ -26,7 +27,9 @@ public class MongoFixture : IDisposable
             .AddInMemoryCollection(inMemorySettings)
             .Build();
 
-        Context = new MongoDbContext(config);
+        // Use a no-op logger in tests to satisfy the constructor without extra dependencies
+        var logger = NullLogger<MongoDbContext>.Instance;
+        Context = new MongoDbContext(config, logger);
     }
 
     public void Dispose()

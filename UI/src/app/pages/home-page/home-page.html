@@ -5,9 +5,6 @@
       <div>
         <h1 class="tw:text-4xl tw:font-bold tw:text-gray-900">Welcome to TeamConnect</h1>
         <p class="tw:text-gray-600 tw:mt-2">Build stronger teams through feedback and collaboration</p>
-        @if (currentUser()) {
-          <p class="tw:text-sm tw:text-gray-500 tw:mt-2">Logged in as: <span class="tw:font-semibold">{{ currentUser()?.email }}</span></p>
-        }
       </div>
       <button
         mat-flat-button

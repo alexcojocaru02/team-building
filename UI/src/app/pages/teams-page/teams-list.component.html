@@ -31,7 +31,7 @@
         @if (team.ownerId === currentUserId) {
         <span class="app-pill app-pill--blue">Owner</span>
         }
-        @if (team.ownerId && team.ownerId !== currentUserId) {
+        @if (isCurrentUserMember(team)) {
         <span class="app-pill app-pill--gray">Member</span>
         }
       </div>

@@ -1,0 +1,80 @@
+name: PR CI - Tests
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  backend-tests:
+    name: Backend - dotnet tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '8.0.x'
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('**/packages.lock.json') }}
+          restore-keys: |
+            nuget-${{ runner.os }}-
+      - name: Restore
+        run: dotnet restore TeamConnect.Api/TeamConnect.Api.csproj
+      - name: Build
+        run: dotnet build TeamConnect.Api/TeamConnect.Api.csproj --no-restore -c Release
+      - name: Test
+        run: dotnet test TeamConnect.Api.Tests/TeamConnect.Api.Tests.csproj --no-build -c Release --collect:"XPlat Code Coverage" --logger "console;verbosity=normal"
+      - name: Upload backend test artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-test-results
+          path: TeamConnect.Api.Tests/TestResults/**
+          if-no-files-found: ignore
+
+  frontend-tests:
+    name: Frontend - Angular unit tests
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [20]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Cache npm
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: npm-${{ runner.os }}-node-${{ matrix.node-version }}-${{ hashFiles('UI/package-lock.json') }}
+          restore-keys: |
+            npm-${{ runner.os }}-node-${{ matrix.node-version }}-
+      - name: Install dependencies
+        run: npm ci
+        working-directory: UI
+      - name: Install Google Chrome stable for headless tests
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget gnupg2 xvfb
+          wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+          sudo sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list'
+          sudo apt-get update
+          sudo apt-get install -y google-chrome-stable
+      - name: Run Angular unit tests (xvfb, stable Chrome, no-sandbox)
+        run: |
+          export CHROME_BIN=/usr/bin/google-chrome-stable
+          xvfb-run --auto-servernum --server-args='-screen 0 1280x720x24' npm run test --prefix UI -- --watch=false --browsers=ChromeHeadlessNoSandbox --code-coverage --progress=false
+        env:
+          CI: true
+      - name: Upload frontend coverage artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-coverage
+          path: UI/coverage/**
+          if-no-files-found: ignore

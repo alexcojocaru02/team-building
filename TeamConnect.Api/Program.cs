@@ -3,6 +3,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text.Json;
 using System.Text;
+using System.Text.RegularExpressions;
 using TeamConnect.Api.Modules.Auth;
 using TeamConnect.Api.Shared.Services;
 
@@ -25,7 +26,20 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngularApp", policy =>
     {
-        policy.WithOrigins("http://localhost:4200") // Angular default dev server
+        // Read allowed origins from configuration (set via appsettings or environment variables).
+        // Guard against an empty or whitespace-only setting which would produce an empty
+        // origins array and cause WithOrigins() to throw. Fall back to the default
+        // localhost origin and log a warning so misconfiguration is visible.
+        var origins = builder.Configuration["Cors:AllowedOrigins"] ?? string.Empty;
+        var originArray = origins.Split(',').Select(o => o.Trim()).Where(o => !string.IsNullOrEmpty(o)).ToArray();
+
+        if (originArray.Length == 0)
+        {
+            originArray = new[] { "http://localhost:4200" };
+            Console.WriteLine("Warning: 'Cors:AllowedOrigins' is empty; falling back to default http://localhost:4200");
+        }
+
+        policy.WithOrigins(originArray)
               .AllowAnyMethod()
               .AllowAnyHeader()
               .AllowCredentials();
@@ -35,6 +49,34 @@ builder.Services.AddCors(options =>
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "TeamConnect.Api", Version = "v1" });
+
+    // Generate operationIds which are required by Azure API management
+
+    c.CustomOperationIds(e =>
+    {
+        // Safely get controller name
+        var controller = "UnknownController";
+        if (e.ActionDescriptor.RouteValues != null &&
+            e.ActionDescriptor.RouteValues.TryGetValue("controller", out var cName) &&
+            !string.IsNullOrWhiteSpace(cName))
+        {
+            controller = cName;
+        }
+
+        var method = string.IsNullOrWhiteSpace(e.HttpMethod) ? "UNKNOWN" : e.HttpMethod.ToUpperInvariant();
+        var path = e.RelativePath ?? string.Empty;
+
+        // Build a raw id and replace path separators with underscore
+        var raw = $"{controller}_{method}_{path.Replace('/', '_')}";
+
+        // Keep only alphanumeric and underscore, collapse repeated underscores, trim and limit length
+        var sanitized = Regex.Replace(raw, "[^A-Za-z0-9_]", "_");
+        sanitized = Regex.Replace(sanitized, "_+", "_").Trim('_');
+        if (sanitized.Length > 120) sanitized = sanitized.Substring(0, 120);
+
+        return string.IsNullOrWhiteSpace(sanitized) ? "operation_unknown" : sanitized;
+    });
+    c.ResolveConflictingActions(apiDescriptions => apiDescriptions.First());
 
     var jwtSecurityScheme = new OpenApiSecurityScheme
     {
@@ -60,9 +102,26 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 builder.Services.AddSingleton<MongoDbContext>();
+builder.Services.AddScoped<IEmailSender, SmtpEmailSender>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<JwtService>();
 builder.Services.AddScoped<ProfileAndTeamMigrationRunner>();
+
+// Validate critical JWT configuration at startup and fail fast when missing.
+// This prevents the app from starting with an empty signing key which would
+// silently produce authentication errors or insecure behavior.
+var jwtKey = builder.Configuration["Jwt:Key"];
+if (string.IsNullOrWhiteSpace(jwtKey))
+{
+    throw new InvalidOperationException("Configuration value 'Jwt:Key' is missing or empty. Set Jwt:Key in appsettings or environment variables.");
+}
+var jwtIssuer = builder.Configuration["Jwt:Issuer"]; 
+var jwtAudience = builder.Configuration["Jwt:Audience"]; 
+if (string.IsNullOrWhiteSpace(jwtIssuer) || string.IsNullOrWhiteSpace(jwtAudience))
+{
+    throw new InvalidOperationException("Configuration values 'Jwt:Issuer' and/or 'Jwt:Audience' are missing or empty. Set Jwt:Issuer and Jwt:Audience in appsettings or environment variables.");
+}
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -77,14 +136,14 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidIssuer = builder.Configuration["Jwt:Issuer"],
             ValidAudience = builder.Configuration["Jwt:Audience"],
             IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"] ?? string.Empty)
+                Encoding.UTF8.GetBytes(jwtKey)
             ),
 
             // tighten clock skew for testing; increase as needed in production
             ClockSkew = TimeSpan.Zero
         };
 
-        // Helpful for diagnosing invalid_token causes � writes exception to console
+        // Helpful for diagnosing invalid_token causes - writes exception to console
         options.Events = new JwtBearerEvents
         {
             OnAuthenticationFailed = ctx =>
@@ -141,7 +200,19 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+// In production ensure HSTS is enabled and HTTPS redirection runs before static file middleware
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHsts();
+}
+
 app.UseHttpsRedirection();
+
+if (!app.Environment.IsDevelopment())
+{
+    app.UseDefaultFiles();
+    app.UseStaticFiles();
+}
 
 // CORS must be called before Authentication and Authorization
 app.UseCors("AllowAngularApp");
@@ -151,5 +222,10 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+if (!app.Environment.IsDevelopment())
+{
+    app.MapFallbackToFile("index.html");
+}
 
 app.Run();

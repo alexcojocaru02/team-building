@@ -11,6 +11,10 @@ body {
     }
 }
 
+.cdk-overlay-container .mat-mdc-select-panel {
+    background-color: var(--mdc-theme-surface, #ffffff);
+}
+
 :root {
   --sidenav-collapsed: 62px;
   --sidenav-expanded: 180px;

@@ -15,10 +15,12 @@ namespace TeamConnect.Api.Modules.TeamActivities
     public class TeamActivitiesController : ControllerBase
     {
         private readonly MongoDbContext _context;
+        private readonly INotificationService? _notificationService;
 
-        public TeamActivitiesController(MongoDbContext context)
+        public TeamActivitiesController(MongoDbContext context, INotificationService? notificationService = null)
         {
             _context = context;
+            _notificationService = notificationService;
         }
 
         [HttpGet]
@@ -129,6 +131,11 @@ namespace TeamConnect.Api.Modules.TeamActivities
             };
 
             await _context.TeamActivities.InsertOneAsync(activity);
+
+            if (_notificationService != null)
+            {
+                await _notificationService.SendTeamActivityCreatedEmailAsync(teamId, activity.Id, currentUserId);
+            }
 
             return Ok(await BuildDtoAsync(activity, currentUserId));
         }
