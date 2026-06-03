@@ -12,47 +12,68 @@ export const E2E_ADMIN = {
   password: 'E2eAdmin@1234!',
 };
 
-const TIMEOUT = 30_000;
+const TIMEOUT = process.env['CI'] ? 60_000 : 30_000;
 
-export async function ensureLoggedIn(page: Page, user = E2E_USER): Promise<void> {
+async function loginAndWait(page: Page, user: typeof E2E_USER): Promise<'success' | 'invalid'> {
   await page.goto('/login');
   await page.fill('#login-email', user.email);
   await page.fill('#login-password', user.password);
   await page.click('button[type="submit"]');
+  return Promise.race([
+    page.waitForURL('**/home', { timeout: TIMEOUT }).then(() => 'success' as const),
+    page.waitForSelector('text=Invalid email or password', { timeout: TIMEOUT }).then(() => 'invalid' as const),
+  ]);
+}
 
-  // Wait for either successful redirect or an error message
-  const result = await Promise.race([
-    page.waitForURL('**/home', { timeout: TIMEOUT }).then(() => 'success'),
-    page.waitForSelector('text=Invalid email or password', { timeout: TIMEOUT }).then(() => 'invalid'),
+export async function ensureLoggedIn(page: Page, user = E2E_USER): Promise<void> {
+  const loginResult = await loginAndWait(page, user);
+  if (loginResult === 'success') return;
+
+  // User doesn't exist yet — register (which auto-logs in)
+  await page.goto('/login');
+  await page.locator('p button:has-text("Sign Up")').click();
+  await page.fill('#register-full-name', user.fullName);
+  await page.fill('#register-email', user.email);
+  await page.fill('#register-password', user.password);
+  await page.click('button[type="submit"]');
+
+  const regResult = await Promise.race([
+    page.waitForURL('**/home', { timeout: TIMEOUT }).then(() => 'success' as const),
+    page.waitForSelector('text=Registration failed', { timeout: TIMEOUT }).then(() => 'exists' as const),
   ]);
 
-  if (result === 'invalid') {
-    // User doesn't exist yet — register (which auto-logs in)
-    await page.goto('/login');
-    await page.locator('p button:has-text("Sign Up")').click();
-    await page.fill('#register-full-name', user.fullName);
-    await page.fill('#register-email', user.email);
-    await page.fill('#register-password', user.password);
-    await page.click('button[type="submit"]');
-    await page.waitForURL('**/home', { timeout: TIMEOUT });
+  if (regResult === 'exists') {
+    // Email already registered — retry login (race condition between parallel tests or previous run)
+    const retryResult = await loginAndWait(page, user);
+    if (retryResult !== 'success') {
+      throw new Error(`ensureLoggedIn: could not log in as ${user.email} after register failed`);
+    }
   }
 }
 
 export async function getAuthToken(request: APIRequestContext, apiBaseUrl: string, user = E2E_USER): Promise<string> {
-  const response = await request.post(`${apiBaseUrl}/auth/login`, {
+  const loginRes = await request.post(`${apiBaseUrl}/auth/login`, {
     data: { email: user.email, password: user.password },
   });
 
-  if (response.ok()) {
-    const body = await response.json();
-    return body.token as string;
+  if (loginRes.ok()) {
+    return ((await loginRes.json()) as { token: string }).token;
   }
 
-  const regResponse = await request.post(`${apiBaseUrl}/auth/register`, {
+  const regRes = await request.post(`${apiBaseUrl}/auth/register`, {
     data: { fullName: user.fullName, email: user.email, password: user.password },
   });
-  const body = await regResponse.json();
-  return body.token as string;
+
+  if (regRes.ok()) {
+    return ((await regRes.json()) as { token: string }).token;
+  }
+
+  // Registration failed (email already taken) — retry login
+  const retryRes = await request.post(`${apiBaseUrl}/auth/login`, {
+    data: { email: user.email, password: user.password },
+  });
+  if (!retryRes.ok()) throw new Error(`getAuthToken: login failed for ${user.email} (${retryRes.status()})`);
+  return ((await retryRes.json()) as { token: string }).token;
 }
 
 export async function deletePostViaApi(
