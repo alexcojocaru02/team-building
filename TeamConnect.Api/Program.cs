@@ -116,11 +116,11 @@ if (string.IsNullOrWhiteSpace(jwtKey))
 {
     throw new InvalidOperationException("Configuration value 'Jwt:Key' is missing or empty. Set Jwt:Key in appsettings or environment variables.");
 }
-var jwtIssuer = builder.Configuration["Jwt:Issuer"];
-var jwtAudience = builder.Configuration["Jwt:Audience"];
+var jwtIssuer = builder.Configuration["Jwt:Issuer"]; 
+var jwtAudience = builder.Configuration["Jwt:Audience"]; 
 if (string.IsNullOrWhiteSpace(jwtIssuer) || string.IsNullOrWhiteSpace(jwtAudience))
 {
-    Console.WriteLine("Warning: Jwt:Issuer or Jwt:Audience is not set; authentication may fail.");
+    throw new InvalidOperationException("Configuration values 'Jwt:Issuer' and/or 'Jwt:Audience' are missing or empty. Set Jwt:Issuer and Jwt:Audience in appsettings or environment variables.");
 }
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
