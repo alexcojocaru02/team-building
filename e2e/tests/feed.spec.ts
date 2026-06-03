@@ -17,21 +17,19 @@ test.describe('Feed', () => {
   });
 
   test.afterEach(async ({ request }) => {
-    // Sterge posturile create in test via API
     for (const postId of createdPostIds) {
       await deletePostViaApi(request, API_BASE_URL, postId, authToken);
     }
     createdPostIds.length = 0;
   });
 
-  test('pagina de feed se incarca', async ({ page }) => {
+  test('feed page loads', async ({ page }) => {
     await expect(page.locator('textarea[name="content"]')).toBeVisible();
   });
 
-  test('poate posta un update nou', async ({ page }) => {
+  test('can post a new update', async ({ page }) => {
     const postText = `E2E post ${Date.now()}`;
 
-    // Interceptam raspunsul ca sa capturem postId pentru cleanup
     const responsePromise = page.waitForResponse(res =>
       res.url().includes('/api/feed') && res.request().method() === 'POST' && res.status() === 200
     );
@@ -46,18 +44,18 @@ test.describe('Feed', () => {
     await expect(page.locator(`text=${postText}`)).toBeVisible({ timeout: 10000 });
   });
 
-  test('butonul Post update este dezactivat cand textul e gol', async ({ page }) => {
+  test('Post update button is disabled when text is empty', async ({ page }) => {
     const submitBtn = page.locator('button:has-text("Post update")');
     await expect(submitBtn).toBeDisabled();
 
-    await page.fill('textarea[name="content"]', 'ceva text');
+    await page.fill('textarea[name="content"]', 'some text');
     await expect(submitBtn).toBeEnabled();
 
     await page.fill('textarea[name="content"]', '');
     await expect(submitBtn).toBeDisabled();
   });
 
-  test('poate da like unui post existent', async ({ page }) => {
+  test('can like a post', async ({ page }) => {
     const responsePromise = page.waitForResponse(res =>
       res.url().includes('/api/feed') && res.request().method() === 'POST' && res.status() === 200
     );
@@ -70,12 +68,11 @@ test.describe('Feed', () => {
     createdPostIds.push(body.id);
 
     await page.waitForTimeout(300);
-    const likeBtn = page.locator('button:has-text("Like")').first();
-    await likeBtn.click();
+    await page.locator('button:has-text("Like")').first().click();
     await expect(page.locator('button:has-text("Liked")').first()).toBeVisible({ timeout: 5000 });
   });
 
-  test('poate sterge propriul post', async ({ page }) => {
+  test('can delete own post', async ({ page }) => {
     const responsePromise = page.waitForResponse(res =>
       res.url().includes('/api/feed') && res.request().method() === 'POST' && res.status() === 200
     );
@@ -86,14 +83,9 @@ test.describe('Feed', () => {
     await responsePromise;
 
     await page.waitForTimeout(300);
-
-    // Apasa butonul de stergere (trash icon) pe primul post
     await page.locator('article').first().locator('button[aria-label="Delete post"]').click();
-
-    // Confirma in dialog (butonul din mat-dialog-actions)
     await page.locator('mat-dialog-actions button:has-text("Delete")').click();
 
     await expect(page.locator(`text=${postText}`)).not.toBeVisible({ timeout: 5000 });
-    // Postul a fost sters din UI, nu mai e nevoie de cleanup via API
   });
 });
