@@ -1,0 +1,68 @@
+using TeamConnect.Api.Shared.DTOs;
+using TeamConnect.Api.Shared.Repositories;
+using TeamConnect.Api.Shared.Services;
+using FeedbackModel = TeamConnect.Api.Shared.Models.Feedback;
+
+namespace TeamConnect.Api.Modules.Feedback
+{
+    public class FeedbackService
+    {
+        private readonly IFeedbackRepository _feedbackRepository;
+        private readonly IUserRepository _userRepository;
+        private readonly INotificationService? _notificationService;
+
+        public FeedbackService(IFeedbackRepository feedbackRepository, IUserRepository userRepository, INotificationService? notificationService = null)
+        {
+            _feedbackRepository = feedbackRepository;
+            _userRepository = userRepository;
+            _notificationService = notificationService;
+        }
+
+        public async Task<FeedbackResponseDto?> Send(CreateFeedbackDto dto, string fromUserId)
+        {
+            var feedback = new FeedbackModel
+            {
+                FromUserId = fromUserId,
+                ToUserId = dto.ToUserId,
+                Message = dto.Message,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            var summaries = (await _userRepository.FindSummariesByIdsAsync([fromUserId, dto.ToUserId]))
+                .ToDictionary(u => u.Id);
+
+            await _feedbackRepository.InsertAsync(feedback);
+
+            if (_notificationService != null)
+                await _notificationService.SendFeedbackReceivedEmailAsync(fromUserId, dto.ToUserId, dto.Message);
+
+            return MapToDto(feedback, summaries);
+        }
+
+        public async Task<List<FeedbackResponseDto>> GetReceived(string userId)
+        {
+            var feedbacks = await _feedbackRepository.GetReceivedByUserAsync(userId);
+            var userIds = feedbacks.SelectMany(f => new[] { f.FromUserId, f.ToUserId }).Distinct();
+            var summaries = (await _userRepository.FindSummariesByIdsAsync(userIds)).ToDictionary(u => u.Id);
+            return feedbacks.Select(f => MapToDto(f, summaries)).ToList();
+        }
+
+        private static FeedbackResponseDto MapToDto(FeedbackModel f, Dictionary<string, UserSummary> summaries)
+        {
+            summaries.TryGetValue(f.FromUserId, out var from);
+            summaries.TryGetValue(f.ToUserId, out var to);
+            return new FeedbackResponseDto
+            {
+                Id = f.Id,
+                FromUserId = f.FromUserId,
+                ToUserId = f.ToUserId,
+                Message = f.Message,
+                CreatedAt = f.CreatedAt,
+                FromUserFullName = from?.FullName,
+                FromUserEmail = from?.Email ?? "Unknown",
+                ToUserFullName = to?.FullName,
+                ToUserEmail = to?.Email ?? "Unknown"
+            };
+        }
+    }
+}
