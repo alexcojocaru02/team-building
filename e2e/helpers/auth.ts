@@ -3,13 +3,13 @@ import { Page, APIRequestContext } from '@playwright/test';
 export const E2E_USER = {
   fullName: 'E2E Test User',
   email: 'e2e-user@teamconnect.test',
-  password: 'Passw0rd',
+  password: 'E2eTest@1234!',
 };
 
 export const E2E_ADMIN = {
   fullName: 'E2E Admin User',
   email: 'e2e-admin@teamconnect.test',
-  password: 'Passw0rd',
+  password: 'E2eAdmin@1234!',
 };
 
 const TIMEOUT = process.env['CI'] ? 60_000 : 30_000;
@@ -52,28 +52,20 @@ export async function ensureLoggedIn(page: Page, user = E2E_USER): Promise<void>
 }
 
 export async function getAuthToken(request: APIRequestContext, apiBaseUrl: string, user = E2E_USER): Promise<string> {
-  const loginRes = await request.post(`${apiBaseUrl}/auth/login`, {
+  const response = await request.post(`${apiBaseUrl}/auth/login`, {
     data: { email: user.email, password: user.password },
   });
 
-  if (loginRes.ok()) {
-    return ((await loginRes.json()) as { token: string }).token;
+  if (response.ok()) {
+    const body = await response.json();
+    return body.token as string;
   }
 
-  const regRes = await request.post(`${apiBaseUrl}/auth/register`, {
+  const regResponse = await request.post(`${apiBaseUrl}/auth/register`, {
     data: { fullName: user.fullName, email: user.email, password: user.password },
   });
-
-  if (regRes.ok()) {
-    return ((await regRes.json()) as { token: string }).token;
-  }
-
-  // Registration failed (email already taken) — retry login
-  const retryRes = await request.post(`${apiBaseUrl}/auth/login`, {
-    data: { email: user.email, password: user.password },
-  });
-  if (!retryRes.ok()) throw new Error(`getAuthToken: login failed for ${user.email} (${retryRes.status()})`);
-  return ((await retryRes.json()) as { token: string }).token;
+  const body = await regResponse.json();
+  return body.token as string;
 }
 
 export async function deletePostViaApi(
