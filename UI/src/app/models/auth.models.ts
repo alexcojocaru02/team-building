@@ -60,6 +60,22 @@ export interface CreateTeamDto {
   description?: string;
 }
 
+export interface TeamJoinRequestDto {
+  id: string;
+  teamId: string;
+  teamName: string;
+  userId: string;
+  userFullName: string;
+  userEmail: string;
+  status: string;
+  createdAt: string;
+}
+
+export interface CreateTeamResponseDto {
+  team: TeamDetailDto;
+  newToken?: string;
+}
+
 // Aliases for backward compatibility
 export type LoginDto = LoginRequestDto;
 export type RegisterDto = RegisterRequestDto;

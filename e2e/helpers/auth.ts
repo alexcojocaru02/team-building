@@ -94,6 +94,42 @@ export async function getTeamForUser(
   return myTeam?.id ?? null;
 }
 
+export async function createTeamViaApi(
+  request: APIRequestContext,
+  apiBaseUrl: string,
+  name: string,
+  token: string
+): Promise<{ teamId: string; newToken?: string }> {
+  const res = await request.post(`${apiBaseUrl}/teams`, {
+    data: { name },
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const body = await res.json();
+  return { teamId: body.team?.id ?? body.id, newToken: body.newToken };
+}
+
+export async function deleteTeamViaApi(
+  request: APIRequestContext,
+  apiBaseUrl: string,
+  teamId: string,
+  token: string
+): Promise<void> {
+  await request.delete(`${apiBaseUrl}/teams/${teamId}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
+export async function requestJoinTeamViaApi(
+  request: APIRequestContext,
+  apiBaseUrl: string,
+  teamId: string,
+  token: string
+): Promise<void> {
+  await request.post(`${apiBaseUrl}/teams/${teamId}/join-requests`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
 export async function deletePostViaApi(
   request: APIRequestContext,
   apiBaseUrl: string,

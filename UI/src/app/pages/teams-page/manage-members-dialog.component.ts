@@ -7,8 +7,9 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { TeamDetailDto } from '../../models/auth.models';
+import { TeamDetailDto, TeamJoinRequestDto } from '../../models/auth.models';
 import { UsersService, UserSummaryDto } from '../../services/users.service';
+import { AuthService } from '../../services/auth.service';
 
 interface ManageMembersDialogData {
   team: TeamDetailDto;
@@ -25,6 +26,7 @@ export class ManageMembersDialogComponent implements OnInit {
   private dialogRef = inject(MatDialogRef<ManageMembersDialogComponent, boolean>);
   private snackBar = inject(MatSnackBar);
   private usersService = inject(UsersService);
+  private authService = inject(AuthService);
   protected data = inject<ManageMembersDialogData>(MAT_DIALOG_DATA);
 
   protected readonly team = this.data.team;
@@ -41,9 +43,20 @@ export class ManageMembersDialogComponent implements OnInit {
     this.users().filter(user => !this.memberIdSet().has(user.id))
   );
   protected selectedUserId = '';
+  protected readonly joinRequests = signal<TeamJoinRequestDto[]>([]);
+  protected readonly processingRequestId = signal<string | null>(null);
   private hasChanges = false;
 
   ngOnInit(): void {
+    const currentUser = this.authService.currentUser();
+    const canSeeRequests = currentUser?.role === 'Admin' || this.team.ownerId === currentUser?.id;
+    if (canSeeRequests) {
+      this.usersService.getTeamJoinRequests(this.team.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+        next: (reqs) => this.joinRequests.set(reqs),
+        error: () => {}
+      });
+    }
+
     this.usersService.getUsers().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (users) => {
         this.users.set(users);
@@ -108,6 +121,38 @@ export class ManageMembersDialogComponent implements OnInit {
         console.error('Failed to remove team member:', err);
         this.showSnackBar(this.getErrorMessage(err, 'Failed to remove member.'), true);
         this.isUpdating.set(false);
+      }
+    });
+  }
+
+  approveRequest(req: TeamJoinRequestDto): void {
+    this.processingRequestId.set(req.id);
+    this.usersService.approveJoinRequest(req.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: () => {
+        this.joinRequests.set(this.joinRequests().filter(r => r.id !== req.id));
+        this.memberIds.set([...this.memberIds(), req.userId]);
+        this.hasChanges = true;
+        this.processingRequestId.set(null);
+        this.showSnackBar(`${req.userFullName || req.userEmail} added to team.`);
+      },
+      error: () => {
+        this.processingRequestId.set(null);
+        this.showSnackBar('Failed to approve request.', true);
+      }
+    });
+  }
+
+  rejectRequest(req: TeamJoinRequestDto): void {
+    this.processingRequestId.set(req.id);
+    this.usersService.rejectJoinRequest(req.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: () => {
+        this.joinRequests.set(this.joinRequests().filter(r => r.id !== req.id));
+        this.processingRequestId.set(null);
+        this.showSnackBar('Request rejected.');
+      },
+      error: () => {
+        this.processingRequestId.set(null);
+        this.showSnackBar('Failed to reject request.', true);
       }
     });
   }

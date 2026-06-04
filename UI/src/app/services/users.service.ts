@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { UserDto, UpdateProfileDto, TeamDetailDto, CreateTeamDto } from '../models/auth.models';
+import { UserDto, UpdateProfileDto, TeamDetailDto, CreateTeamDto, TeamJoinRequestDto, CreateTeamResponseDto } from '../models/auth.models';
 
 export interface UserSummaryDto {
   id: string;
@@ -48,8 +48,28 @@ export class UsersService {
     return this.http.get<TeamDetailDto>(`${this.apiUrl}/teams/${id}`);
   }
 
-  createTeam(dto: CreateTeamDto): Observable<TeamDetailDto> {
-    return this.http.post<TeamDetailDto>(`${this.apiUrl}/teams`, dto);
+  createTeam(dto: CreateTeamDto): Observable<CreateTeamResponseDto> {
+    return this.http.post<CreateTeamResponseDto>(`${this.apiUrl}/teams`, dto);
+  }
+
+  requestJoinTeam(teamId: string): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${this.apiUrl}/teams/${teamId}/join-requests`, {});
+  }
+
+  getTeamJoinRequests(teamId: string): Observable<TeamJoinRequestDto[]> {
+    return this.http.get<TeamJoinRequestDto[]>(`${this.apiUrl}/teams/${teamId}/join-requests`);
+  }
+
+  getAllJoinRequests(): Observable<TeamJoinRequestDto[]> {
+    return this.http.get<TeamJoinRequestDto[]>(`${this.apiUrl}/teams/join-requests`);
+  }
+
+  approveJoinRequest(requestId: string): Observable<{ message: string }> {
+    return this.http.put<{ message: string }>(`${this.apiUrl}/teams/join-requests/${requestId}/approve`, {});
+  }
+
+  rejectJoinRequest(requestId: string): Observable<{ message: string }> {
+    return this.http.put<{ message: string }>(`${this.apiUrl}/teams/join-requests/${requestId}/reject`, {});
   }
 
   updateTeam(id: string, dto: CreateTeamDto): Observable<TeamDetailDto> {

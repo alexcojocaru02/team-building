@@ -58,6 +58,11 @@ export class SidePanelComponent implements OnInit, AfterViewInit {
     this.expandedTeamId.set(this.expandedTeamId() === teamId ? null : teamId);
   }
 
+  canSeeDashboard(team: TeamDetailDto): boolean {
+    const userId = this.authService.currentUser()?.id;
+    return this.isAdmin() || team.ownerId === userId;
+  }
+
   teamLabel(index: number): string {
     return `T${index + 1}`;
   }

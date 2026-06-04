@@ -112,6 +112,7 @@ builder.Services.AddScoped<TeamConnect.Api.Modules.Teams.ITeamRepository, TeamCo
 builder.Services.AddScoped<TeamConnect.Api.Modules.Feed.IFeedRepository, TeamConnect.Api.Modules.Feed.FeedRepository>();
 builder.Services.AddScoped<TeamConnect.Api.Modules.Feedback.IFeedbackRepository, TeamConnect.Api.Modules.Feedback.FeedbackRepository>();
 builder.Services.AddScoped<TeamConnect.Api.Modules.TeamActivities.ITeamActivityRepository, TeamConnect.Api.Modules.TeamActivities.TeamActivityRepository>();
+builder.Services.AddScoped<TeamConnect.Api.Modules.Teams.ITeamJoinRequestRepository, TeamConnect.Api.Modules.Teams.TeamJoinRequestRepository>();
 
 // Services
 builder.Services.AddScoped<AuthService>();

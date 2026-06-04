@@ -29,6 +29,35 @@
       </div>
     }
 
+    @if (joinRequests().length > 0) {
+      <div class="tw:bg-white tw:rounded-2xl tw:shadow-lg tw:p-8 tw:mb-8">
+        <h2 class="tw:text-lg tw:font-semibold tw:text-gray-800 tw:mb-4">Pending Join Requests</h2>
+        <div class="tw:space-y-3">
+          @for (req of joinRequests(); track req.id) {
+          <div class="tw:flex tw:items-center tw:justify-between tw:p-3 tw:border tw:rounded-lg">
+            <div>
+              <p class="tw:font-medium tw:text-gray-800">{{ req.userFullName || '—' }}</p>
+              <p class="tw:text-sm tw:text-gray-500">{{ req.userEmail }}</p>
+              <p class="tw:text-xs tw:text-gray-400">{{ req.createdAt | date: 'short' }}</p>
+            </div>
+            <div class="tw:flex tw:gap-2">
+              <button mat-flat-button color="primary" type="button"
+                [disabled]="processingRequestId() === req.id"
+                (click)="approveRequest(req)">
+                Approve
+              </button>
+              <button mat-button color="warn" type="button"
+                [disabled]="processingRequestId() === req.id"
+                (click)="rejectRequest(req)">
+                Reject
+              </button>
+            </div>
+          </div>
+          }
+        </div>
+      </div>
+    }
+
     @if (!isLoading() && cohesionData()) {
       <!-- Total Feedback Count Card -->
       <div class="tw:grid tw:grid-cols-1 tw:md:grid-cols-2 tw:gap-6 tw:mb-8">
