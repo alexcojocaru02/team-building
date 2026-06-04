@@ -1,11 +1,9 @@
 <div class="tw:p-6">
   <div class="tw:flex tw:justify-between tw:items-center tw:mb-6">
     <h1 class="tw:text-3xl tw:font-bold">Teams</h1>
-    @if (isAdmin) {
     <button mat-flat-button color="primary" type="button" (click)="createTeam()" [disabled]="isCreatingTeam()">
       {{ isCreatingTeam() ? 'Creating...' : 'Create Team' }}
     </button>
-    }
   </div>
 
   @if (deleteMessage()) {
@@ -35,11 +33,11 @@
         <span class="app-pill app-pill--gray">Member</span>
         }
       </div>
-      
+
       @if (team.description) {
       <p class="tw:text-gray-600 tw:mb-3">{{ team.description }}</p>
       }
-      
+
       <div class="tw:mb-3">
         <p class="tw:text-sm tw:text-gray-600"><strong>Members:</strong> {{ team.memberIds.length }}</p>
         @if (team.createdAt) {
@@ -58,6 +56,18 @@
         <button *ngIf="isAdmin" mat-flat-button color="warn" type="button" (click)="requestDeleteTeam(team)" [disabled]="isDeletingTeamId() === team.id">
           {{ isDeletingTeamId() === team.id ? 'Deleting...' : 'Delete' }}
         </button>
+      </div>
+      } @else if (!isCurrentUserMember(team)) {
+      <div class="tw:flex tw:gap-2">
+        @if (hasPendingRequest(team.id)) {
+        <button mat-button type="button" disabled>
+          Request Pending
+        </button>
+        } @else {
+        <button mat-flat-button color="accent" type="button" (click)="requestJoin(team)" [disabled]="isRequestingJoinId() === team.id">
+          {{ isRequestingJoinId() === team.id ? 'Requesting...' : 'Request to Join' }}
+        </button>
+        }
       </div>
       }
     </div>

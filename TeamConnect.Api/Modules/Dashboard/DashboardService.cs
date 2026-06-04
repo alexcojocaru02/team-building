@@ -1,5 +1,5 @@
-using TeamConnect.Api.Shared.DTOs;
 using TeamConnect.Api.Modules.Feedback;
+using TeamConnect.Api.Shared.DTOs;
 using TeamConnect.Api.Shared.Repositories;
 
 namespace TeamConnect.Api.Modules.Dashboard
@@ -15,23 +15,30 @@ namespace TeamConnect.Api.Modules.Dashboard
             _userRepository = userRepository;
         }
 
-        public async Task<CohesionDashboardDto> GetCohesion()
+        public async Task<CohesionDashboardDto> GetCohesion(List<string> memberIds)
         {
+            var memberSet = memberIds.ToHashSet();
             var feedbacks = await _feedbackRepository.GetAllAsync();
             var users = await _userRepository.GetAllAsync();
 
-            var userStats = users.Select(u => new UserFeedbackStatsDto
+            var teamFeedbacks = feedbacks
+                .Where(f => memberSet.Contains(f.FromUserId) && memberSet.Contains(f.ToUserId))
+                .ToList();
+
+            var teamUsers = users.Where(u => memberSet.Contains(u.Id)).ToList();
+
+            var userStats = teamUsers.Select(u => new UserFeedbackStatsDto
             {
                 UserId = u.Id,
                 Email = u.Email ?? string.Empty,
-                FeedbackReceived = feedbacks.Count(f => f.ToUserId == u.Id)
+                FeedbackReceived = teamFeedbacks.Count(f => f.ToUserId == u.Id)
             })
             .OrderByDescending(u => u.FeedbackReceived)
             .ToList();
 
             return new CohesionDashboardDto
             {
-                TotalFeedbacks = feedbacks.Count,
+                TotalFeedbacks = teamFeedbacks.Count,
                 Users = userStats
             };
         }

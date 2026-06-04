@@ -101,6 +101,7 @@ builder.Services.AddSwaggerGen(c =>
         { jwtSecurityScheme, Array.Empty<string>() }
     });
 });
+builder.Services.AddHealthChecks();
 builder.Services.AddSingleton<MongoDbContext>();
 builder.Services.AddScoped<IEmailSender, SmtpEmailSender>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
@@ -112,6 +113,7 @@ builder.Services.AddScoped<TeamConnect.Api.Modules.Teams.ITeamRepository, TeamCo
 builder.Services.AddScoped<TeamConnect.Api.Modules.Feed.IFeedRepository, TeamConnect.Api.Modules.Feed.FeedRepository>();
 builder.Services.AddScoped<TeamConnect.Api.Modules.Feedback.IFeedbackRepository, TeamConnect.Api.Modules.Feedback.FeedbackRepository>();
 builder.Services.AddScoped<TeamConnect.Api.Modules.TeamActivities.ITeamActivityRepository, TeamConnect.Api.Modules.TeamActivities.TeamActivityRepository>();
+builder.Services.AddScoped<TeamConnect.Api.Modules.Teams.ITeamJoinRequestRepository, TeamConnect.Api.Modules.Teams.TeamJoinRequestRepository>();
 
 // Services
 builder.Services.AddScoped<AuthService>();
@@ -236,6 +238,7 @@ app.UseCors("AllowAngularApp");
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.MapHealthChecks("/api/health");
 app.MapControllers();
 
 if (!app.Environment.IsDevelopment())

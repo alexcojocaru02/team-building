@@ -34,6 +34,8 @@ export class TeamsListComponent implements OnInit {
   deleteMessage = signal('');
   isDeletingTeamId = signal<string | null>(null);
   isCreatingTeam = signal(false);
+  isRequestingJoinId = signal<string | null>(null);
+  pendingRequestTeamIds = signal<Set<string>>(new Set());
 
   ngOnInit() {
     const currentUser = this.authService.currentUser();
@@ -79,9 +81,13 @@ export class TeamsListComponent implements OnInit {
       }),
       switchMap((result) => this.usersService.createTeam(result).pipe(
         tap({
-          next: (team) => {
-            this.teams.update(teams => [team, ...teams]);
-            this.showSnackBar(`Team "${team.name}" created successfully.`);
+          next: (response) => {
+            this.teams.update(teams => [response.team, ...teams]);
+            if (response.newToken) {
+              this.authService.updateToken(response.newToken);
+              this.isAdmin = this.authService.isAdmin();
+            }
+            this.showSnackBar(`Team "${response.team.name}" created successfully.`);
           }
         }),
         catchError((err) => {
@@ -156,6 +162,26 @@ export class TeamsListComponent implements OnInit {
         this.deleteTeam(team);
       }
     });
+  }
+
+  requestJoin(team: TeamDetailDto) {
+    this.isRequestingJoinId.set(team.id);
+    this.usersService.requestJoinTeam(team.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: () => {
+        this.pendingRequestTeamIds.update(ids => new Set([...ids, team.id]));
+        this.isRequestingJoinId.set(null);
+        this.showSnackBar(`Join request sent for "${team.name}".`);
+      },
+      error: (err) => {
+        console.error('Failed to request join:', err);
+        this.showSnackBar(this.getErrorMessage(err, 'Failed to send join request.'), true);
+        this.isRequestingJoinId.set(null);
+      }
+    });
+  }
+
+  hasPendingRequest(teamId: string): boolean {
+    return this.pendingRequestTeamIds().has(teamId);
   }
 
   private deleteTeam(team: TeamDetailDto) {

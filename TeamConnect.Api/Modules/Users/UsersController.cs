@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using TeamConnect.Api.Shared.DTOs;
+using TeamConnect.Api.Shared.Models;
 
 namespace TeamConnect.Api.Modules.Users
 {
@@ -20,6 +21,29 @@ namespace TeamConnect.Api.Modules.Users
         [HttpGet]
         public async Task<IActionResult> GetAll() =>
             Ok(await _usersService.GetAll());
+
+        [HttpGet("teammates")]
+        public async Task<IActionResult> GetTeammates()
+        {
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrWhiteSpace(currentUserId))
+                return Unauthorized();
+
+            return Ok(await _usersService.GetTeammates(currentUserId));
+        }
+
+        [HttpGet("teammates/{teamId}")]
+        public async Task<IActionResult> GetTeammatesForTeam(string teamId)
+        {
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrWhiteSpace(currentUserId))
+                return Unauthorized();
+
+            var result = await _usersService.GetTeammatesForTeam(teamId, currentUserId);
+            if (result == null) return StatusCode(403, "You are not a member of this team");
+
+            return Ok(result);
+        }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(string id)
@@ -56,6 +80,14 @@ namespace TeamConnect.Api.Modules.Users
             {
                 return Forbid();
             }
+        }
+
+        [HttpPost("{id}/promote-admin")]
+        [Authorize(Roles = UserRoles.Admin)]
+        public async Task<IActionResult> PromoteToAdmin(string id)
+        {
+            var success = await _usersService.PromoteToAdmin(id);
+            return success ? NoContent() : NotFound();
         }
 
         [HttpDelete("me")]

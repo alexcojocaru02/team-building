@@ -68,6 +68,68 @@ export async function getAuthToken(request: APIRequestContext, apiBaseUrl: strin
   return body.token as string;
 }
 
+export async function getTeamForUser(
+  request: APIRequestContext,
+  apiBaseUrl: string,
+  user = E2E_USER
+): Promise<string | null> {
+  const token = await getAuthToken(request, apiBaseUrl, user);
+
+  const meRes = await request.get(`${apiBaseUrl}/users/me`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!meRes.ok()) return null;
+  const me = await meRes.json();
+
+  const teamsRes = await request.get(`${apiBaseUrl}/teams`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!teamsRes.ok()) return null;
+  const teams = await teamsRes.json();
+  if (!Array.isArray(teams) || teams.length === 0) return null;
+
+  const myTeam = (teams as any[]).find(
+    (t: any) => t.ownerId === me.id || (Array.isArray(t.memberIds) && t.memberIds.includes(me.id))
+  );
+  return myTeam?.id ?? null;
+}
+
+export async function createTeamViaApi(
+  request: APIRequestContext,
+  apiBaseUrl: string,
+  name: string,
+  token: string
+): Promise<{ teamId: string; newToken?: string }> {
+  const res = await request.post(`${apiBaseUrl}/teams`, {
+    data: { name },
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const body = await res.json();
+  return { teamId: body.team?.id ?? body.id, newToken: body.newToken };
+}
+
+export async function deleteTeamViaApi(
+  request: APIRequestContext,
+  apiBaseUrl: string,
+  teamId: string,
+  token: string
+): Promise<void> {
+  await request.delete(`${apiBaseUrl}/teams/${teamId}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
+export async function requestJoinTeamViaApi(
+  request: APIRequestContext,
+  apiBaseUrl: string,
+  teamId: string,
+  token: string
+): Promise<void> {
+  await request.post(`${apiBaseUrl}/teams/${teamId}/join-requests`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
 export async function deletePostViaApi(
   request: APIRequestContext,
   apiBaseUrl: string,

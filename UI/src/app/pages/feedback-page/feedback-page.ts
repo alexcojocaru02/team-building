@@ -1,10 +1,9 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { RouterModule, ActivatedRoute } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { FeedbackService, CreateFeedbackDto, FeedbackDto } from '../../services/feedback.service';
-import { AuthService } from '../../services/auth.service';
 import { UsersService, UserSummaryDto } from '../../services/users.service';
 
 @Component({
@@ -16,8 +15,10 @@ import { UsersService, UserSummaryDto } from '../../services/users.service';
 })
 export class FeedbackPage implements OnInit {
   private feedbackService = inject(FeedbackService);
-  private authService = inject(AuthService);
   private usersService = inject(UsersService);
+  private route = inject(ActivatedRoute);
+
+  teamId = signal('');
 
   receivedFeedback = signal<FeedbackDto[]>([]);
   isLoadingFeedback = signal(true);
@@ -26,28 +27,25 @@ export class FeedbackPage implements OnInit {
   successMessage = signal('');
 
   activeTab = signal<'send' | 'received'>('send');
-
-  // Form state for sending feedback
   toUserId = signal('');
   feedbackMessage = signal('');
-
   users = signal<UserSummaryDto[]>([]);
 
   ngOnInit(): void {
-    this.loadUsers();
-    this.loadReceivedFeedback();
+    this.route.paramMap.subscribe(params => {
+      const id = params.get('teamId') ?? '';
+      this.teamId.set(id);
+      if (id) {
+        this.loadUsers(id);
+        this.loadReceivedFeedback();
+      }
+    });
   }
 
-  loadUsers(): void {
-    this.usersService.getUsers().subscribe({
-      next: (data) => {
-        const currentUserId = this.authService.currentUser()?.id;
-        this.users.set(data.filter(u => u.id !== currentUserId));
-      },
-      error: (error) => {
-        this.errorMessage.set('Failed to load users');
-        console.error('Error loading users:', error);
-      }
+  loadUsers(teamId: string): void {
+    this.usersService.getTeammatesForTeam(teamId).subscribe({
+      next: (data) => this.users.set(data),
+      error: () => this.errorMessage.set('Failed to load teammates')
     });
   }
 
@@ -58,10 +56,9 @@ export class FeedbackPage implements OnInit {
         this.receivedFeedback.set(data);
         this.isLoadingFeedback.set(false);
       },
-      error: (error) => {
+      error: () => {
         this.errorMessage.set('Failed to load feedback');
         this.isLoadingFeedback.set(false);
-        console.error('Error loading feedback:', error);
       }
     });
   }
@@ -87,13 +84,11 @@ export class FeedbackPage implements OnInit {
         this.toUserId.set('');
         this.feedbackMessage.set('');
         this.isSubmitting.set(false);
-        // Reload received feedback after a delay
         setTimeout(() => this.loadReceivedFeedback(), 1000);
       },
-      error: (error) => {
+      error: () => {
         this.errorMessage.set('Failed to send feedback');
         this.isSubmitting.set(false);
-        console.error('Error sending feedback:', error);
       }
     });
   }

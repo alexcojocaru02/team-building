@@ -1,3 +1,4 @@
+using TeamConnect.Api.Modules.Auth;
 using TeamConnect.Api.Shared.DTOs;
 using TeamConnect.Api.Shared.Models;
 using TeamConnect.Api.Shared.Repositories;
@@ -9,16 +10,25 @@ namespace TeamConnect.Api.Modules.Teams
     {
         private readonly ITeamRepository _teamRepository;
         private readonly IUserRepository _userRepository;
+        private readonly ITeamJoinRequestRepository? _joinRequestRepository;
+        private readonly JwtService? _jwtService;
         private readonly INotificationService? _notificationService;
 
-        public TeamsService(ITeamRepository teamRepository, IUserRepository userRepository, INotificationService? notificationService = null)
+        public TeamsService(
+            ITeamRepository teamRepository,
+            IUserRepository userRepository,
+            ITeamJoinRequestRepository? joinRequestRepository = null,
+            JwtService? jwtService = null,
+            INotificationService? notificationService = null)
         {
             _teamRepository = teamRepository;
             _userRepository = userRepository;
+            _joinRequestRepository = joinRequestRepository;
+            _jwtService = jwtService;
             _notificationService = notificationService;
         }
 
-        public async Task<TeamDetailDto> Create(CreateTeamDto dto, string ownerId)
+        public async Task<CreateTeamResponseDto> Create(CreateTeamDto dto, string ownerId)
         {
             var team = new Team
             {
@@ -33,7 +43,22 @@ namespace TeamConnect.Api.Modules.Teams
             await _teamRepository.InsertAsync(team);
             await _userRepository.AddToTeamAsync(ownerId, team.Id);
 
-            return MapToDetailDto(team);
+            // Upgrade user to TeamOwner if they were a plain User
+            var owner = await _userRepository.FindByIdAsync(ownerId);
+            string? newToken = null;
+            if (owner != null && owner.Role == UserRoles.User)
+            {
+                await _userRepository.UpdateRoleAsync(ownerId, UserRoles.TeamOwner);
+                owner.Role = UserRoles.TeamOwner;
+                if (_jwtService != null)
+                    newToken = _jwtService.Generate(owner);
+            }
+
+            return new CreateTeamResponseDto
+            {
+                Team = MapToDetailDto(team),
+                NewToken = newToken
+            };
         }
 
         public async Task<AddUserResult> AddUser(string teamId, string userId, string requesterId)
@@ -113,7 +138,107 @@ namespace TeamConnect.Api.Modules.Teams
             if (!deleted) return false;
 
             await _userRepository.RemoveTeamFromAllUsersAsync(id);
+            if (_joinRequestRepository != null)
+                await _joinRequestRepository.DeleteByTeamIdAsync(id);
             return true;
+        }
+
+        // Join request methods
+
+        public async Task<RequestJoinResult> RequestJoin(string teamId, string userId)
+        {
+            if (_joinRequestRepository == null) throw new InvalidOperationException("Join request repository not configured.");
+            var team = await _teamRepository.FindByIdAsync(teamId);
+            if (team == null) return RequestJoinResult.TeamNotFound;
+
+            if (team.MemberIds.Contains(userId))
+                return RequestJoinResult.AlreadyMember;
+
+            var existing = await _joinRequestRepository.FindPendingByUserAndTeamAsync(userId, teamId);
+            if (existing != null)
+                return RequestJoinResult.AlreadyRequested;
+
+            await _joinRequestRepository.InsertAsync(new TeamJoinRequest
+            {
+                TeamId = teamId,
+                UserId = userId,
+                Status = JoinRequestStatus.Pending,
+                CreatedAt = DateTime.UtcNow
+            });
+
+            return RequestJoinResult.Ok;
+        }
+
+        public async Task<List<TeamJoinRequestDto>> GetPendingRequestsForTeam(string teamId)
+        {
+            if (_joinRequestRepository == null) return new List<TeamJoinRequestDto>();
+            var requests = await _joinRequestRepository.GetPendingForTeamAsync(teamId);
+            return await MapRequestDtos(requests);
+        }
+
+        public async Task<List<TeamJoinRequestDto>> GetAllPendingRequests()
+        {
+            if (_joinRequestRepository == null) return new List<TeamJoinRequestDto>();
+            var requests = await _joinRequestRepository.GetAllPendingAsync();
+            return await MapRequestDtos(requests);
+        }
+
+        public async Task<ApproveRequestResult> ApproveRequest(string requestId, string approverId, string approverRole)
+        {
+            if (_joinRequestRepository == null) return ApproveRequestResult.NotFound;
+            var request = await _joinRequestRepository.FindByIdAsync(requestId);
+            if (request == null) return ApproveRequestResult.NotFound;
+
+            var team = await _teamRepository.FindByIdAsync(request.TeamId);
+            if (team == null) return ApproveRequestResult.NotFound;
+
+            var isAdmin = approverRole == UserRoles.Admin;
+            var isTeamOwner = team.OwnerId == approverId;
+            if (!isAdmin && !isTeamOwner) return ApproveRequestResult.Forbidden;
+
+            await _joinRequestRepository.UpdateStatusAsync(requestId, JoinRequestStatus.Approved);
+            await AddUser(request.TeamId, request.UserId, approverId);
+
+            return ApproveRequestResult.Ok;
+        }
+
+        public async Task<ApproveRequestResult> RejectRequest(string requestId, string rejecterId, string rejecterRole)
+        {
+            if (_joinRequestRepository == null) return ApproveRequestResult.NotFound;
+            var request = await _joinRequestRepository.FindByIdAsync(requestId);
+            if (request == null) return ApproveRequestResult.NotFound;
+
+            var team = await _teamRepository.FindByIdAsync(request.TeamId);
+            if (team == null) return ApproveRequestResult.NotFound;
+
+            var isAdmin = rejecterRole == UserRoles.Admin;
+            var isTeamOwner = team.OwnerId == rejecterId;
+            if (!isAdmin && !isTeamOwner) return ApproveRequestResult.Forbidden;
+
+            await _joinRequestRepository.UpdateStatusAsync(requestId, JoinRequestStatus.Rejected);
+            return ApproveRequestResult.Ok;
+        }
+
+        private async Task<List<TeamJoinRequestDto>> MapRequestDtos(List<TeamJoinRequest> requests)
+        {
+            var result = new List<TeamJoinRequestDto>();
+            foreach (var r in requests)
+            {
+                var team = await _teamRepository.FindByIdAsync(r.TeamId);
+                var user = await _userRepository.FindByIdAsync(r.UserId);
+                result.Add(new TeamJoinRequestDto
+                {
+                    Id = r.Id,
+                    TeamId = r.TeamId,
+                    TeamName = team?.Name ?? r.TeamId,
+                    UserId = r.UserId,
+                    UserFullName = user?.FullName ?? "",
+                    UserEmail = user?.Email ?? "",
+                    Status = r.Status,
+                    CreatedAt = r.CreatedAt
+                });
+            }
+            return result;
         }
 
         public static TeamDetailDto MapToDetailDto(Team team) => new()
@@ -130,4 +255,6 @@ namespace TeamConnect.Api.Modules.Teams
 
     public enum AddUserResult { Ok, TeamNotFound, UserNotFound }
     public enum RemoveUserResult { Ok, TeamNotFound }
+    public enum RequestJoinResult { Ok, TeamNotFound, AlreadyMember, AlreadyRequested }
+    public enum ApproveRequestResult { Ok, NotFound, Forbidden }
 }

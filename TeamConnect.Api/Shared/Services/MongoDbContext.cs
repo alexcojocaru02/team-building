@@ -40,6 +40,7 @@ namespace TeamConnect.Api.Shared.Services
         public IMongoCollection<Feedback> Feedbacks => _database.GetCollection<Feedback>("Feedbacks");
         public IMongoCollection<TeamActivity> TeamActivities => _database.GetCollection<TeamActivity>("TeamActivities");
         public IMongoCollection<SchemaMigrationRecord> SchemaMigrations => _database.GetCollection<SchemaMigrationRecord>("SchemaMigrations");
+        public IMongoCollection<TeamConnect.Api.Shared.Models.TeamJoinRequest> TeamJoinRequests => _database.GetCollection<TeamConnect.Api.Shared.Models.TeamJoinRequest>("TeamJoinRequests");
 
     }
 }

@@ -80,6 +80,12 @@ export class AuthService {
     return this.tokenSignal();
   }
 
+  updateToken(token: string): void {
+    this.tokenSignal.set(token);
+    localStorage.setItem('token', token);
+    this.loadUserFromToken(token);
+  }
+
   private handleAuthSuccess(response: AuthResponse): void {
     this.tokenSignal.set(response.token);
     localStorage.setItem('token', response.token);

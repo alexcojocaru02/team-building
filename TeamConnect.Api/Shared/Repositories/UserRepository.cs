@@ -92,5 +92,11 @@ namespace TeamConnect.Api.Shared.Repositories
 
         public Task DeleteAsync(string id) =>
             _context.Users.DeleteOneAsync(u => u.Id == id);
+
+        public Task UpdateRoleAsync(string id, string role)
+        {
+            var update = Builders<User>.Update.Set(u => u.Role, role);
+            return _context.Users.UpdateOneAsync(u => u.Id == id, update);
+        }
     }
 }

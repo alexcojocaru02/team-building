@@ -16,14 +16,13 @@ test.describe('Home page', () => {
   });
 
   test('Feed card navigates to /feed', async ({ page }) => {
-    // Target the card link specifically (has routerlink attribute), not the sidebar link
-    await page.locator('a[routerlink="/feed"]').click();
+    await page.locator('a:has(h2:text("Feed"))').first().click();
     await expect(page).toHaveURL(/\/feed/, { timeout: 10_000 });
   });
 
-  test('Feedback card navigates to /feedback', async ({ page }) => {
-    await page.locator('a[routerlink="/feedback"]').click();
-    await expect(page).toHaveURL(/\/feedback/, { timeout: 10_000 });
+  test('Feedback card navigates to /teams', async ({ page }) => {
+    await page.locator('a:has(h2:text("Feedback"))').first().click();
+    await expect(page).toHaveURL(/\/teams/, { timeout: 10_000 });
   });
 
   test('logout button navigates to /login', async ({ page }) => {

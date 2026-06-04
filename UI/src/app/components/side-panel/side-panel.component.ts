@@ -1,57 +1,38 @@
-import { Component, computed, inject, OnInit, AfterViewInit, PLATFORM_ID } from '@angular/core';
+import { Component, computed, inject, OnInit, AfterViewInit, PLATFORM_ID, signal } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-import { isPlatformBrowser, DOCUMENT } from '@angular/common';
+import { CommonModule, isPlatformBrowser, DOCUMENT } from '@angular/common';
 import { AuthService } from '../../services/auth.service';
-
-type NavItem = {
-  icon: string;
-  label: string;
-  route: string;
-};
+import { UsersService } from '../../services/users.service';
+import { TeamDetailDto } from '../../models/auth.models';
 
 @Component({
   standalone: true,
   selector: 'app-side-panel',
-  imports: [RouterModule, MatIconModule, MatButtonModule],
+  imports: [RouterModule, MatIconModule, MatButtonModule, CommonModule],
   templateUrl: './side-panel.component.html',
   styleUrls: ['./side-panel.component.scss']
 })
 export class SidePanelComponent implements OnInit, AfterViewInit {
   private authService = inject(AuthService);
+  private usersService = inject(UsersService);
   private platformId = inject(PLATFORM_ID);
   private document = inject(DOCUMENT) as Document;
   private isBrowser = isPlatformBrowser(this.platformId);
 
   collapsed = false;
+  isAdmin = this.authService.isAdmin;
 
-  private baseItems: NavItem[] = [
-    { icon: 'home', label: 'Home', route: '/home' },
-    { icon: 'dynamic_feed', label: 'Feed', route: '/feed' },
-    { icon: 'forum', label: 'Feedback', route: '/feedback' },
-    { icon: 'event_note', label: 'Activities', route: '/team-activities' },
-    { icon: 'insights', label: 'Dashboard', route: '/dashboard' },
-    { icon: 'groups', label: 'Teams', route: '/teams' }
-  ];
-
-  navItems = computed(() => {
-    const items: NavItem[] = [...this.baseItems];
-
-    if (this.authService.isAdmin()) {
-      items.push({ icon: 'admin_panel_settings', label: 'Admin', route: '/admin' });
-    }
-
-    return items;
-  });
+  userTeams = signal<TeamDetailDto[]>([]);
+  expandedTeamId = signal<string | null>(null);
 
   ngOnInit(): void {
     if (!this.isBrowser) return;
     try {
       this.collapsed = localStorage.getItem('sideCollapsed') === 'true';
-    } catch (e) {
-      // Ignore localStorage access errors (private browsing mode, disabled storage, or quota exceeded).
-    }
+    } catch (e) {}
+    this.loadTeams();
   }
 
   ngAfterViewInit(): void {
@@ -59,12 +40,37 @@ export class SidePanelComponent implements OnInit, AfterViewInit {
     this.updateCssVar();
   }
 
+  private loadTeams(): void {
+    const currentUserId = this.authService.currentUser()?.id;
+    if (!currentUserId) return;
+    this.usersService.getAllTeams().subscribe({
+      next: (teams) => {
+        const myTeams = teams.filter(t => t.memberIds.includes(currentUserId));
+        this.userTeams.set(myTeams);
+        if (myTeams.length > 0) {
+          this.expandedTeamId.set(myTeams[0].id);
+        }
+      }
+    });
+  }
+
+  toggleTeam(teamId: string): void {
+    this.expandedTeamId.set(this.expandedTeamId() === teamId ? null : teamId);
+  }
+
+  canSeeDashboard(team: TeamDetailDto): boolean {
+    const userId = this.authService.currentUser()?.id;
+    return this.isAdmin() || team.ownerId === userId;
+  }
+
+  teamLabel(index: number): string {
+    return `T${index + 1}`;
+  }
+
   toggle(): void {
     this.collapsed = !this.collapsed;
     if (this.isBrowser) {
-      try { localStorage.setItem('sideCollapsed', String(this.collapsed)); } catch (e) {
-        // Ignore write errors to localStorage (private browsing, disabled storage, or quota exceeded).
-      }
+      try { localStorage.setItem('sideCollapsed', String(this.collapsed)); } catch (e) {}
       this.updateCssVar();
     }
   }
