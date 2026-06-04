@@ -3,19 +3,24 @@ import { Component, inject, signal, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { FeedService, FeedPostDto, CreateFeedPostDto } from '../../services/feed.service';
 import { AuthService } from '../../services/auth.service';
+import { ConfirmDialogComponent } from '../teams-page/confirm-dialog.component';
 
 @Component({
   selector: 'app-feed-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, MatButtonModule],
+  imports: [CommonModule, FormsModule, RouterModule, MatButtonModule, MatDialogModule, MatSnackBarModule],
   templateUrl: './feed-page.html',
   styleUrl: './feed-page.scss',
 })
 export class FeedPage implements OnInit {
   private feedService = inject(FeedService);
   private authService = inject(AuthService);
+  private dialog = inject(MatDialog);
+  private snackBar = inject(MatSnackBar);
   private avatarPalette = [
     '#0ea5e9',
     '#2563eb',
@@ -144,6 +149,43 @@ export class FeedPage implements OnInit {
 
   setCommentDraft(postId: string, value: string): void {
     this.commentDrafts[postId] = value;
+  }
+
+  isPostAuthorOrAdmin(post: FeedPostDto): boolean {
+    const user = this.authService.currentUser();
+    return !!user && (user.id === post.authorId || this.authService.isAdmin());
+  }
+
+  requestDeletePost(post: FeedPostDto): void {
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '420px',
+      data: {
+        title: 'Delete post',
+        message: 'Are you sure you want to delete this post? This action cannot be undone.',
+        confirmText: 'Delete',
+        cancelText: 'Cancel',
+        confirmColor: 'warn',
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((confirmed: boolean) => {
+      if (!confirmed) return;
+
+      this.feedService.deletePost(post.id).subscribe({
+        next: () => {
+          this.posts.update(posts => posts.filter(p => p.id !== post.id));
+          this.snackBar.open('Post deleted.', 'Dismiss', {
+            duration: 2500,
+            horizontalPosition: 'end',
+            verticalPosition: 'top',
+          });
+        },
+        error: (error) => {
+          this.errorMessage.set('Failed to delete post');
+          console.error('Error deleting post:', error);
+        },
+      });
+    });
   }
 
   isCommentThreadVisible(postId: string): boolean {

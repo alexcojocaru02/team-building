@@ -104,9 +104,24 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddSingleton<MongoDbContext>();
 builder.Services.AddScoped<IEmailSender, SmtpEmailSender>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
+builder.Services.AddScoped<ProfileAndTeamMigrationRunner>();
+
+// Repositories
+builder.Services.AddScoped<TeamConnect.Api.Shared.Repositories.IUserRepository, TeamConnect.Api.Shared.Repositories.UserRepository>();
+builder.Services.AddScoped<TeamConnect.Api.Modules.Teams.ITeamRepository, TeamConnect.Api.Modules.Teams.TeamRepository>();
+builder.Services.AddScoped<TeamConnect.Api.Modules.Feed.IFeedRepository, TeamConnect.Api.Modules.Feed.FeedRepository>();
+builder.Services.AddScoped<TeamConnect.Api.Modules.Feedback.IFeedbackRepository, TeamConnect.Api.Modules.Feedback.FeedbackRepository>();
+builder.Services.AddScoped<TeamConnect.Api.Modules.TeamActivities.ITeamActivityRepository, TeamConnect.Api.Modules.TeamActivities.TeamActivityRepository>();
+
+// Services
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<JwtService>();
-builder.Services.AddScoped<ProfileAndTeamMigrationRunner>();
+builder.Services.AddScoped<TeamConnect.Api.Modules.Teams.TeamsService>();
+builder.Services.AddScoped<TeamConnect.Api.Modules.Feed.FeedService>();
+builder.Services.AddScoped<TeamConnect.Api.Modules.Users.UsersService>();
+builder.Services.AddScoped<TeamConnect.Api.Modules.Feedback.FeedbackService>();
+builder.Services.AddScoped<TeamConnect.Api.Modules.Dashboard.DashboardService>();
+builder.Services.AddScoped<TeamConnect.Api.Modules.TeamActivities.TeamActivitiesService>();
 
 // Validate critical JWT configuration at startup and fail fast when missing.
 // This prevents the app from starting with an empty signing key which would

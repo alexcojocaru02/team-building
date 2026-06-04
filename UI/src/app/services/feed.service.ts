@@ -69,4 +69,8 @@ export class FeedService {
   getComments(postId: string): Observable<FeedPostCommentDto[]> {
     return this.http.get<FeedPostCommentDto[]>(`${this.apiUrl}/feed/${postId}/comments`);
   }
+
+  deletePost(postId: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/feed/${postId}`);
+  }
 }

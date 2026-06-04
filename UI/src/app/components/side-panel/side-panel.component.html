@@ -1,6 +1,14 @@
 <div
-  class="sidenav tw:fixed tw:inset-y-0 tw:left-0 tw:flex tw:flex-col tw:bg-[#0b1220] tw:text-white tw:transition-all tw:duration-150"
+  class="sidenav tw:fixed tw:inset-y-0 tw:left-0 tw:flex tw:flex-col tw:bg-[var(--tc-surface-dark)] tw:text-white tw:transition-all tw:duration-150"
   [style.width]="collapsed ? 'var(--sidenav-collapsed)' : 'var(--sidenav-expanded)'">
+
+  <div class="tw:flex tw:items-center tw:justify-center tw:px-3 tw:pt-4 tw:pb-2 tw:overflow-hidden">
+    @if (collapsed) {
+      <img src="assets/logos/teamconnect-rotund-64-transparent.svg" alt="TeamConnect" class="tw:h-9 tw:w-9" />
+    } @else {
+      <img src="assets/logos/teamconnect-wordmark-compact-dark.svg" alt="TeamConnect" class="tw:h-10" />
+    }
+  </div>
 
   <button
     mat-icon-button

@@ -61,6 +61,12 @@ export class AuthService {
     this.clearAuthState(true);
   }
 
+  deleteAccount(): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/users/me`).pipe(
+      tap(() => this.clearAuthState(true))
+    );
+  }
+
   private clearAuthState(navigate: boolean = false): void {
     this.tokenSignal.set(null);
     this.currentUserSignal.set(null);

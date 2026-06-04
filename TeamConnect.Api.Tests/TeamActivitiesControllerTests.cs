@@ -7,8 +7,10 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
 using TeamConnect.Api.Modules.TeamActivities;
+using TeamConnect.Api.Modules.Teams;
 using TeamConnect.Api.Shared.DTOs;
 using TeamConnect.Api.Shared.Models;
+using TeamConnect.Api.Shared.Repositories;
 using TeamConnect.Api.Tests.Fixtures;
 using Xunit;
 
@@ -35,27 +37,34 @@ public class TeamActivitiesControllerTests : IClassFixture<MongoFixture>
         };
     }
 
+    private TeamActivitiesController BuildController() =>
+        new TeamActivitiesController(new TeamActivitiesService(
+            new TeamActivityRepository(_fixture.Context),
+            new UserRepository(_fixture.Context)));
+
+    private TeamsService BuildTeamsService() =>
+        new TeamsService(
+            new TeamRepository(_fixture.Context),
+            new UserRepository(_fixture.Context));
+
     [Fact]
     public async Task GetAll_NonMember_IsForbid()
     {
         var db = _fixture.Context;
 
-        var users = db.Users;
-        var teams = db.Teams;
-
-        await users.DeleteManyAsync(FilterDefinition<User>.Empty);
-        await teams.DeleteManyAsync(FilterDefinition<Team>.Empty);
+        await db.Users.DeleteManyAsync(FilterDefinition<User>.Empty);
+        await db.Teams.DeleteManyAsync(FilterDefinition<Team>.Empty);
 
         var owner = new User { Id = MongoDB.Bson.ObjectId.GenerateNewId().ToString(), Email = "owner@example.com" };
-        await users.InsertOneAsync(owner);
+        await db.Users.InsertOneAsync(owner);
 
         var team = new Team { Id = MongoDB.Bson.ObjectId.GenerateNewId().ToString(), OwnerId = owner.Id, MemberIds = new List<string>() };
-        await teams.InsertOneAsync(team);
+        await db.Teams.InsertOneAsync(team);
 
-        var controller = new TeamActivitiesController(db);
+        var controller = BuildController();
         SetUser(controller, "random-user");
 
-        var result = await controller.GetAll(team.Id);
+        var result = await controller.GetAll(team.Id, BuildTeamsService());
 
         Assert.IsType<ForbidResult>(result);
     }
@@ -64,30 +73,28 @@ public class TeamActivitiesControllerTests : IClassFixture<MongoFixture>
     public async Task Create_PollWithLessThanTwoOptions_ReturnsBadRequest()
     {
         var db = _fixture.Context;
-        var users = db.Users;
-        var teams = db.Teams;
 
-        await users.DeleteManyAsync(FilterDefinition<User>.Empty);
-        await teams.DeleteManyAsync(FilterDefinition<Team>.Empty);
+        await db.Users.DeleteManyAsync(FilterDefinition<User>.Empty);
+        await db.Teams.DeleteManyAsync(FilterDefinition<Team>.Empty);
 
         var owner = new User { Id = MongoDB.Bson.ObjectId.GenerateNewId().ToString(), Email = "owner2@example.com" };
-        await users.InsertOneAsync(owner);
+        await db.Users.InsertOneAsync(owner);
 
         var team = new Team { Id = MongoDB.Bson.ObjectId.GenerateNewId().ToString(), OwnerId = owner.Id, MemberIds = new List<string>() };
-        await teams.InsertOneAsync(team);
+        await db.Teams.InsertOneAsync(team);
 
-        var controller = new TeamActivitiesController(db);
+        var controller = BuildController();
         SetUser(controller, owner.Id);
 
         var dto = new CreateTeamActivityDto
         {
-            ActivityType = Shared.Models.ActivityType.Poll,
+            ActivityType = ActivityType.Poll,
             Title = "Test Poll",
             Description = "desc",
             Options = new List<string> { "only one" }
         };
 
-        var result = await controller.Create(team.Id, dto);
+        var result = await controller.Create(team.Id, dto, BuildTeamsService());
 
         Assert.IsType<BadRequestObjectResult>(result);
         var bad = result as BadRequestObjectResult;
@@ -99,30 +106,28 @@ public class TeamActivitiesControllerTests : IClassFixture<MongoFixture>
     public async Task Create_DueAtInPast_ReturnsBadRequest()
     {
         var db = _fixture.Context;
-        var users = db.Users;
-        var teams = db.Teams;
 
-        await users.DeleteManyAsync(FilterDefinition<User>.Empty);
-        await teams.DeleteManyAsync(FilterDefinition<Team>.Empty);
+        await db.Users.DeleteManyAsync(FilterDefinition<User>.Empty);
+        await db.Teams.DeleteManyAsync(FilterDefinition<Team>.Empty);
 
         var owner = new User { Id = MongoDB.Bson.ObjectId.GenerateNewId().ToString(), Email = "owner4@example.com" };
-        await users.InsertOneAsync(owner);
+        await db.Users.InsertOneAsync(owner);
 
         var team = new Team { Id = MongoDB.Bson.ObjectId.GenerateNewId().ToString(), OwnerId = owner.Id, MemberIds = new List<string>() };
-        await teams.InsertOneAsync(team);
+        await db.Teams.InsertOneAsync(team);
 
-        var controller = new TeamActivitiesController(db);
+        var controller = BuildController();
         SetUser(controller, owner.Id);
 
         var dto = new CreateTeamActivityDto
         {
-            ActivityType = Shared.Models.ActivityType.Prompt,
+            ActivityType = ActivityType.Prompt,
             Title = "Past Due Prompt",
             Description = "desc",
             DueAt = DateTime.UtcNow.AddMinutes(-1)
         };
 
-        var result = await controller.Create(team.Id, dto);
+        var result = await controller.Create(team.Id, dto, BuildTeamsService());
 
         Assert.IsType<BadRequestObjectResult>(result);
         var bad = result as BadRequestObjectResult;
@@ -134,30 +139,28 @@ public class TeamActivitiesControllerTests : IClassFixture<MongoFixture>
     public async Task Create_DueAtWithoutTimezone_ReturnsBadRequest()
     {
         var db = _fixture.Context;
-        var users = db.Users;
-        var teams = db.Teams;
 
-        await users.DeleteManyAsync(FilterDefinition<User>.Empty);
-        await teams.DeleteManyAsync(FilterDefinition<Team>.Empty);
+        await db.Users.DeleteManyAsync(FilterDefinition<User>.Empty);
+        await db.Teams.DeleteManyAsync(FilterDefinition<Team>.Empty);
 
         var owner = new User { Id = MongoDB.Bson.ObjectId.GenerateNewId().ToString(), Email = "owner5@example.com" };
-        await users.InsertOneAsync(owner);
+        await db.Users.InsertOneAsync(owner);
 
         var team = new Team { Id = MongoDB.Bson.ObjectId.GenerateNewId().ToString(), OwnerId = owner.Id, MemberIds = new List<string>() };
-        await teams.InsertOneAsync(team);
+        await db.Teams.InsertOneAsync(team);
 
-        var controller = new TeamActivitiesController(db);
+        var controller = BuildController();
         SetUser(controller, owner.Id);
 
         var dto = new CreateTeamActivityDto
         {
-            ActivityType = Shared.Models.ActivityType.Prompt,
+            ActivityType = ActivityType.Prompt,
             Title = "Unspecified Due Prompt",
             Description = "desc",
             DueAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(1), DateTimeKind.Unspecified)
         };
 
-        var result = await controller.Create(team.Id, dto);
+        var result = await controller.Create(team.Id, dto, BuildTeamsService());
 
         Assert.IsType<BadRequestObjectResult>(result);
         var bad = result as BadRequestObjectResult;
@@ -169,26 +172,23 @@ public class TeamActivitiesControllerTests : IClassFixture<MongoFixture>
     public async Task Respond_SubmittingTwice_ReplacesPreviousResponse()
     {
         var db = _fixture.Context;
-        var users = db.Users;
-        var teams = db.Teams;
-        var activities = db.TeamActivities;
 
-        await users.DeleteManyAsync(FilterDefinition<User>.Empty);
-        await teams.DeleteManyAsync(FilterDefinition<Team>.Empty);
-        await activities.DeleteManyAsync(FilterDefinition<TeamActivity>.Empty);
+        await db.Users.DeleteManyAsync(FilterDefinition<User>.Empty);
+        await db.Teams.DeleteManyAsync(FilterDefinition<Team>.Empty);
+        await db.TeamActivities.DeleteManyAsync(FilterDefinition<TeamActivity>.Empty);
 
         var owner = new User { Id = MongoDB.Bson.ObjectId.GenerateNewId().ToString(), Email = "owner3@example.com" };
         var participant = new User { Id = MongoDB.Bson.ObjectId.GenerateNewId().ToString(), Email = "user3@example.com" };
-        await users.InsertManyAsync(new[] { owner, participant });
+        await db.Users.InsertManyAsync(new[] { owner, participant });
 
         var team = new Team { Id = MongoDB.Bson.ObjectId.GenerateNewId().ToString(), OwnerId = owner.Id, MemberIds = new List<string> { participant.Id } };
-        await teams.InsertOneAsync(team);
+        await db.Teams.InsertOneAsync(team);
 
         var activity = new TeamActivity
         {
             TeamId = team.Id,
             CreatedByUserId = owner.Id,
-            ActivityType = Shared.Models.ActivityType.Poll,
+            ActivityType = ActivityType.Poll,
             Title = "Poll",
             Description = "Choose",
             Options = new List<string> { "A", "B" },
@@ -196,23 +196,22 @@ public class TeamActivitiesControllerTests : IClassFixture<MongoFixture>
             Status = "Open",
             CreatedAt = DateTime.UtcNow
         };
-        await activities.InsertOneAsync(activity);
+        await db.TeamActivities.InsertOneAsync(activity);
 
-        var controller = new TeamActivitiesController(db);
+        var controller = BuildController();
         SetUser(controller, participant.Id);
 
-        // First response: select option 0
+        var teamsService = BuildTeamsService();
+
         var resp1 = new SubmitTeamActivityResponseDto { SelectedOptionIndex = 0 };
-        var r1 = await controller.Respond(team.Id, activity.Id, resp1);
+        var r1 = await controller.Respond(team.Id, activity.Id, resp1, teamsService);
         Assert.IsType<OkObjectResult>(r1);
 
-        // Second response: select option 1
         var resp2 = new SubmitTeamActivityResponseDto { SelectedOptionIndex = 1 };
-        var r2 = await controller.Respond(team.Id, activity.Id, resp2);
+        var r2 = await controller.Respond(team.Id, activity.Id, resp2, teamsService);
         Assert.IsType<OkObjectResult>(r2);
 
-        // Reload activity from DB
-        var updated = await activities.Find(a => a.Id == activity.Id).FirstOrDefaultAsync();
+        var updated = await db.TeamActivities.Find(a => a.Id == activity.Id).FirstOrDefaultAsync();
         Assert.NotNull(updated);
         Assert.Single(updated.Participations);
         Assert.Equal(1, updated.Participations.First().SelectedOptionIndex);
