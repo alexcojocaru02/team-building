@@ -21,9 +21,9 @@ test.describe('Home page', () => {
     await expect(page).toHaveURL(/\/feed/, { timeout: 10_000 });
   });
 
-  test('Feedback card navigates to /feedback', async ({ page }) => {
-    await page.locator('a[routerlink="/feedback"]').click();
-    await expect(page).toHaveURL(/\/feedback/, { timeout: 10_000 });
+  test('Feedback card navigates to /teams', async ({ page }) => {
+    await page.locator('a:has(h2:text("Feedback"))').first().click();
+    await expect(page).toHaveURL(/\/teams/, { timeout: 10_000 });
   });
 
   test('logout button navigates to /login', async ({ page }) => {

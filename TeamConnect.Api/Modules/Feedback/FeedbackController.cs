@@ -33,6 +33,9 @@ namespace TeamConnect.Api.Modules.Feedback
             if (fromUserId == dto.ToUserId)
                 return BadRequest("You cannot send feedback to yourself");
 
+            if (!await _feedbackService.AreTeammatesAsync(fromUserId, dto.ToUserId))
+                return StatusCode(403, "You can only send feedback to members of your team");
+
             var result = await _feedbackService.Send(dto, fromUserId);
             return Ok(result);
         }

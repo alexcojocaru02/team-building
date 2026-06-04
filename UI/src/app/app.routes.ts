@@ -16,10 +16,10 @@ export const routes: Routes = [
     children: [
       { path: '', redirectTo: 'home', pathMatch: 'full' },
       { path: 'home', component: HomePage, canActivate: [authGuard] },
-      { path: 'feedback', component: FeedbackPage, canActivate: [authGuard] },
       { path: 'feed', component: FeedPage, canActivate: [authGuard] },
-      { path: 'team-activities', loadComponent: () => import('./pages/team-activities-page/team-activities-page').then(m => m.TeamActivitiesPage), canActivate: [authGuard] },
-      { path: 'dashboard', component: CohesionDashboard, canActivate: [authGuard] },
+      { path: 'teams/:teamId/feedback', component: FeedbackPage, canActivate: [authGuard] },
+      { path: 'teams/:teamId/activities', loadComponent: () => import('./pages/team-activities-page/team-activities-page').then(m => m.TeamActivitiesPage), canActivate: [authGuard] },
+      { path: 'teams/:teamId/dashboard', component: CohesionDashboard, canActivate: [authGuard] },
       // Profile routes
       { path: 'profile', loadComponent: () => import('./pages/profile-page/profile-view.component').then(m => m.ProfileViewComponent), canActivate: [authGuard] },
       { path: 'profile/edit', loadComponent: () => import('./pages/profile-page/profile-edit.component').then(m => m.ProfileEditComponent), canActivate: [authGuard] },

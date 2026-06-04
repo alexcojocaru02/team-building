@@ -71,4 +71,8 @@ export class UsersService {
   getTeammates(): Observable<UserSummaryDto[]> {
     return this.http.get<UserSummaryDto[]>(`${this.apiUrl}/users/teammates`);
   }
+
+  getTeammatesForTeam(teamId: string): Observable<UserSummaryDto[]> {
+    return this.http.get<UserSummaryDto[]>(`${this.apiUrl}/users/teammates/${teamId}`);
+  }
 }

@@ -68,6 +68,32 @@ export async function getAuthToken(request: APIRequestContext, apiBaseUrl: strin
   return body.token as string;
 }
 
+export async function getTeamForUser(
+  request: APIRequestContext,
+  apiBaseUrl: string,
+  user = E2E_USER
+): Promise<string | null> {
+  const token = await getAuthToken(request, apiBaseUrl, user);
+
+  const meRes = await request.get(`${apiBaseUrl}/users/me`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!meRes.ok()) return null;
+  const me = await meRes.json();
+
+  const teamsRes = await request.get(`${apiBaseUrl}/teams`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!teamsRes.ok()) return null;
+  const teams = await teamsRes.json();
+  if (!Array.isArray(teams) || teams.length === 0) return null;
+
+  const myTeam = (teams as any[]).find(
+    (t: any) => t.ownerId === me.id || (Array.isArray(t.memberIds) && t.memberIds.includes(me.id))
+  );
+  return myTeam?.id ?? null;
+}
+
 export async function deletePostViaApi(
   request: APIRequestContext,
   apiBaseUrl: string,

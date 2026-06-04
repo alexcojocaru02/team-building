@@ -18,15 +18,10 @@
           {{ visibleActivities().length }} activities
         </span>
 
-        @if (availableTeams().length > 0) {
-          <mat-form-field appearance="outline" class="tw:min-w-56 tw:w-full sm:tw:w-64">
-            <mat-label>Team</mat-label>
-            <mat-select [value]="selectedTeamId()" (selectionChange)="onTeamChange($event.value)">
-              @for (team of availableTeams(); track team.id) {
-                <mat-option [value]="team.id">{{ team.name }}</mat-option>
-              }
-            </mat-select>
-          </mat-form-field>
+        @if (selectedTeam()) {
+          <span class="tw:hidden sm:tw:inline-flex tw:rounded-full tw:bg-white/80 tw:px-3 tw:py-1 tw:text-xs tw:font-medium tw:text-slate-600 tw:ring-1 tw:ring-slate-200">
+            {{ selectedTeam()?.name }}
+          </span>
         }
       </div>
     </div>

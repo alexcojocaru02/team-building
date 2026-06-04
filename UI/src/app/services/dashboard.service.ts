@@ -21,7 +21,7 @@ export class DashboardService {
   private http = inject(HttpClient);
   private apiUrl = environment.apiUrl;
 
-  getCohesionData(): Observable<CohesionDashboardDto> {
-    return this.http.get<CohesionDashboardDto>(`${this.apiUrl}/dashboard/cohesion`);
+  getCohesionData(teamId: string): Observable<CohesionDashboardDto> {
+    return this.http.get<CohesionDashboardDto>(`${this.apiUrl}/dashboard/cohesion/${teamId}`);
   }
 }

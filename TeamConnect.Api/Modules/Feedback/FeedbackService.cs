@@ -18,6 +18,14 @@ namespace TeamConnect.Api.Modules.Feedback
             _notificationService = notificationService;
         }
 
+        public async Task<bool> AreTeammatesAsync(string userId1, string userId2)
+        {
+            var user1 = await _userRepository.FindByIdAsync(userId1);
+            var user2 = await _userRepository.FindByIdAsync(userId2);
+            if (user1 == null || user2 == null) return false;
+            return user1.TeamIds.Intersect(user2.TeamIds).Any();
+        }
+
         public async Task<FeedbackResponseDto?> Send(CreateFeedbackDto dto, string fromUserId)
         {
             var feedback = new FeedbackModel

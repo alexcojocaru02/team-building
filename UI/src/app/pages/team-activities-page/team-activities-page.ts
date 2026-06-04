@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { RouterModule, ActivatedRoute } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatChipsModule } from '@angular/material/chips';
@@ -45,6 +45,7 @@ type ActivityFilter = 'open' | 'closed' | 'all';
 export class TeamActivitiesPage implements OnInit {
   private destroyRef = inject(DestroyRef);
   private authService = inject(AuthService);
+  private route = inject(ActivatedRoute);
   private dialog = inject(MatDialog);
   private snackBar = inject(MatSnackBar);
   private usersService = inject(UsersService);
@@ -121,7 +122,16 @@ export class TeamActivitiesPage implements OnInit {
   });
 
   ngOnInit(): void {
-    this.loadInitialData();
+    this.route.paramMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(params => {
+      const teamId = params.get('teamId') ?? '';
+      if (teamId) {
+        this.selectedTeamId.set(teamId);
+        this.usersService.getTeam(teamId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+          next: (team) => this.teams.set([team]),
+        });
+        this.loadTeamData(teamId);
+      }
+    });
   }
 
   openCreateActivityDialog(): void {
