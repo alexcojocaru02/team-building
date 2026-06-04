@@ -67,4 +67,8 @@ export class UsersService {
   deleteTeam(id: string): Observable<{ message: string }> {
     return this.http.delete<{ message: string }>(`${this.apiUrl}/teams/${id}`);
   }
+
+  getTeammates(): Observable<UserSummaryDto[]> {
+    return this.http.get<UserSummaryDto[]>(`${this.apiUrl}/users/teammates`);
+  }
 }
