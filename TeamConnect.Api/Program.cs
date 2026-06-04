@@ -101,6 +101,7 @@ builder.Services.AddSwaggerGen(c =>
         { jwtSecurityScheme, Array.Empty<string>() }
     });
 });
+builder.Services.AddHealthChecks();
 builder.Services.AddSingleton<MongoDbContext>();
 builder.Services.AddScoped<IEmailSender, SmtpEmailSender>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
@@ -237,6 +238,7 @@ app.UseCors("AllowAngularApp");
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.MapHealthChecks("/api/health");
 app.MapControllers();
 
 if (!app.Environment.IsDevelopment())
