@@ -1,64 +1,95 @@
-/* You can add global styles to this file, and also import other style files */
+@use '@angular/material' as mat;
 @import "tailwindcss" prefix(tw);
 
+// ── TeamConnect brand tokens ──────────────────────────────────────────────────
+:root {
+  --tc-primary:        #2E8B57;
+  --tc-primary-light:  #4ABA7A;
+  --tc-primary-dark:   #1E5C34;
+  --tc-primary-text:   #1E7A48;
+  --tc-accent:         #7DD4A8;
+  --tc-accent-light:   #A8EDCA;
+  --tc-surface-dark:   #0f1f14;
+  --tc-text-dark:      #1A2E1E;
+  --tc-tagline:        #2A9A5A;
 
+  --sidenav-collapsed: 62px;
+  --sidenav-expanded:  180px;
+  --sidenav-width:     var(--sidenav-expanded);
+}
+
+// ── Angular Material M3 theme ─────────────────────────────────────────────────
+@include mat.core();
+
+html {
+  @include mat.theme((
+    color: (
+      primary:    mat.$green-palette,
+      theme-type: light,
+    ),
+    typography: (
+      brand-family: 'Roboto',
+      plain-family: 'Roboto',
+    ),
+    density: 0,
+  ));
+}
+
+// ── Base ──────────────────────────────────────────────────────────────────────
 html, body { height: 100%; }
-body { 
-    margin: 0; 
-    font-family: Roboto, "Helvetica Neue", sans-serif; 
-    .mdc-notched-outline__notch {
-        border-right: none;
-    }
+body {
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+
+  .mdc-notched-outline__notch {
+    border-right: none;
+  }
 }
 
 .cdk-overlay-container .mat-mdc-select-panel {
-    background-color: var(--mdc-theme-surface, #ffffff);
+  background-color: var(--mdc-theme-surface, #ffffff);
 }
 
-:root {
-  --sidenav-collapsed: 62px;
-  --sidenav-expanded: 180px;
-  --sidenav-width: var(--sidenav-expanded);
-}
-
+// ── Layout ────────────────────────────────────────────────────────────────────
 .app-content {
-    margin-left: var(--sidenav-width);
-    transition: margin-left .18s ease;
-    min-height: 100vh;
+  margin-left: var(--sidenav-width);
+  transition: margin-left .18s ease;
+  min-height: 100vh;
 }
 
+// ── Pills ─────────────────────────────────────────────────────────────────────
 .app-pill {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 9999px;
-    padding: 0.25rem 0.75rem;
-    font-size: 0.75rem;
-    font-weight: 500;
-    line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1;
 }
 
 .app-pill--blue {
-    background: rgb(219 234 254);
-    color: rgb(30 64 175);
+  background: rgb(219 234 254);
+  color: rgb(30 64 175);
 }
 
 .app-pill--gray {
-    background: rgb(243 244 246);
-    color: rgb(31 41 55);
+  background: rgb(243 244 246);
+  color: rgb(31 41 55);
 }
 
 .app-pill--red {
-    background: rgb(254 226 226);
-    color: rgb(153 27 27);
+  background: rgb(254 226 226);
+  color: rgb(153 27 27);
 }
 
 .app-pill--green {
-    background: rgb(220 252 231);
-    color: rgb(21 128 61);
+  background: color-mix(in srgb, var(--tc-primary-light) 20%, white);
+  color: var(--tc-primary-text);
 }
 
 .app-pill--yellow {
-    background: rgb(254 249 195);
-    color: rgb(161 98 7);
+  background: rgb(254 249 195);
+  color: rgb(161 98 7);
 }

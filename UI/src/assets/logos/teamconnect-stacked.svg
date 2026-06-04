@@ -1,0 +1,25 @@
+<svg width="220" height="220" viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg">
+  <rect width="220" height="220" fill="#ffffff"/>
+  <g transform="translate(110,95) scale(0.52)">
+    <line x1="0" y1="-75" x2="-65" y2="38"  stroke="#2E8B57" stroke-width="0.8" opacity="0.18"/>
+    <line x1="0" y1="-75" x2="65"  y2="38"  stroke="#2E8B57" stroke-width="0.8" opacity="0.18"/>
+    <line x1="-65" y1="38" x2="65" y2="38"  stroke="#2E8B57" stroke-width="0.8" opacity="0.18"/>
+    <line x1="0"   y1="-75" x2="0" y2="0"   stroke="#2E8B57" stroke-width="2"   opacity="0.65"/>
+    <line x1="-65" y1="38"  x2="0" y2="0"   stroke="#2E8B57" stroke-width="2"   opacity="0.65"/>
+    <line x1="65"  y1="38"  x2="0" y2="0"   stroke="#2E8B57" stroke-width="2"   opacity="0.65"/>
+    <circle cx="0"   cy="-75" r="10" fill="#4ABA7A"/>
+    <circle cx="-65" cy="38"  r="10" fill="#4ABA7A"/>
+    <circle cx="65"  cy="38"  r="10" fill="#4ABA7A"/>
+    <circle cx="0"   cy="-75" r="16" stroke="#4ABA7A" stroke-width="1" fill="none" opacity="0.3"/>
+    <circle cx="-65" cy="38"  r="16" stroke="#4ABA7A" stroke-width="1" fill="none" opacity="0.3"/>
+    <circle cx="65"  cy="38"  r="16" stroke="#4ABA7A" stroke-width="1" fill="none" opacity="0.3"/>
+    <circle cx="0" cy="0" r="18" fill="#1E5C34"/>
+    <circle cx="0" cy="0" r="26" stroke="#2E8B57" stroke-width="1.2" fill="none" opacity="0.4"/>
+    <circle cx="0" cy="0" r="34" stroke="#2E8B57" stroke-width="0.7" fill="none" opacity="0.2"/>
+    <circle cx="0" cy="0" r="5"  fill="#7DD4A8"/>
+  </g>
+  <text x="110" y="158" text-anchor="middle" font-family="system-ui, sans-serif" font-size="22" font-weight="500" fill="#1A2E1E">Team</text>
+  <text x="110" y="184" text-anchor="middle" font-family="system-ui, sans-serif" font-size="22" font-weight="500" fill="#1E7A48">Connect</text>
+  <line x1="45" y1="194" x2="175" y2="194" stroke="#2A9A5A" stroke-width="0.7" opacity="0.3"/>
+  <text x="110" y="210" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" letter-spacing="2" fill="#2A9A5A">remote teams</text>
+</svg>
