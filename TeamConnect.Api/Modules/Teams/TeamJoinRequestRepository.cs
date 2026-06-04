@@ -39,5 +39,8 @@ namespace TeamConnect.Api.Modules.Teams
             var update = Builders<TeamJoinRequest>.Update.Set(r => r.Status, status);
             return _context.TeamJoinRequests.UpdateOneAsync(r => r.Id == id, update);
         }
+
+        public Task DeleteByTeamIdAsync(string teamId) =>
+            _context.TeamJoinRequests.DeleteManyAsync(r => r.TeamId == teamId);
     }
 }

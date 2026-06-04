@@ -10,5 +10,6 @@ namespace TeamConnect.Api.Modules.Teams
         Task<List<TeamJoinRequest>> GetAllPendingAsync();
         Task InsertAsync(TeamJoinRequest request);
         Task UpdateStatusAsync(string id, string status);
+        Task DeleteByTeamIdAsync(string teamId);
     }
 }

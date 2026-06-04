@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using TeamConnect.Api.Shared.DTOs;
+using TeamConnect.Api.Shared.Models;
 
 namespace TeamConnect.Api.Modules.Users
 {
@@ -79,6 +80,14 @@ namespace TeamConnect.Api.Modules.Users
             {
                 return Forbid();
             }
+        }
+
+        [HttpPost("{id}/promote-admin")]
+        [Authorize(Roles = UserRoles.Admin)]
+        public async Task<IActionResult> PromoteToAdmin(string id)
+        {
+            var success = await _usersService.PromoteToAdmin(id);
+            return success ? NoContent() : NotFound();
         }
 
         [HttpDelete("me")]

@@ -73,6 +73,15 @@ namespace TeamConnect.Api.Modules.Users
             return MapToProfileDto(user);
         }
 
+        public async Task<bool> PromoteToAdmin(string id)
+        {
+            var user = await _userRepository.FindByIdAsync(id);
+            if (user == null) return false;
+
+            await _userRepository.UpdateRoleAsync(id, UserRoles.Admin);
+            return true;
+        }
+
         public async Task<bool> DeleteMe(string id)
         {
             var user = await _userRepository.FindByIdAsync(id);

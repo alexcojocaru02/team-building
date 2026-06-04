@@ -138,6 +138,8 @@ namespace TeamConnect.Api.Modules.Teams
             if (!deleted) return false;
 
             await _userRepository.RemoveTeamFromAllUsersAsync(id);
+            if (_joinRequestRepository != null)
+                await _joinRequestRepository.DeleteByTeamIdAsync(id);
             return true;
         }
 
