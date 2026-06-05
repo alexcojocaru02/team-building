@@ -3,6 +3,9 @@ import { Component, inject, signal, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatMenuModule } from '@angular/material/menu';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { FeedService, FeedPostDto, CreateFeedPostDto } from '../../services/feed.service';
@@ -12,7 +15,7 @@ import { ConfirmDialogComponent } from '../teams-page/confirm-dialog.component';
 @Component({
   selector: 'app-feed-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, MatButtonModule, MatDialogModule, MatSnackBarModule],
+  imports: [CommonModule, FormsModule, RouterModule, MatButtonModule, MatIconModule, MatDividerModule, MatMenuModule, MatDialogModule, MatSnackBarModule],
   templateUrl: './feed-page.html',
   styleUrl: './feed-page.scss',
 })
@@ -45,6 +48,7 @@ export class FeedPage implements OnInit {
   isSubmitting = signal(false);
   commentDrafts: Record<string, string> = {};
   expandedComments: Record<string, boolean> = {};
+  composeExpanded = signal(false);
 
   currentUser = this.authService.currentUser;
 
@@ -81,6 +85,7 @@ export class FeedPage implements OnInit {
         this.posts.update(posts => [newPost, ...posts]);
         this.newPostContent.set('');
         this.isSubmitting.set(false);
+        this.composeExpanded.set(false);
       },
       error: (error) => {
         this.errorMessage.set('Failed to create post');

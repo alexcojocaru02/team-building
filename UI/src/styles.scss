@@ -50,6 +50,15 @@ body {
   background-color: var(--mdc-theme-surface, #ffffff);
 }
 
+.mat-mdc-menu-panel {
+  background-color: #ffffff !important;
+
+  .mat-mdc-menu-content {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+  }
+}
+
 // ── Layout ────────────────────────────────────────────────────────────────────
 .app-content {
   margin-left: var(--sidenav-width);
