@@ -88,10 +88,14 @@ export async function getTeamForUser(
   const teams = await teamsRes.json();
   if (!Array.isArray(teams) || teams.length === 0) return null;
 
-  const myTeam = (teams as any[]).find(
-    (t: any) => t.ownerId === me.id || (Array.isArray(t.memberIds) && t.memberIds.includes(me.id))
+  // Prefer a team this user owns (so they have the TeamOwner JWT role for admin operations)
+  const ownedTeam = (teams as any[]).find((t: any) => t.ownerId === me.id);
+  if (ownedTeam) return ownedTeam.id;
+
+  const memberTeam = (teams as any[]).find(
+    (t: any) => Array.isArray(t.memberIds) && t.memberIds.includes(me.id)
   );
-  return myTeam?.id ?? null;
+  return memberTeam?.id ?? null;
 }
 
 export async function createTeamViaApi(
@@ -128,6 +132,51 @@ export async function requestJoinTeamViaApi(
   await request.post(`${apiBaseUrl}/teams/${teamId}/join-requests`, {
     headers: { Authorization: `Bearer ${token}` },
   });
+}
+
+/**
+ * Ensures `requester` and `approver` share a team so the feedback API's
+ * AreTeammatesAsync check passes.  Strategy: the requester creates a fresh
+ * shared team (gaining TeamOwner role + a new token), then immediately adds
+ * the approver to it.
+ *
+ * Returns the created team ID so the caller can delete it after the test.
+ */
+export async function ensureTeammates(
+  request: APIRequestContext,
+  apiBaseUrl: string,
+  _teamId: string,
+  requester: typeof E2E_USER,
+  approver: typeof E2E_USER
+): Promise<string | null> {
+  const requesterToken = await getAuthToken(request, apiBaseUrl, requester);
+  const approverToken = await getAuthToken(request, apiBaseUrl, approver);
+
+  // Resolve the approver's user ID
+  const approverMeRes = await request.get(`${apiBaseUrl}/users/me`, {
+    headers: { Authorization: `Bearer ${approverToken}` },
+  });
+  if (!approverMeRes.ok()) return null;
+  const approverMe = await approverMeRes.json();
+
+  // Requester creates a team → gains TeamOwner role and a fresh token
+  const { teamId: sharedTeamId, newToken } = await createTeamViaApi(
+    request, apiBaseUrl, `e2e-shared-${Date.now()}`, requesterToken
+  );
+  if (!sharedTeamId) return null;
+
+  const ownerToken = newToken ?? requesterToken;
+
+  // Add the approver (user) to the shared team using the TeamOwner token
+  const addRes = await request.post(`${apiBaseUrl}/teams/${sharedTeamId}/add/${approverMe.id}`, {
+    headers: { Authorization: `Bearer ${ownerToken}` },
+  });
+  if (!addRes.ok()) {
+    console.error(`ensureTeammates: add user failed ${addRes.status()}: ${await addRes.text()}`);
+    return null;
+  }
+
+  return sharedTeamId;
 }
 
 export async function deletePostViaApi(

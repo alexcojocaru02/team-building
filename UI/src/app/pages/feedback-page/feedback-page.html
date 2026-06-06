@@ -30,8 +30,8 @@
     @if (!isLoadingFeedback() && receivedFeedback().length > 0) {
 
       <!-- Tone stat cards -->
-      <div class="overview-grid" style="margin-bottom: 20px;">
-        <div class="stat-card">
+      <div class="overview-grid" style="margin-bottom: 20px;" data-testid="stat-cards">
+        <div class="stat-card" data-testid="stat-card-total">
           <div class="stat-icon" style="background: #ede9fe; color: #6d28d9;">
             <mat-icon>forum</mat-icon>
           </div>
@@ -140,26 +140,30 @@
     <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; flex-wrap: wrap;">
       <p style="font-size: 1rem; font-weight: 600; color: #0f172a; margin: 0;">Received feedback</p>
       @if (!isLoadingFeedback() && receivedFeedback().length > 0) {
-        <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+        <div style="display: flex; gap: 6px; flex-wrap: wrap;" data-testid="tone-filter-chips">
           <button
             class="filter-chip"
             [class.filter-chip--active]="selectedTone() === null"
             (click)="selectedTone.set(null)"
+            data-testid="filter-chip-all"
           >All</button>
           <button
             class="filter-chip filter-chip--positive"
             [class.filter-chip--active]="selectedTone() === 'Positive'"
             (click)="toggleToneFilter('Positive')"
+            data-testid="filter-chip-positive"
           >Positive</button>
           <button
             class="filter-chip filter-chip--constructive"
             [class.filter-chip--active]="selectedTone() === 'Constructive'"
             (click)="toggleToneFilter('Constructive')"
+            data-testid="filter-chip-constructive"
           >Constructive</button>
           <button
             class="filter-chip filter-chip--critical"
             [class.filter-chip--active]="selectedTone() === 'Critical'"
             (click)="toggleToneFilter('Critical')"
+            data-testid="filter-chip-critical"
           >Critical</button>
         </div>
       }

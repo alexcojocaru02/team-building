@@ -62,7 +62,7 @@
                   type="submit"
                   [disabled]="isSubmitting() || !newPostContent().trim()"
                 >
-                  {{ isSubmitting() ? 'Posting...' : 'Post' }}
+                  {{ isSubmitting() ? 'Posting...' : 'Post update' }}
                 </button>
               </div>
             </div>
@@ -134,7 +134,7 @@
                   <mat-icon>more_vert</mat-icon>
                 </button>
                 <mat-menu #postMenu="matMenu">
-                  <button mat-menu-item (click)="requestDeletePost(post)" class="tw:text-rose-600">
+                  <button mat-menu-item aria-label="Delete post" (click)="requestDeletePost(post)" class="tw:text-rose-600">
                     <mat-icon color="warn">delete_outline</mat-icon>
                     <span>Delete post</span>
                   </button>
@@ -175,7 +175,7 @@
                 [class.post-actions__btn--liked]="post.likedByCurrentUser"
               >
                 <mat-icon>{{ post.likedByCurrentUser ? 'thumb_up' : 'thumb_up_off_alt' }}</mat-icon>
-                <span>Like</span>
+                <span>{{ post.likedByCurrentUser ? 'Liked' : 'Like' }}</span>
               </button>
 
               <button
