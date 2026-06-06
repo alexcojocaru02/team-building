@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Text;
 using System.Text.RegularExpressions;
 using TeamConnect.Api.Modules.Auth;
@@ -17,6 +18,7 @@ builder.Services.AddControllers()
     {
         // Make JSON property name matching case-sensitive
         opts.JsonSerializerOptions.PropertyNameCaseInsensitive = false;
+        opts.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
     });
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

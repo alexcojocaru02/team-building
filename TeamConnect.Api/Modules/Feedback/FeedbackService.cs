@@ -33,6 +33,8 @@ namespace TeamConnect.Api.Modules.Feedback
                 FromUserId = fromUserId,
                 ToUserId = dto.ToUserId,
                 Message = dto.Message,
+                Category = dto.Category,
+                Tone = dto.Tone,
                 CreatedAt = DateTime.UtcNow
             };
 
@@ -65,6 +67,8 @@ namespace TeamConnect.Api.Modules.Feedback
                 FromUserId = f.FromUserId,
                 ToUserId = f.ToUserId,
                 Message = f.Message,
+                Category = f.Category,
+                Tone = f.Tone,
                 CreatedAt = f.CreatedAt,
                 FromUserFullName = from?.FullName,
                 FromUserEmail = from?.Email ?? "Unknown",

@@ -18,7 +18,7 @@ namespace TeamConnect.Api.Modules.Feedback
         }
 
         [HttpPost]
-        public async Task<IActionResult> Send(CreateFeedbackDto dto)
+        public async Task<IActionResult> Send([FromBody] CreateFeedbackDto dto)
         {
             if (string.IsNullOrWhiteSpace(dto.Message))
                 return BadRequest("Feedback message is required");
