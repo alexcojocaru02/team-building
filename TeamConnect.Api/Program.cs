@@ -126,6 +126,7 @@ builder.Services.AddScoped<TeamConnect.Api.Modules.Users.UsersService>();
 builder.Services.AddScoped<TeamConnect.Api.Modules.Feedback.FeedbackService>();
 builder.Services.AddScoped<TeamConnect.Api.Modules.Dashboard.DashboardService>();
 builder.Services.AddScoped<TeamConnect.Api.Modules.TeamActivities.TeamActivitiesService>();
+builder.Services.AddScoped<TeamConnect.Api.Modules.Gamification.GamificationService>();
 
 // Validate critical JWT configuration at startup and fail fast when missing.
 // This prevents the app from starting with an empty signing key which would

@@ -20,6 +20,7 @@ export const routes: Routes = [
       { path: 'teams/:teamId/feedback', component: FeedbackPage, canActivate: [authGuard] },
       { path: 'teams/:teamId/activities', loadComponent: () => import('./pages/team-activities-page/team-activities-page').then(m => m.TeamActivitiesPage), canActivate: [authGuard] },
       { path: 'teams/:teamId/dashboard', component: CohesionDashboard, canActivate: [authGuard] },
+      { path: 'teams/:teamId/leaderboard', loadComponent: () => import('./pages/gamification-page/gamification-page').then(m => m.GamificationPage), canActivate: [authGuard] },
       // Profile routes
       { path: 'profile', loadComponent: () => import('./pages/profile-page/profile-view.component').then(m => m.ProfileViewComponent), canActivate: [authGuard] },
       { path: 'profile/edit', loadComponent: () => import('./pages/profile-page/profile-edit.component').then(m => m.ProfileEditComponent), canActivate: [authGuard] },

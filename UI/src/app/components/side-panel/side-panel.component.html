@@ -77,6 +77,11 @@
               <mat-icon style="font-size:16px; width:16px; height:16px; line-height:16px;" aria-hidden="true">event_note</mat-icon>
               <span>Activities</span>
             </a>
+            <a [routerLink]="['/teams', team.id, 'leaderboard']" routerLinkActive="tw:bg-white/15"
+               class="tw:flex tw:items-center tw:gap-2 tw:px-3 tw:py-1.5 tw:rounded-md tw:no-underline tw:text-white/60 hover:tw:text-white hover:tw:bg-white/10 tw:transition-colors tw:text-sm">
+              <mat-icon style="font-size:16px; width:16px; height:16px; line-height:16px;" aria-hidden="true">leaderboard</mat-icon>
+              <span>Leaderboard</span>
+            </a>
             @if (canSeeDashboard(team)) {
               <a [routerLink]="['/teams', team.id, 'dashboard']" routerLinkActive="tw:bg-white/15"
                  class="tw:flex tw:items-center tw:gap-2 tw:px-3 tw:py-1.5 tw:rounded-md tw:no-underline tw:text-white/60 hover:tw:text-white hover:tw:bg-white/10 tw:transition-colors tw:text-sm">

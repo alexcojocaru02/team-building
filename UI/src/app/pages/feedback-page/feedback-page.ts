@@ -12,6 +12,7 @@ import {
 import { UsersService, UserSummaryDto } from '../../services/users.service';
 import { TeamDetailDto } from '../../models/auth.models';
 import { SendFeedbackDialogComponent } from './send-feedback-dialog';
+import { ColleagueProfileDialogComponent } from '../../shared/colleague-profile-dialog.component';
 
 @Component({
   selector: 'app-feedback-page',
@@ -141,6 +142,14 @@ export class FeedbackPage implements OnInit {
 
   getCategoryLabel(value: FeedbackCategory): string {
     return this.categories.find(c => c.value === value)?.label ?? value;
+  }
+
+  openProfile(userId: string): void {
+    this.dialog.open(ColleagueProfileDialogComponent, {
+      width: '480px',
+      maxWidth: '95vw',
+      data: { userId }
+    });
   }
 
   getInitials(name?: string): string {

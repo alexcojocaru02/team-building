@@ -11,6 +11,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { FeedService, FeedPostDto, CreateFeedPostDto } from '../../services/feed.service';
 import { AuthService } from '../../services/auth.service';
 import { ConfirmDialogComponent } from '../teams-page/confirm-dialog.component';
+import { ColleagueProfileDialogComponent } from '../../shared/colleague-profile-dialog.component';
 
 @Component({
   selector: 'app-feed-page',
@@ -199,6 +200,14 @@ export class FeedPage implements OnInit {
 
   toggleCommentThread(postId: string): void {
     this.expandedComments[postId] = !this.isCommentThreadVisible(postId);
+  }
+
+  openProfile(userId: string): void {
+    this.dialog.open(ColleagueProfileDialogComponent, {
+      width: '480px',
+      maxWidth: '95vw',
+      data: { userId }
+    });
   }
 
   getInitials(value: string | null | undefined): string {

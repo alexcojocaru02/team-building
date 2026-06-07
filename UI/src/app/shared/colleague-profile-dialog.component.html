@@ -1,0 +1,102 @@
+<div style="padding: 24px; max-width: 480px;">
+  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+    <h2 style="font-size: 1.25rem; font-weight: 700; color: #0f172a; margin: 0;">{{ title }}</h2>
+    <button mat-icon-button type="button" (click)="close()" aria-label="Close">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  @if (isLoading()) {
+    <p style="color: #64748b; margin: 0;">Loading profile...</p>
+  } @else if (errorMessage()) {
+    <p style="color: #dc2626; margin: 0;">{{ errorMessage() }}</p>
+  } @else if (profile(); as p) {
+    <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 20px;">
+      @if (p.avatarUrl) {
+        <div style="width: 56px; height: 56px; border-radius: 50%; overflow: hidden; flex-shrink: 0;">
+          <img [src]="p.avatarUrl" alt="Avatar" style="width: 100%; height: 100%; object-fit: cover;" />
+        </div>
+      } @else {
+        <div style="width: 56px; height: 56px; border-radius: 50%; background: #f1f5f9; color: #475569; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.25rem; flex-shrink: 0;">
+          {{ (p.fullName || p.email).charAt(0).toUpperCase() }}
+        </div>
+      }
+      <div>
+        <p style="font-weight: 600; color: #0f172a; margin: 0;">{{ p.fullName || p.email }}</p>
+        <p style="font-size: 0.8125rem; color: #64748b; margin: 2px 0 0;">{{ p.email }}</p>
+      </div>
+    </div>
+
+    @if (p.pronouns || p.department || p.location || p.timezone) {
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
+        @if (p.pronouns) {
+          <div>
+            <p style="font-size: 0.75rem; color: #94a3b8; margin: 0;">Pronouns</p>
+            <p style="font-size: 0.875rem; color: #334155; margin: 2px 0 0;">{{ p.pronouns }}</p>
+          </div>
+        }
+        @if (p.department) {
+          <div>
+            <p style="font-size: 0.75rem; color: #94a3b8; margin: 0;">Department</p>
+            <p style="font-size: 0.875rem; color: #334155; margin: 2px 0 0;">{{ p.department }}</p>
+          </div>
+        }
+        @if (p.location) {
+          <div>
+            <p style="font-size: 0.75rem; color: #94a3b8; margin: 0;">Location</p>
+            <p style="font-size: 0.875rem; color: #334155; margin: 2px 0 0;">{{ p.location }}</p>
+          </div>
+        }
+        @if (p.timezone) {
+          <div>
+            <p style="font-size: 0.75rem; color: #94a3b8; margin: 0;">Timezone</p>
+            <p style="font-size: 0.875rem; color: #334155; margin: 2px 0 0;">{{ p.timezone }}</p>
+          </div>
+        }
+      </div>
+    }
+
+    @if (p.bio) {
+      <div style="margin-bottom: 16px;">
+        <p style="font-size: 0.75rem; color: #94a3b8; margin: 0 0 4px;">Bio</p>
+        <p style="font-size: 0.875rem; color: #334155; margin: 0;">{{ p.bio }}</p>
+      </div>
+    }
+
+    @if (p.preferredWorkStyle) {
+      <div style="margin-bottom: 16px;">
+        <p style="font-size: 0.75rem; color: #94a3b8; margin: 0 0 4px;">Preferred work style</p>
+        <p style="font-size: 0.875rem; color: #334155; margin: 0;">{{ p.preferredWorkStyle }}</p>
+      </div>
+    }
+
+    @if ((p.hobbies?.length ?? 0) > 0) {
+      <div style="margin-bottom: 16px;">
+        <p style="font-size: 0.75rem; color: #94a3b8; margin: 0 0 6px;">Hobbies & interests</p>
+        <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+          @for (hobby of p.hobbies; track hobby) {
+            <span style="font-size: 0.75rem; font-weight: 500; padding: 4px 10px; border-radius: 999px; background: color-mix(in srgb, var(--tc-accent-light) 35%, white); color: var(--tc-primary-text);">{{ hobby }}</span>
+          }
+        </div>
+      </div>
+    }
+
+    @if ((p.strengths?.length ?? 0) > 0) {
+      <div style="margin-bottom: 16px;">
+        <p style="font-size: 0.75rem; color: #94a3b8; margin: 0 0 6px;">Strengths & skills</p>
+        <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+          @for (strength of p.strengths; track strength) {
+            <span style="font-size: 0.75rem; font-weight: 500; padding: 4px 10px; border-radius: 999px; background: #fef3c7; color: #92400e;">{{ strength }}</span>
+          }
+        </div>
+      </div>
+    }
+
+    @if (p.icebreaker) {
+      <div>
+        <p style="font-size: 0.75rem; color: #94a3b8; margin: 0 0 4px;">Icebreaker / fun fact</p>
+        <p style="font-size: 0.875rem; color: #334155; margin: 0;">{{ p.icebreaker }}</p>
+      </div>
+    }
+  }
+</div>

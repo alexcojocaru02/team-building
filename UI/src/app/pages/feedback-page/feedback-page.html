@@ -215,10 +215,16 @@
         @for (feedback of filteredFeedback(); track feedback.id) {
           <article class="received-item">
             <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 10px;">
-              <div style="display: flex; align-items: center; gap: 10px;">
+              <div
+                style="display: flex; align-items: center; gap: 10px; cursor: pointer;"
+                role="button"
+                tabindex="0"
+                (click)="openProfile(feedback.fromUserId)"
+                (keydown.enter)="openProfile(feedback.fromUserId)"
+              >
                 <div class="avatar">{{ getInitials(feedback.fromUserFullName || feedback.fromUserEmail) }}</div>
                 <div>
-                  <p style="font-weight: 600; color: #0f172a; margin: 0; font-size: 0.9375rem;">
+                  <p style="font-weight: 600; color: #0f172a; margin: 0; font-size: 0.9375rem;" class="hover-underline">
                     {{ feedback.fromUserFullName || feedback.fromUserEmail || feedback.fromUserId }}
                   </p>
                   <p style="font-size: 0.75rem; color: #94a3b8; margin: 2px 0 0;">{{ feedback.createdAt | date: 'MMM d, y · h:mm a' }}</p>

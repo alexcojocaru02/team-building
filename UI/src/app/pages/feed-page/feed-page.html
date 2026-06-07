@@ -109,7 +109,13 @@
 
             <!-- Post header -->
             <div class="tw:flex tw:items-start tw:justify-between tw:mb-3">
-              <div class="tw:flex tw:items-center tw:gap-3">
+              <div
+                class="tw:flex tw:items-center tw:gap-3 tw:cursor-pointer"
+                role="button"
+                tabindex="0"
+                (click)="openProfile(post.authorId)"
+                (keydown.enter)="openProfile(post.authorId)"
+              >
                 <div
                   class="avatar avatar--md"
                   [style.background-color]="getAvatarColor(post.authorFullName || post.authorEmail || post.authorId)"
@@ -117,7 +123,7 @@
                   {{ getInitials(post.authorFullName || post.authorEmail || post.authorId) }}
                 </div>
                 <div>
-                  <p class="tw:text-sm tw:font-semibold tw:text-slate-900 tw:leading-tight">
+                  <p class="tw:text-sm tw:font-semibold tw:text-slate-900 tw:leading-tight hover:tw:underline">
                     {{ post.authorFullName || post.authorEmail || post.authorId }}
                   </p>
                   <p class="tw:text-xs tw:text-slate-400 tw:mt-0.5">{{ post.createdAt | date: 'MMM d, y · h:mm a' }}</p>
@@ -197,13 +203,23 @@
                 @for (comment of post.recentComments; track comment.id) {
                   <div class="tw:flex tw:items-start tw:gap-2.5">
                     <div
-                      class="avatar avatar--sm tw:shrink-0"
+                      class="avatar avatar--sm tw:shrink-0 tw:cursor-pointer"
+                      role="button"
+                      tabindex="0"
+                      (click)="openProfile(comment.authorId)"
+                      (keydown.enter)="openProfile(comment.authorId)"
                       [style.background-color]="getAvatarColor(comment.authorFullName || comment.authorEmail || comment.authorId)"
                     >
                       {{ getInitials(comment.authorFullName || comment.authorEmail || comment.authorId) }}
                     </div>
                     <div class="comment-bubble">
-                      <span class="tw:font-semibold tw:text-slate-900 tw:text-sm tw:mr-2">
+                      <span
+                        class="tw:font-semibold tw:text-slate-900 tw:text-sm tw:mr-2 tw:cursor-pointer hover:tw:underline"
+                        role="button"
+                        tabindex="0"
+                        (click)="openProfile(comment.authorId)"
+                        (keydown.enter)="openProfile(comment.authorId)"
+                      >
                         {{ comment.authorFullName || comment.authorEmail || comment.authorId }}
                       </span>
                       <span class="tw:text-xs tw:text-slate-400">{{ comment.createdAt | date: 'short' }}</span>

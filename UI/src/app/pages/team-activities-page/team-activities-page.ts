@@ -18,6 +18,7 @@ import { UsersService } from '../../services/users.service';
 import { TeamActivitiesService, CreateTeamActivityDto, SubmitTeamActivityResponseDto, TeamActivityDto, TeamActivitySummaryDto } from '../../services/team-activities.service';
 import { TeamDetailDto, UserDto } from '../../models/auth.models';
 import { CreateTeamActivityDialogComponent } from './create-team-activity-dialog.component';
+import { ColleagueProfileDialogComponent } from '../../shared/colleague-profile-dialog.component';
 
 type ActivityFilter = 'open' | 'closed' | 'all';
 
@@ -378,6 +379,14 @@ export class TeamActivitiesPage implements OnInit {
 
   toggleSummary(): void {
     this.summaryCollapsed.update(v => !v);
+  }
+
+  openProfile(userId: string): void {
+    this.dialog.open(ColleagueProfileDialogComponent, {
+      width: '480px',
+      maxWidth: '95vw',
+      data: { userId }
+    });
   }
 
   getInitials(value: string | null | undefined): string {

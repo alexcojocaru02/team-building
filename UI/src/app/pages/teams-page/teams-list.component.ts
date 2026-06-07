@@ -190,11 +190,14 @@ export class TeamsListComponent implements OnInit {
       next: () => {
         this.teams.update(teams => teams.filter(t => t.id !== team.id));
         this.isDeletingTeamId.set(null);
+        this.showSnackBar(`Team "${team.name}" deleted successfully.`);
       },
       error: (err) => {
         console.error('Failed to delete team:', err);
-        this.deleteMessage.set(this.getErrorMessage(err, 'Failed to delete team.'));
+        const message = this.getErrorMessage(err, 'Failed to delete team.');
+        this.deleteMessage.set(message);
         this.isDeletingTeamId.set(null);
+        this.showSnackBar(message, true);
       }
     });
   }

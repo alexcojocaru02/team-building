@@ -1,0 +1,75 @@
+<div class="gamification-page">
+  <div style="max-width: 700px; margin: 0 auto;">
+
+    <!-- Header -->
+    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 24px;">
+      <button mat-icon-button type="button" routerLink="/" aria-label="Back to home">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <div>
+        <h1 style="font-size: 1.5rem; font-weight: 700; color: #0f172a; margin: 0;">Leaderboard</h1>
+        @if (team()) {
+          <p style="font-size: 0.8125rem; color: #64748b; margin: 0;">
+            Team: <strong style="color: #334155;">{{ team()!.name }}</strong>
+          </p>
+        }
+      </div>
+    </div>
+
+    <!-- Error Message -->
+    @if (errorMessage()) {
+      <div style="margin-bottom: 24px; padding: 16px; background: #fef2f2; border: 1px solid #fecaca; border-radius: 12px;">
+        <p style="color: #dc2626; margin: 0;">{{ errorMessage() }}</p>
+      </div>
+    }
+
+    <!-- Loading State -->
+    @if (isLoading()) {
+      <div style="display: flex; justify-content: center; padding: 48px 0;">
+        <p style="color: #64748b; margin: 0;">Loading leaderboard...</p>
+      </div>
+    }
+
+    @if (!isLoading() && !errorMessage()) {
+      @if (entries().length === 0) {
+        <div class="leaderboard-card" style="padding: 48px; text-align: center;">
+          <mat-icon style="font-size: 48px; width: 48px; height: 48px; color: #cbd5e1;" aria-hidden="true">emoji_events</mat-icon>
+          <p style="color: #64748b; margin: 12px 0 0;">No points earned yet. Take part in activities and give feedback to climb the leaderboard!</p>
+        </div>
+      } @else {
+        <div class="leaderboard-card" style="padding: 0; overflow: hidden;">
+          @for (entry of entries(); track entry.userId) {
+            <div
+              class="leaderboard-row"
+              style="cursor: pointer;"
+              role="button"
+              tabindex="0"
+              [class.leaderboard-row--me]="entry.userId === currentUserId()"
+              (click)="openProfile(entry.userId)"
+              (keydown.enter)="openProfile(entry.userId)">
+              <div style="display: flex; align-items: center; gap: 16px;">
+                <div class="rank-badge" [class.rank-badge--first]="entry.rank === 1">
+                  {{ entry.rank }}
+                </div>
+                <div>
+                  <p style="font-weight: 600; color: #0f172a; margin: 0;">
+                    {{ entry.fullName || entry.email }}
+                    @if (entry.userId === currentUserId()) {
+                      <span style="font-size: 0.75rem; font-weight: 600; color: var(--tc-primary-text); margin-left: 4px;">(you)</span>
+                    }
+                  </p>
+                  <p style="font-size: 0.75rem; color: #94a3b8; margin: 2px 0 0;">
+                    {{ entry.activityPoints }} activity pts · {{ entry.feedbackGiven }} feedback given · {{ entry.feedbackReceived }} received
+                  </p>
+                </div>
+              </div>
+              <div style="font-size: 1.25rem; font-weight: 700; color: var(--tc-primary-text);">
+                {{ entry.totalPoints }}
+              </div>
+            </div>
+          }
+        </div>
+      }
+    }
+  </div>
+</div>
