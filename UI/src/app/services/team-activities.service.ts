@@ -3,21 +3,25 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 
-export type TeamActivityType = 'prompt' | 'poll' | 'mini-challenge' | 'trivia';
+export type TeamActivityType = 'prompt' | 'poll' | 'mini-challenge' | 'trivia' | 'sync-meeting';
 export type TeamActivityStatus = 'Open' | 'Closed';
+export type RsvpStatus = 'Pending' | 'Accepted' | 'Declined';
 
 export interface CreateTeamActivityDto {
   title: string;
   description: string;
   activityType: TeamActivityType | string;
   options: string[];
-  dueAt?: string | null;
   points: number;
+  scheduledAt?: string | null;
+  scheduledEndAt?: string | null;
+  meetingLink?: string | null;
 }
 
 export interface SubmitTeamActivityResponseDto {
   textResponse?: string | null;
   selectedOptionIndex?: number | null;
+  rsvpStatus?: RsvpStatus | null;
 }
 
 export interface TeamActivityResponseDto {
@@ -26,6 +30,7 @@ export interface TeamActivityResponseDto {
   userEmail?: string;
   textResponse?: string | null;
   selectedOptionIndex?: number | null;
+  rsvpStatus?: RsvpStatus | null;
   submittedAt: string;
 }
 
@@ -40,7 +45,9 @@ export interface TeamActivityDto {
   description: string;
   options: string[];
   points: number;
-  dueAt?: string | null;
+  scheduledAt?: string | null;
+  scheduledEndAt?: string | null;
+  meetingLink?: string | null;
   status: TeamActivityStatus;
   createdAt: string;
   completedAt?: string | null;
@@ -49,6 +56,9 @@ export interface TeamActivityDto {
   hasCurrentUserResponded: boolean;
   currentUserTextResponse?: string | null;
   currentUserSelectedOptionIndex?: number | null;
+  currentUserRsvpStatus?: RsvpStatus | null;
+  acceptedCount: number;
+  declinedCount: number;
   recentResponses: TeamActivityResponseDto[];
 }
 
@@ -86,6 +96,7 @@ export class TeamActivitiesService {
       return n === 'poll' ? 'Poll'
         : n === 'trivia' ? 'Trivia'
         : n === 'mini-challenge' || n === 'minichallenge' || n === 'challenge' ? 'MiniChallenge'
+        : n === 'sync-meeting' || n === 'syncmeeting' || n === 'sync' ? 'SyncMeeting'
         : 'Prompt';
     };
 

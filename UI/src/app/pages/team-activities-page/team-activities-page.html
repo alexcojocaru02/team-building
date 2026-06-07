@@ -1,4 +1,4 @@
-<section class="tw:min-h-screen tw:bg-[radial-gradient(circle_at_top,_#e0f2fe,_#eef2ff_45%,_#f8fafc)] tw:px-4 tw:py-6 sm:tw:px-6 lg:tw:px-8">
+<section class="tw:min-h-screen tw:bg-[#f4f6f8] tw:px-4 tw:py-6 sm:tw:px-6 lg:tw:px-8">
   <div class="tw:mx-auto tw:w-full tw:max-w-3xl">
     <div class="tw:mb-6 tw:flex tw:items-center tw:justify-between tw:gap-4">
       <div class="tw:flex tw:items-center tw:gap-3">
@@ -166,24 +166,50 @@
 
               <p class="tw:mt-2 tw:whitespace-pre-wrap tw:text-[15px] tw:leading-6 tw:text-slate-700">{{ activity.description }}</p>
 
-              <div class="tw:mt-4 tw:grid tw:grid-cols-2 tw:gap-3 sm:tw:grid-cols-4">
-              <div class="tw:rounded-2xl tw:bg-slate-50 tw:p-3">
-                <p class="tw:text-[11px] tw:uppercase tw:tracking-wide tw:text-slate-500">Responses</p>
-                <p class="tw:mt-1 tw:text-lg tw:font-semibold tw:text-slate-900">{{ activity.responsesCount }}</p>
+              @if (activity.activityType.toLowerCase() === 'syncmeeting') {
+                <div class="tw:mt-4 tw:grid tw:grid-cols-2 tw:gap-3 sm:tw:grid-cols-3">
+                  <div class="tw:rounded-2xl tw:bg-slate-50 tw:p-3">
+                    <p class="tw:text-[11px] tw:uppercase tw:tracking-wide tw:text-slate-500">When</p>
+                    <p class="tw:mt-1 tw:text-sm tw:font-medium tw:text-slate-800">
+                      @if (activity.scheduledAt) {
+                        {{ activity.scheduledAt | date: 'medium' }}
+                        @if (activity.scheduledEndAt) {
+                          – {{ activity.scheduledEndAt | date: (sameDay(activity.scheduledAt, activity.scheduledEndAt) ? 'shortTime' : 'medium') }}
+                        }
+                      } @else {
+                        Not scheduled
+                      }
+                    </p>
+                  </div>
+                  <div class="tw:rounded-2xl tw:bg-slate-50 tw:p-3">
+                    <p class="tw:text-[11px] tw:uppercase tw:tracking-wide tw:text-slate-500">RSVPs</p>
+                    <p class="tw:mt-1 tw:text-sm tw:font-medium tw:text-slate-800">{{ activity.acceptedCount }} accepted · {{ activity.declinedCount }} declined</p>
+                  </div>
+                  <div class="tw:rounded-2xl tw:bg-slate-50 tw:p-3">
+                    <p class="tw:text-[11px] tw:uppercase tw:tracking-wide tw:text-slate-500">Your RSVP</p>
+                    <p class="tw:mt-1 tw:text-sm tw:font-medium tw:text-slate-800">{{ activity.currentUserRsvpStatus && activity.currentUserRsvpStatus !== 'Pending' ? activity.currentUserRsvpStatus : 'Not responded' }}</p>
+                  </div>
+                </div>
+              } @else {
+                <div class="tw:mt-4 tw:grid tw:grid-cols-2 tw:gap-3 sm:tw:grid-cols-4">
+                <div class="tw:rounded-2xl tw:bg-slate-50 tw:p-3">
+                  <p class="tw:text-[11px] tw:uppercase tw:tracking-wide tw:text-slate-500">Responses</p>
+                  <p class="tw:mt-1 tw:text-lg tw:font-semibold tw:text-slate-900">{{ activity.responsesCount }}</p>
+                </div>
+                <div class="tw:rounded-2xl tw:bg-slate-50 tw:p-3">
+                  <p class="tw:text-[11px] tw:uppercase tw:tracking-wide tw:text-slate-500">Participants</p>
+                  <p class="tw:mt-1 tw:text-lg tw:font-semibold tw:text-slate-900">{{ activity.participantCount }}</p>
+                </div>
+                <div class="tw:rounded-2xl tw:bg-slate-50 tw:p-3">
+                  <p class="tw:text-[11px] tw:uppercase tw:tracking-wide tw:text-slate-500">Due</p>
+                  <p class="tw:mt-1 tw:text-sm tw:font-medium tw:text-slate-800">{{ activity.scheduledEndAt ? (activity.scheduledEndAt | date: 'medium') : 'No due date' }}</p>
+                </div>
+                <div class="tw:rounded-2xl tw:bg-slate-50 tw:p-3">
+                  <p class="tw:text-[11px] tw:uppercase tw:tracking-wide tw:text-slate-500">Your status</p>
+                  <p class="tw:mt-1 tw:text-sm tw:font-medium tw:text-slate-800">{{ activity.hasCurrentUserResponded ? 'Responded' : 'Pending' }}</p>
+                </div>
               </div>
-              <div class="tw:rounded-2xl tw:bg-slate-50 tw:p-3">
-                <p class="tw:text-[11px] tw:uppercase tw:tracking-wide tw:text-slate-500">Participants</p>
-                <p class="tw:mt-1 tw:text-lg tw:font-semibold tw:text-slate-900">{{ activity.participantCount }}</p>
-              </div>
-              <div class="tw:rounded-2xl tw:bg-slate-50 tw:p-3">
-                <p class="tw:text-[11px] tw:uppercase tw:tracking-wide tw:text-slate-500">Due</p>
-                <p class="tw:mt-1 tw:text-sm tw:font-medium tw:text-slate-800">{{ activity.dueAt ? (activity.dueAt | date: 'medium') : 'No due date' }}</p>
-              </div>
-              <div class="tw:rounded-2xl tw:bg-slate-50 tw:p-3">
-                <p class="tw:text-[11px] tw:uppercase tw:tracking-wide tw:text-slate-500">Your status</p>
-                <p class="tw:mt-1 tw:text-sm tw:font-medium tw:text-slate-800">{{ activity.hasCurrentUserResponded ? 'Responded' : 'Pending' }}</p>
-              </div>
-            </div>
+              }
             </div>
             }
 
@@ -214,7 +240,23 @@
               </div>
             }
 
-            @if (activity.status === 'Open') {
+            @if (activity.activityType.toLowerCase() === 'syncmeeting') {
+              <div class="tw:mt-4 tw:border-t tw:border-slate-100 tw:pt-4">
+                <div class="tw:flex tw:flex-wrap tw:items-center tw:justify-between tw:gap-3">
+                  <p class="tw:text-xs tw:text-slate-500">
+                    @if (activity.status === 'Open') {
+                      View the meeting details, join the call, or RSVP.
+                    } @else {
+                      This meeting has ended.
+                    }
+                  </p>
+                  <button mat-flat-button color="primary" type="button" class="tw:!rounded-2xl tw:!px-5" (click)="openSyncMeetingDialog(activity)">
+                    <mat-icon>groups</mat-icon>
+                    {{ activity.status === 'Open' ? 'Open meeting details' : 'View meeting details' }}
+                  </button>
+                </div>
+              </div>
+            } @else if (activity.status === 'Open') {
               <div class="tw:mt-4 tw:border-t tw:border-slate-100 tw:pt-4">
                 <form (ngSubmit)="submitResponse(activity)" class="tw:space-y-4">
                   @if (activity.activityType.toLowerCase() === 'poll') {
@@ -240,11 +282,11 @@
                   <div class="tw:flex tw:flex-wrap tw:items-center tw:justify-between tw:gap-3">
                     <p class="tw:text-xs tw:text-slate-500">Save your answer anytime; the leader can close the activity when it is done.</p>
                     <div class="tw:flex tw:gap-2">
-                      <button mat-flat-button color="primary" type="submit" class="tw:!rounded-2xl tw:!px-5 tw:!font-semibold">
+                      <button mat-flat-button color="primary" type="submit" class="tw:!rounded-2xl tw:!px-5">
                         {{ activity.hasCurrentUserResponded ? 'Update response' : 'Submit response' }}
                       </button>
                       @if (canManageSelectedTeam()) {
-                        <button mat-stroked-button type="button" class="tw:!rounded-2xl tw:!px-5 tw:!font-semibold" (click)="completeActivity(activity)">
+                        <button mat-stroked-button type="button" class="tw:!rounded-2xl tw:!px-5" (click)="completeActivity(activity)">
                           Close
                         </button>
                       }

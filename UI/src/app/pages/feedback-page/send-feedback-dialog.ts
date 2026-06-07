@@ -32,7 +32,7 @@ export interface SendFeedbackDialogData {
 
     <mat-dialog-content style="padding-top: 8px;">
 
-      <div style="background: #f8fafc; border-radius: 8px; padding: 10px 12px; margin-bottom: 16px;">
+      <div style="background: rgba(100, 116, 139, 0.08); border-radius: 8px; padding: 10px 12px; margin-bottom: 16px;">
         <p style="font-size: 0.8125rem; color: #475569; margin: 0;">
           🏆 You earn <strong>+{{ data.giverPoints }} pts</strong> · colleague gets <strong>+{{ data.receiverPoints }} pts</strong>
         </p>

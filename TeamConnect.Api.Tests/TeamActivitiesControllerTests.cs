@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
@@ -124,7 +124,7 @@ public class TeamActivitiesControllerTests : IClassFixture<MongoFixture>
             ActivityType = ActivityType.Prompt,
             Title = "Past Due Prompt",
             Description = "desc",
-            DueAt = DateTime.UtcNow.AddMinutes(-1)
+            ScheduledEndAt = DateTime.UtcNow.AddMinutes(-1)
         };
 
         var result = await controller.Create(team.Id, dto, BuildTeamsService());
@@ -157,7 +157,7 @@ public class TeamActivitiesControllerTests : IClassFixture<MongoFixture>
             ActivityType = ActivityType.Prompt,
             Title = "Unspecified Due Prompt",
             Description = "desc",
-            DueAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(1), DateTimeKind.Unspecified)
+            ScheduledEndAt = DateTime.SpecifyKind(DateTime.UtcNow.AddHours(1), DateTimeKind.Unspecified)
         };
 
         var result = await controller.Create(team.Id, dto, BuildTeamsService());
@@ -217,3 +217,4 @@ public class TeamActivitiesControllerTests : IClassFixture<MongoFixture>
         Assert.Equal(1, updated.Participations.First().SelectedOptionIndex);
     }
 }
+

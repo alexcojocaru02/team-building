@@ -12,7 +12,9 @@ namespace TeamConnect.Api.Shared.DTOs
         public string Description { get; set; } = string.Empty;
         public List<string> Options { get; set; } = new();
         public int Points { get; set; }
-        public DateTime? DueAt { get; set; }
+        public DateTime? ScheduledAt { get; set; }
+        public DateTime? ScheduledEndAt { get; set; }
+        public string? MeetingLink { get; set; }
         public string Status { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; }
         public DateTime? CompletedAt { get; set; }
@@ -21,6 +23,9 @@ namespace TeamConnect.Api.Shared.DTOs
         public bool HasCurrentUserResponded { get; set; }
         public string? CurrentUserTextResponse { get; set; }
         public int? CurrentUserSelectedOptionIndex { get; set; }
+        public string? CurrentUserRsvpStatus { get; set; }
+        public int AcceptedCount { get; set; }
+        public int DeclinedCount { get; set; }
         public List<TeamActivityResponseDto> RecentResponses { get; set; } = new();
     }
 }

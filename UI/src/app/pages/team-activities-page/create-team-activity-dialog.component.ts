@@ -28,9 +28,87 @@ export class CreateTeamActivityDialogComponent {
   protected activityDescription = '';
   protected activityType: TeamActivityType = 'prompt';
   protected activityOptionsText = '';
-  protected activityDueAt = '';
-  protected activityPoints = 10;
+  protected activityScheduledAt = '';
+  protected activityScheduledEndAt = '';
+  protected readonly activityPoints = 10;
+  protected meetingLink = '';
   protected errorMessage = '';
+
+  protected readonly totalSteps = 3;
+  protected step = 1;
+
+  protected get isLastStep(): boolean {
+    return this.step === this.totalSteps;
+  }
+
+  protected get titlePlaceholder(): string {
+    switch (this.activityType) {
+      case 'poll': return 'Which lunch spot should we try this week?';
+      case 'mini-challenge': return 'Share a photo of your workspace';
+      case 'trivia': return 'Friday trivia: how well do you know the team?';
+      case 'sync-meeting': return 'Weekly team sync';
+      default: return 'Weekly check-in prompt';
+    }
+  }
+
+  protected get descriptionPlaceholder(): string {
+    switch (this.activityType) {
+      case 'poll': return 'Describe what the team is voting on...';
+      case 'mini-challenge': return 'Describe the challenge and what counts as completing it...';
+      case 'trivia': return 'Write the trivia question (and answer, if needed)...';
+      case 'sync-meeting': return 'Add an agenda or notes for this meeting...';
+      default: return 'Ask a question, define a challenge, or describe the activity...';
+    }
+  }
+
+  protected stepLabel(step: number): string {
+    switch (step) {
+      case 1: return 'Basics';
+      case 2: return 'Content';
+      case 3: return this.activityType === 'sync-meeting' ? 'Schedule' : 'Due date';
+      default: return '';
+    }
+  }
+
+  back(): void {
+    if (this.step > 1) {
+      this.step -= 1;
+      this.errorMessage = '';
+    }
+  }
+
+  next(): void {
+    if (!this.validateStep(this.step)) return;
+    this.errorMessage = '';
+    this.step += 1;
+  }
+
+  private validateStep(step: number): boolean {
+    if (step === 1) {
+      if (!this.activityTitle.trim()) {
+        this.errorMessage = 'Title is required.';
+        return false;
+      }
+    }
+
+    if (step === 2) {
+      if (!this.activityDescription.trim()) {
+        this.errorMessage = 'Description is required.';
+        return false;
+      }
+      if (this.activityType === 'poll' && this.parseOptions(this.activityOptionsText).length < 2) {
+        this.errorMessage = 'Poll activities need at least two options.';
+        return false;
+      }
+      if (this.activityType === 'sync-meeting' && !this.meetingLink.trim()) {
+        this.errorMessage = 'Meeting link is required for sync meetings.';
+        return false;
+      }
+    }
+
+    this.errorMessage = '';
+    return true;
+  }
 
   cancel(): void {
     this.dialogRef.close();
@@ -51,21 +129,59 @@ export class CreateTeamActivityDialogComponent {
       return;
     }
 
-    // validate due date/time if provided
-    let dueAtIso: string | null = null;
-    if (this.activityDueAt) {
-      const parsed = new Date(this.activityDueAt);
-      if (isNaN(parsed.getTime())) {
+    let scheduledAtIso: string | null = null;
+    let scheduledEndAtIso: string | null = null;
+    let meetingLink: string | null = null;
+
+    if (this.activityType === 'sync-meeting') {
+      meetingLink = this.meetingLink.trim();
+
+      if (!meetingLink) {
+        this.errorMessage = 'Meeting link is required for sync meetings.';
+        return;
+      }
+      if (!this.activityScheduledAt) {
+        this.errorMessage = 'Scheduled date and time is required for sync meetings.';
+        return;
+      }
+
+      const parsedScheduledAt = new Date(this.activityScheduledAt);
+      if (isNaN(parsedScheduledAt.getTime())) {
+        this.errorMessage = 'Please provide a valid scheduled date and time.';
+        return;
+      }
+      if (parsedScheduledAt.getTime() < new Date().getTime()) {
+        this.errorMessage = 'Scheduled date and time must be in the future.';
+        return;
+      }
+      scheduledAtIso = parsedScheduledAt.toISOString();
+
+      if (!this.activityScheduledEndAt) {
+        this.errorMessage = 'Scheduled end date and time is required for sync meetings.';
+        return;
+      }
+
+      const parsedScheduledEndAt = new Date(this.activityScheduledEndAt);
+      if (isNaN(parsedScheduledEndAt.getTime())) {
+        this.errorMessage = 'Please provide a valid scheduled end date and time.';
+        return;
+      }
+      if (parsedScheduledEndAt.getTime() <= parsedScheduledAt.getTime()) {
+        this.errorMessage = 'Scheduled end time must be after the start time.';
+        return;
+      }
+      scheduledEndAtIso = parsedScheduledEndAt.toISOString();
+    } else if (this.activityScheduledEndAt) {
+      const parsedDueAt = new Date(this.activityScheduledEndAt);
+      if (isNaN(parsedDueAt.getTime())) {
         this.errorMessage = 'Please provide a valid due date and time.';
         return;
       }
-      // optional: do not allow past dates
-      const now = new Date();
-      if (parsed.getTime() < now.getTime()) {
+      if (parsedDueAt.getTime() < new Date().getTime()) {
         this.errorMessage = 'Due date must be in the future.';
         return;
       }
-      dueAtIso = parsed.toISOString();
+      scheduledEndAtIso = parsedDueAt.toISOString();
     }
 
     this.errorMessage = '';
@@ -74,8 +190,10 @@ export class CreateTeamActivityDialogComponent {
       description,
       activityType: this.activityType,
       options,
-      dueAt: dueAtIso,
-      points: Math.max(1, Number(this.activityPoints) || 10),
+      points: this.activityPoints,
+      scheduledAt: scheduledAtIso,
+      scheduledEndAt: scheduledEndAtIso,
+      meetingLink,
     });
   }
 

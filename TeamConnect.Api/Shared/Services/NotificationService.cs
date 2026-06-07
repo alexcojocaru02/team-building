@@ -1,4 +1,4 @@
-using MongoDB.Driver;
+﻿using MongoDB.Driver;
 using System.Net;
 using TeamConnect.Api.Shared.Models;
 
@@ -32,7 +32,7 @@ namespace TeamConnect.Api.Shared.Services
 <h2>Welcome to TeamConnect</h2>
 <p>Hi {Encode(DisplayName(user))},</p>
 <p>Your account is ready. You can now sign in and start collaborating with your team.</p>
-<p>We’re glad to have you on board.</p>
+<p>Weâ€™re glad to have you on board.</p>
 <p>TeamConnect</p>",
                 $"Welcome to TeamConnect\n\nHi {DisplayName(user)},\nYour account is ready. You can now sign in and start collaborating with your team.\n\nTeamConnect");
         }
@@ -109,6 +109,32 @@ namespace TeamConnect.Api.Shared.Services
             }
 
             var recipients = await GetUsersAsync(recipientIds);
+
+            if (activity.ActivityType == ActivityType.SyncMeeting)
+            {
+                var meetingSubject = $"New sync meeting in {team.Name}: {activity.Title}";
+
+                foreach (var recipient in recipients.Values)
+                {
+                    await SendAsync(
+                        recipient.Email,
+                        meetingSubject,
+                        $@"
+<h2>New sync meeting scheduled</h2>
+<p>Hi {Encode(DisplayName(recipient))},</p>
+<p><strong>{Encode(DisplayName(creator))}</strong> scheduled a new sync meeting in <strong>{Encode(team.Name)}</strong>.</p>
+<p><strong>{Encode(activity.Title)}</strong></p>
+<p>{Encode(activity.Description)}</p>
+{BuildScheduledAtBlock(activity)}
+{BuildMeetingLinkBlock(activity)}
+<p>Open TeamConnect to RSVP.</p>
+<p>TeamConnect</p>",
+                        $"Hi {DisplayName(recipient)},\n\n{DisplayName(creator)} scheduled a new sync meeting in {team.Name}.\n\n{activity.Title}\n{activity.Description}\n{BuildScheduledAtText(activity)}\n{BuildMeetingLinkText(activity)}\n\nOpen TeamConnect to RSVP.\n\nTeamConnect");
+                }
+
+                return;
+            }
+
             var subject = $"New {activity.ActivityType} activity in {team.Name}";
 
             foreach (var recipient in recipients.Values)
@@ -191,19 +217,69 @@ namespace TeamConnect.Api.Shared.Services
 
         private static string BuildDueDateBlock(TeamActivity activity)
         {
-            if (!activity.DueAt.HasValue)
+            if (!activity.ScheduledEndAt.HasValue)
             {
                 return string.Empty;
             }
 
-            return $"<p><strong>Due:</strong> {Encode(activity.DueAt.Value.ToUniversalTime().ToString("u"))}</p>";
+            return $"<p><strong>Due:</strong> {Encode(activity.ScheduledEndAt.Value.ToUniversalTime().ToString("u"))}</p>";
         }
 
         private static string BuildDueDateText(TeamActivity activity)
         {
-            return activity.DueAt.HasValue
-                ? $"Due: {activity.DueAt.Value.ToUniversalTime():u}"
+            return activity.ScheduledEndAt.HasValue
+                ? $"Due: {activity.ScheduledEndAt.Value.ToUniversalTime():u}"
                 : string.Empty;
+        }
+
+        private static string BuildScheduledAtBlock(TeamActivity activity)
+        {
+            if (!activity.ScheduledAt.HasValue)
+            {
+                return string.Empty;
+            }
+
+            var when = Encode(activity.ScheduledAt.Value.ToUniversalTime().ToString("u"));
+            if (activity.ScheduledEndAt.HasValue)
+            {
+                when += $" â€“ {Encode(activity.ScheduledEndAt.Value.ToUniversalTime().ToString("u"))}";
+            }
+
+            return $"<p><strong>When:</strong> {when}</p>";
+        }
+
+        private static string BuildScheduledAtText(TeamActivity activity)
+        {
+            if (!activity.ScheduledAt.HasValue)
+            {
+                return string.Empty;
+            }
+
+            var when = $"{activity.ScheduledAt.Value.ToUniversalTime():u}";
+            if (activity.ScheduledEndAt.HasValue)
+            {
+                when += $" â€“ {activity.ScheduledEndAt.Value.ToUniversalTime():u}";
+            }
+
+            return $"When: {when}";
+        }
+
+        private static string BuildMeetingLinkBlock(TeamActivity activity)
+        {
+            if (string.IsNullOrWhiteSpace(activity.MeetingLink))
+            {
+                return string.Empty;
+            }
+
+            var encodedLink = Encode(activity.MeetingLink);
+            return $"<p><a href=\"{encodedLink}\">Join the meeting</a></p>";
+        }
+
+        private static string BuildMeetingLinkText(TeamActivity activity)
+        {
+            return string.IsNullOrWhiteSpace(activity.MeetingLink)
+                ? string.Empty
+                : $"Join the meeting: {activity.MeetingLink}";
         }
     }
 }

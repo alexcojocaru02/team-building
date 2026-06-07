@@ -14,7 +14,9 @@ namespace TeamConnect.Api.Shared.DTOs
         public ActivityType ActivityType { get; set; }
 
         public List<string> Options { get; set; } = new();
-        public DateTime? DueAt { get; set; }
         public int Points { get; set; } = 10;
+        public DateTime? ScheduledAt { get; set; }
+        public DateTime? ScheduledEndAt { get; set; }
+        public string? MeetingLink { get; set; }
     }
 }

@@ -5,6 +5,7 @@ namespace TeamConnect.Api.Shared.Models
         Prompt,
         Poll,
         Trivia,
-        MiniChallenge
+        MiniChallenge,
+        SyncMeeting
     }
 }

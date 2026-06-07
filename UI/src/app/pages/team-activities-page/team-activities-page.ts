@@ -18,6 +18,7 @@ import { UsersService } from '../../services/users.service';
 import { TeamActivitiesService, CreateTeamActivityDto, SubmitTeamActivityResponseDto, TeamActivityDto, TeamActivitySummaryDto } from '../../services/team-activities.service';
 import { TeamDetailDto, UserDto } from '../../models/auth.models';
 import { CreateTeamActivityDialogComponent } from './create-team-activity-dialog.component';
+import { SyncMeetingDialogComponent, SyncMeetingDialogResult } from './sync-meeting-dialog.component';
 import { ColleagueProfileDialogComponent } from '../../shared/colleague-profile-dialog.component';
 
 type ActivityFilter = 'open' | 'closed' | 'all';
@@ -156,6 +157,52 @@ export class TeamActivitiesPage implements OnInit {
       }
 
       this.createActivity(result);
+    });
+  }
+
+  sameDay(start?: string | null, end?: string | null): boolean {
+    if (!start || !end) return false;
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+    return startDate.getFullYear() === endDate.getFullYear()
+      && startDate.getMonth() === endDate.getMonth()
+      && startDate.getDate() === endDate.getDate();
+  }
+
+  openSyncMeetingDialog(activity: TeamActivityDto): void {
+    const dialogRef = this.dialog.open(SyncMeetingDialogComponent, {
+      width: '560px',
+      maxWidth: '95vw',
+      data: {
+        activity,
+        canManage: this.canManageSelectedTeam()
+      }
+    });
+
+    dialogRef.afterClosed().pipe(takeUntilDestroyed(this.destroyRef)).subscribe((result?: SyncMeetingDialogResult) => {
+      if (!result) return;
+
+      if (result.action === 'rsvp') {
+        this.submitRsvp(activity, result.rsvpStatus);
+      } else if (result.action === 'close') {
+        this.completeActivity(activity);
+      }
+    });
+  }
+
+  private submitRsvp(activity: TeamActivityDto, rsvpStatus: 'Accepted' | 'Declined'): void {
+    const teamId = this.selectedTeamId();
+    if (!teamId) return;
+
+    this.teamActivitiesService.respondToActivity(teamId, activity.id, { rsvpStatus }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (updated) => {
+        this.activities.update(items => items.map(item => item.id === updated.id ? updated : item));
+        this.showSnackBar(`RSVP recorded: ${rsvpStatus}.`);
+      },
+      error: (error) => {
+        this.showSnackBar(this.getErrorMessage(error, 'Failed to submit RSVP.'), true);
+        console.error('Error submitting RSVP:', error);
+      }
     });
   }
 
