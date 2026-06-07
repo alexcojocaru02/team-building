@@ -9,6 +9,7 @@ namespace TeamConnect.Api.Modules.Gamification
     public class GamificationService
     {
         private const int PointsPerFeedbackGiven = 5;
+        private const int PointsPerPositiveFeedbackReceived = 10;
 
         private readonly ITeamActivityRepository _teamActivityRepository;
         private readonly IFeedbackRepository _feedbackRepository;
@@ -47,6 +48,9 @@ namespace TeamConnect.Api.Modules.Gamification
 
             var feedbackGiven = CountByUser(teamFeedback, f => f.FromUserId);
             var feedbackReceived = CountByUser(teamFeedback, f => f.ToUserId);
+            var positiveFeedbackReceived = CountByUser(
+                teamFeedback.Where(f => f.Tone == Shared.Models.FeedbackTone.Positive).ToList(),
+                f => f.ToUserId);
 
             var users = await _userRepository.FindSummariesByIdsAsync(memberIds);
 
@@ -55,6 +59,7 @@ namespace TeamConnect.Api.Modules.Gamification
                 activityPoints.TryGetValue(u.Id, out var earnedActivityPoints);
                 feedbackGiven.TryGetValue(u.Id, out var givenCount);
                 feedbackReceived.TryGetValue(u.Id, out var receivedCount);
+                positiveFeedbackReceived.TryGetValue(u.Id, out var positiveReceivedCount);
 
                 return new LeaderboardEntryDto
                 {
@@ -64,7 +69,9 @@ namespace TeamConnect.Api.Modules.Gamification
                     ActivityPoints = earnedActivityPoints,
                     FeedbackGiven = givenCount,
                     FeedbackReceived = receivedCount,
-                    TotalPoints = earnedActivityPoints + givenCount * PointsPerFeedbackGiven
+                    TotalPoints = earnedActivityPoints
+                        + givenCount * PointsPerFeedbackGiven
+                        + positiveReceivedCount * PointsPerPositiveFeedbackReceived
                 };
             })
             .OrderByDescending(e => e.TotalPoints)
