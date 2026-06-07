@@ -9,17 +9,16 @@
         </button>
         <div>
           <h1 class="tw:text-2xl tw:font-bold tw:tracking-tight tw:text-slate-900 sm:tw:text-3xl">Team Activities</h1>
-          <p class="tw:text-sm tw:text-slate-500">Async prompts, polls, and lightweight team challenges</p>
         </div>
       </div>
 
       <div class="tw:flex tw:flex-wrap tw:items-center tw:justify-end tw:gap-3">
         <span
-          class="tw:inline-flex tw:items-center tw:gap-1.5 tw:rounded-full tw:border tw:px-3 tw:py-1 tw:text-xs tw:font-medium"
+          class="tw:inline-flex tw:items-center tw:leading-none tw:gap-1.5 tw:rounded-full tw:border tw:px-3 tw:py-1 tw:text-xs tw:font-medium"
           style="border-color: var(--tc-primary); background: color-mix(in srgb, var(--tc-primary) 12%, white); color: var(--tc-primary);"
         >
-          <mat-icon class="tw:flex tw:items-center tw:justify-center tw:leading-none" inline="true" style="font-size: 16px; height: 16px; width: 16px;">stars</mat-icon>
-          Earn 10 pts for every activity you complete
+          <mat-icon class="tw:shrink-0" inline="true" style="font-size: 16px; height: 16px; width: 16px; line-height: 16px;">stars</mat-icon>
+          <span>Earn 10 pts for every activity you complete</span>
         </span>
 
         <span class="tw:hidden sm:tw:inline-flex tw:rounded-full tw:bg-white/80 tw:px-3 tw:py-1 tw:text-xs tw:font-medium tw:text-slate-600 tw:ring-1 tw:ring-slate-200">
@@ -87,7 +86,7 @@
         <div class="tw:flex tw:flex-wrap tw:items-center tw:justify-between tw:gap-3">
           <div>
             <h2 class="tw:text-xl tw:font-semibold tw:text-slate-900">Create activity</h2>
-            <p class="tw:text-sm tw:text-slate-500">Use a prompt, poll, trivia item, or mini-challenge for {{ getTeamName(selectedTeamId()) }}</p>
+            <p class="tw:text-sm tw:text-slate-500">Use a prompt, poll, trivia item, mini-challenge, or team meeting for {{ getTeamName(selectedTeamId()) }}</p>
             <p class="tw:mt-1 tw:text-xs tw:text-slate-400">Only the team owner or an admin can create and close activities.</p>
           </div>
 

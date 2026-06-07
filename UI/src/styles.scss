@@ -59,6 +59,10 @@ body {
   }
 }
 
+.mat-mdc-dialog-container .mdc-dialog__surface {
+  background-color: #ffffff !important;
+}
+
 // ── Layout ────────────────────────────────────────────────────────────────────
 .app-content {
   margin-left: var(--sidenav-width);
