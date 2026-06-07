@@ -11,6 +11,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AuthService } from '../../services/auth.service';
 import { UsersService } from '../../services/users.service';
@@ -39,6 +40,7 @@ type ActivityCategoryFilter = 'all' | 'meeting' | 'async';
     MatSnackBarModule,
     MatInputModule,
     MatIconModule,
+    MatTooltipModule,
   ],
   templateUrl: './team-activities-page.html',
   styleUrls: ['./team-activities-page.scss'],

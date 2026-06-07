@@ -41,7 +41,13 @@
             <p class="tw:text-sm tw:font-semibold tw:text-slate-700">Activity summary</p>
             <p class="tw:text-xs tw:text-slate-500">Overview of team activity metrics</p>
           </div>
-          <button mat-icon-button type="button" (click)="toggleSummary()" aria-label="Toggle summary">
+          <button
+            mat-icon-button
+            type="button"
+            (click)="toggleSummary()"
+            aria-label="Toggle summary"
+            [matTooltip]="summaryCollapsed() ? 'Show activity summary metrics' : 'Hide activity summary metrics'"
+          >
             <mat-icon>{{ summaryCollapsed() ? 'keyboard_arrow_down' : 'keyboard_arrow_up' }}</mat-icon>
           </button>
         </div>
@@ -157,7 +163,13 @@
 
               <div class="tw:flex tw:items-center tw:gap-2">
                 <span class="badge" [class.badge--positive]="activity.hasCurrentUserResponded" [class.badge--constructive]="!activity.hasCurrentUserResponded">{{ activity.hasCurrentUserResponded ? 'Responded' : 'Pending' }}</span>
-                <button mat-icon-button type="button" aria-label="Toggle activity" (click)="toggleActivityCollapse(activity.id)">
+                <button
+                  mat-icon-button
+                  type="button"
+                  aria-label="Toggle activity"
+                  [matTooltip]="isActivityCollapsed(activity.id) ? 'Show full activity details and responses' : 'Collapse activity details'"
+                  (click)="toggleActivityCollapse(activity.id)"
+                >
                   <mat-icon>{{ isActivityCollapsed(activity.id) ? 'keyboard_arrow_down' : 'keyboard_arrow_up' }}</mat-icon>
                 </button>
               </div>
@@ -279,12 +291,12 @@
                           <span class="tw:text-[11px] tw:text-slate-400">{{ response.submittedAt | date: 'short' }}</span>
                         </div>
                         @if (activity.activityType.toLowerCase() === 'syncmeeting' && response.rsvpStatus) {
-                          <span
-                            class="badge"
-                            [class.badge--positive]="response.rsvpStatus === 'Accepted'"
-                            [class.badge--critical]="response.rsvpStatus === 'Declined'"
-                            [class.badge--category]="response.rsvpStatus === 'Pending'"
-                          >{{ response.rsvpStatus }}</span>
+                          <mat-icon
+                            class="tw:!text-base"
+                            [style.color]="response.rsvpStatus === 'Accepted' ? '#059669' : response.rsvpStatus === 'Declined' ? '#dc2626' : '#94a3b8'"
+                            [attr.aria-label]="response.rsvpStatus"
+                            [matTooltip]="response.rsvpStatus"
+                          >{{ response.rsvpStatus === 'Accepted' ? 'event_available' : response.rsvpStatus === 'Declined' ? 'event_busy' : 'help_outline' }}</mat-icon>
                         }
                       </div>
                       @if (response.textResponse) {
