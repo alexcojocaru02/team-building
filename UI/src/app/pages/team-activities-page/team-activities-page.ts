@@ -4,7 +4,6 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule, ActivatedRoute } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
-import { MatChipsModule } from '@angular/material/chips';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatRadioModule } from '@angular/material/radio';
@@ -22,6 +21,7 @@ import { SyncMeetingDialogComponent, SyncMeetingDialogResult } from './sync-meet
 import { ColleagueProfileDialogComponent } from '../../shared/colleague-profile-dialog.component';
 
 type ActivityFilter = 'open' | 'closed' | 'all';
+type ActivityCategoryFilter = 'all' | 'meeting' | 'async';
 
 @Component({
   selector: 'app-team-activities-page',
@@ -32,7 +32,6 @@ type ActivityFilter = 'open' | 'closed' | 'all';
     RouterModule,
     MatButtonModule,
     MatButtonToggleModule,
-    MatChipsModule,
     MatDialogModule,
     MatFormFieldModule,
     MatRadioModule,
@@ -60,12 +59,13 @@ export class TeamActivitiesPage implements OnInit {
   activities = signal<TeamActivityDto[]>([]);
   summary = signal<TeamActivitySummaryDto | null>(null);
   // Controls whether the summary cards are collapsed
-  summaryCollapsed = signal(false);
+  summaryCollapsed = signal(true);
   isLoadingTeams = signal(true);
   isLoadingActivities = signal(false);
   isSubmitting = signal(false);
   selectedTeamId = signal('');
   activityFilter = signal<ActivityFilter>('open');
+  activityCategoryFilter = signal<ActivityCategoryFilter>('all');
   private teamDataRequestId = 0;
 
   responseDrafts = signal<Record<string, string>>({});
@@ -102,14 +102,21 @@ export class TeamActivitiesPage implements OnInit {
   });
 
   visibleActivities = computed(() => {
-    const filter = this.activityFilter();
+    const filter = this.canManageSelectedTeam() ? this.activityFilter() : 'open';
+    const categoryFilter = this.activityCategoryFilter();
     const items = this.activities();
 
-    const filtered = filter === 'all'
+    const statusFiltered = filter === 'all'
       ? items
       : filter === 'closed'
         ? items.filter(activity => activity.status === 'Closed')
         : items.filter(activity => activity.status === 'Open');
+
+    const filtered = categoryFilter === 'all'
+      ? statusFiltered
+      : categoryFilter === 'meeting'
+        ? statusFiltered.filter(activity => activity.activityType.toLowerCase() === 'syncmeeting')
+        : statusFiltered.filter(activity => activity.activityType.toLowerCase() !== 'syncmeeting');
 
     return [...filtered].sort((left, right) => {
       const leftResponded = left.hasCurrentUserResponded ? 1 : 0;
@@ -273,7 +280,7 @@ export class TeamActivitiesPage implements OnInit {
         this.activityCollapsed.update(map => {
           const copy = { ...map };
           for (const a of activities) {
-            if (!(a.id in copy)) copy[a.id] = !!a.hasCurrentUserResponded;
+            if (!(a.id in copy)) copy[a.id] = true;
             if (a.hasCurrentUserResponded) copy[a.id] = true;
           }
           return copy;
@@ -392,6 +399,15 @@ export class TeamActivitiesPage implements OnInit {
     });
   }
 
+  activityTypeLabel(activityType: string): string {
+    return activityType.toLowerCase() === 'syncmeeting' ? 'Meeting' : activityType;
+  }
+
+  displayName(userId: string, fullName: string | null | undefined, email: string | null | undefined): string {
+    if (userId === this.currentUser()?.id) return 'You';
+    return fullName || email || userId;
+  }
+
   getTeamName(teamId: string): string {
     return this.teams().find(team => team.id === teamId)?.name ?? 'Selected team';
   }
@@ -414,6 +430,10 @@ export class TeamActivitiesPage implements OnInit {
 
   setActivityFilter(filter: ActivityFilter): void {
     this.activityFilter.set(filter);
+  }
+
+  setActivityCategoryFilter(filter: ActivityCategoryFilter): void {
+    this.activityCategoryFilter.set(filter);
   }
 
   isActivityCollapsed(activityId: string): boolean {

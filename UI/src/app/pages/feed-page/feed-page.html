@@ -124,7 +124,7 @@
                 </div>
                 <div>
                   <p class="tw:text-sm tw:font-semibold tw:text-slate-900 tw:leading-tight hover:tw:underline">
-                    {{ post.authorFullName || post.authorEmail || post.authorId }}
+                    {{ displayName(post.authorId, post.authorFullName, post.authorEmail) }}
                   </p>
                   <p class="tw:text-xs tw:text-slate-400 tw:mt-0.5">{{ post.createdAt | date: 'MMM d, y · h:mm a' }}</p>
                 </div>
@@ -220,7 +220,7 @@
                         (click)="openProfile(comment.authorId)"
                         (keydown.enter)="openProfile(comment.authorId)"
                       >
-                        {{ comment.authorFullName || comment.authorEmail || comment.authorId }}
+                        {{ displayName(comment.authorId, comment.authorFullName, comment.authorEmail) }}
                       </span>
                       <span class="tw:text-xs tw:text-slate-400">{{ comment.createdAt | date: 'short' }}</span>
                       <p class="tw:mt-1 tw:text-[13px] tw:leading-5 tw:text-slate-700 tw:whitespace-pre-wrap">{{ comment.content }}</p>

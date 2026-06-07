@@ -202,6 +202,11 @@ export class FeedPage implements OnInit {
     this.expandedComments[postId] = !this.isCommentThreadVisible(postId);
   }
 
+  displayName(userId: string, fullName: string | null | undefined, email: string | null | undefined): string {
+    if (userId === this.currentUser()?.id) return 'You';
+    return fullName || email || userId;
+  }
+
   openProfile(userId: string): void {
     this.dialog.open(ColleagueProfileDialogComponent, {
       width: '480px',
