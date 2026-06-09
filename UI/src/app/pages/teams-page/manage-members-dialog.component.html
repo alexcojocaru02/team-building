@@ -12,39 +12,42 @@
     </div>
   } @else {
     <div class="tw:grid tw:grid-cols-1 lg:tw:grid-cols-2 tw:gap-6">
-      <section class="tw:rounded-xl tw:border tw:border-slate-200 tw:p-4">
+      <section class="tw:rounded-xl tw:border tw:border-slate-200 tw:p-4 tw:flex tw:flex-col tw:h-full">
         <div class="tw:flex tw:items-center tw:justify-between tw:mb-3">
           <h3 class="tw:text-lg tw:font-semibold">Current members</h3>
           <span class="tw:text-sm tw:text-slate-500">{{ memberUsers().length }} total</span>
         </div>
 
-        @if (memberUsers().length) {
-          <div class="tw:space-y-3">
-            @for (member of memberUsers(); track member.id) {
-              <div class="tw:flex tw:items-center tw:justify-between tw:gap-3 tw:rounded-lg tw:border tw:border-slate-200 tw:p-3">
-                <div>
-                  <p class="tw:font-medium">{{ displayName(member) }}</p>
-                  <p class="tw:text-sm tw:text-slate-500">{{ member.email }}</p>
+        <!-- 👇 scroll area -->
+        <div class="tw:flex-1 tw:overflow-y-auto tw:pr-2">
+          @if (memberUsers().length) {
+            <div class="tw:space-y-3">
+              @for (member of memberUsers(); track member.id) {
+                <div class="tw:flex tw:items-center tw:justify-between tw:gap-3 tw:rounded-lg tw:border tw:border-slate-200 tw:p-3">
+                  <div>
+                    <p class="tw:font-medium">{{ displayName(member) }}</p>
+                    <p class="tw:text-sm tw:text-slate-500">{{ member.email }}</p>
+                  </div>
+
+                  <div class="tw:flex tw:items-center tw:gap-2">
+                    @if (member.id === team.ownerId) {
+                      <span class="app-pill app-pill--blue">Owner</span>
+                    }
+                    <button mat-button type="button"
+                      (click)="removeMember(member.id)"
+                      [disabled]="isUpdating() || member.id === team.ownerId">
+                      Remove
+                    </button>
+                  </div>
                 </div>
-                <div class="tw:flex tw:items-center tw:gap-2">
-                  @if (member.id === team.ownerId) {
-                    <span class="app-pill app-pill--blue">Owner</span>
-                  }
-                  <button
-                    mat-button
-                    type="button"
-                    (click)="removeMember(member.id)"
-                    [disabled]="isUpdating() || member.id === team.ownerId"
-                  >
-                    Remove
-                  </button>
-                </div>
-              </div>
-            }
-          </div>
-        } @else {
-          <p class="tw:rounded-lg tw:bg-slate-50 tw:p-4 tw:text-sm tw:text-slate-600">No members found.</p>
-        }
+              }
+            </div>
+          } @else {
+            <p class="tw:rounded-lg tw:bg-slate-50 tw:p-4 tw:text-sm tw:text-slate-600">
+              No members found.
+            </p>
+          }
+        </div>
       </section>
 
       <section class="tw:rounded-xl tw:border tw:border-slate-200 tw:p-4">

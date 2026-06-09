@@ -67,4 +67,25 @@ export class ProfileViewComponent implements OnInit {
       });
     });
   }
+
+  private readonly avatarPalette = [
+    '#6366f1', '#8b5cf6', '#ec4899', '#f59e0b',
+    '#10b981', '#3b82f6', '#ef4444', '#14b8a6',
+  ];
+
+  getInitials(value: string | null | undefined): string {
+    const trimmed = (value || '').trim();
+    if (!trimmed) return 'U';
+    const parts = trimmed.split(/\s+/).filter(Boolean);
+    if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+    return trimmed.slice(0, 2).toUpperCase();
+  }
+
+  getAvatarColor(value: string | null | undefined): string {
+    const key = (value || '').trim().toLowerCase();
+    if (!key) return this.avatarPalette[0];
+    let hash = 0;
+    for (let i = 0; i < key.length; i++) hash = key.charCodeAt(i) + ((hash << 5) - hash);
+    return this.avatarPalette[Math.abs(hash) % this.avatarPalette.length];
+  }
 }
