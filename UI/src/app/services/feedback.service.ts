@@ -55,4 +55,8 @@ export class FeedbackService {
   getReceivedFeedback(): Observable<FeedbackDto[]> {
     return this.http.get<FeedbackDto[]>(`${this.apiUrl}/feedback/received`);
   }
+
+  getReceivedFeedbackForTeamMember(teamId: string, userId: string): Observable<FeedbackDto[]> {
+    return this.http.get<FeedbackDto[]>(`${this.apiUrl}/feedback/team/${teamId}/member/${userId}`);
+  }
 }

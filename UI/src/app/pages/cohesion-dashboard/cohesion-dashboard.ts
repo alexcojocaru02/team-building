@@ -13,6 +13,7 @@ import { UsersService } from '../../services/users.service';
 import { AuthService } from '../../services/auth.service';
 import { GamificationService, LeaderboardEntryDto } from '../../services/gamification.service';
 import { TeamActivitiesService, TeamActivitySummaryDto } from '../../services/team-activities.service';
+import { FeedbackService, FeedbackDto } from '../../services/feedback.service';
 import { TeamDetailDto, TeamJoinRequestDto } from '../../models/auth.models';
 
 @Component({
@@ -28,6 +29,7 @@ export class CohesionDashboard implements OnInit {
   private authService = inject(AuthService);
   private gamificationService = inject(GamificationService);
   private teamActivitiesService = inject(TeamActivitiesService);
+  private feedbackService = inject(FeedbackService);
   private snackBar = inject(MatSnackBar);
   private route = inject(ActivatedRoute);
   private dialog = inject(MatDialog);
@@ -49,6 +51,10 @@ export class CohesionDashboard implements OnInit {
 
   private currentTeamId = '';
 
+  expandedMemberId = signal<string | null>(null);
+  loadingFeedbackForMemberId = signal<string | null>(null);
+  memberFeedback = signal<Map<string, FeedbackDto[]>>(new Map());
+
   averagePoints = computed(() => {
     const list = this.members();
     if (list.length === 0) return 0;
@@ -58,6 +64,11 @@ export class CohesionDashboard implements OnInit {
   topPerformers = computed(() =>
     [...this.members()].sort((a, b) => b.totalPoints - a.totalPoints).slice(0, 3)
   );
+
+  canViewMemberFeedback = computed(() => {
+    const currentUserId = this.authService.currentUser()?.id;
+    return this.authService.isAdmin() || this.team()?.ownerId === currentUserId;
+  });
 
   needsAttention = computed(() => {
     const list = this.members();
@@ -156,6 +167,38 @@ export class CohesionDashboard implements OnInit {
       maxWidth: '95vw',
       data: { userId }
     });
+  }
+
+  toggleMemberFeedback(userId: string): void {
+    if (this.expandedMemberId() === userId) {
+      this.expandedMemberId.set(null);
+      return;
+    }
+
+    this.expandedMemberId.set(userId);
+
+    if (this.memberFeedback().has(userId)) return;
+
+    this.loadingFeedbackForMemberId.set(userId);
+    this.feedbackService.getReceivedFeedbackForTeamMember(this.currentTeamId, userId).subscribe({
+      next: (feedback) => {
+        this.memberFeedback.update(map => new Map(map).set(userId, feedback));
+        this.loadingFeedbackForMemberId.set(null);
+      },
+      error: () => {
+        this.memberFeedback.update(map => new Map(map).set(userId, []));
+        this.loadingFeedbackForMemberId.set(null);
+      }
+    });
+  }
+
+  getFeedbackToneBadgeClass(tone: string): string {
+    switch (tone) {
+      case 'Positive': return 'badge--positive';
+      case 'Constructive': return 'badge--constructive';
+      case 'Critical': return 'badge--critical';
+      default: return 'badge--category';
+    }
   }
 
   getPercentage(value: number, total: number): number {

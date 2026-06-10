@@ -200,9 +200,18 @@
                     (keydown.enter)="openProfile(member.userId)"
                   >{{ member.fullName || member.email }}</p>
                 </div>
-                <p class="tw:text-sm tw:text-slate-500">
-                  {{ member.totalPoints }} pts · {{ member.feedbackReceived }} feedback received
-                </p>
+                <div class="tw:flex tw:items-center tw:gap-3">
+                  <p class="tw:text-sm tw:text-slate-500">
+                    {{ member.totalPoints }} pts · {{ member.feedbackReceived }} feedback received
+                  </p>
+                  @if (canViewMemberFeedback()) {
+                    <button mat-icon-button type="button" class="tw:!w-8 tw:!h-8 tw:!p-0 tw:!flex tw:!items-center tw:!justify-center tw:text-slate-500"
+                      [attr.aria-label]="expandedMemberId() === member.userId ? 'Hide feedback' : 'View feedback'"
+                      (click)="toggleMemberFeedback(member.userId)">
+                      <mat-icon class="tw:!flex tw:!items-center tw:!justify-center tw:!leading-none">{{ expandedMemberId() === member.userId ? 'expand_less' : 'expand_more' }}</mat-icon>
+                    </button>
+                  }
+                </div>
               </div>
               <div class="tw:w-full tw:bg-slate-100 tw:rounded-full tw:h-2.5 tw:overflow-hidden">
                 <div
@@ -211,6 +220,31 @@
                   [style.width.%]="getPercentage(member.feedbackReceived, cohesionData()?.totalFeedbacks || 1)"
                 ></div>
               </div>
+
+              @if (canViewMemberFeedback() && expandedMemberId() === member.userId) {
+                <div class="tw:mt-3 tw:rounded-2xl tw:bg-slate-50 tw:p-3 tw:space-y-2">
+                  @if (loadingFeedbackForMemberId() === member.userId) {
+                    <p class="tw:text-sm tw:text-slate-500">Loading feedback...</p>
+                  } @else {
+                    @if ((memberFeedback().get(member.userId) ?? []).length === 0) {
+                      <p class="tw:text-sm tw:text-slate-500">No feedback received yet.</p>
+                    }
+                    @for (item of memberFeedback().get(member.userId); track item.id) {
+                      <div class="tw:rounded-xl tw:bg-white tw:p-3 tw:shadow-sm">
+                        <div class="tw:flex tw:items-center tw:justify-between tw:gap-2 tw:mb-1">
+                          <div class="tw:flex tw:items-center tw:gap-2">
+                            <span class="badge badge--category">{{ item.category }}</span>
+                            <span class="badge" [class]="getFeedbackToneBadgeClass(item.tone)">{{ item.tone }}</span>
+                          </div>
+                          <p class="tw:text-xs tw:text-slate-400">{{ item.createdAt | date: 'short' }}</p>
+                        </div>
+                        <p class="tw:text-sm tw:text-slate-700">{{ item.message }}</p>
+                        <p class="tw:text-xs tw:text-slate-400 tw:mt-1">From {{ item.fromUserFullName || item.fromUserEmail }}</p>
+                      </div>
+                    }
+                  }
+                </div>
+              }
             </div>
           }
         </div>
