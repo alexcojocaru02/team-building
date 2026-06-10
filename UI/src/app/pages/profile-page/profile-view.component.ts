@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { AuthService } from '../../services/auth.service';
 import { UsersService } from '../../services/users.service';
@@ -12,7 +13,7 @@ import { ConfirmDialogComponent } from '../teams-page/confirm-dialog.component';
 @Component({
   selector: 'app-profile-view',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, MatButtonModule, MatDialogModule],
+  imports: [CommonModule, FormsModule, RouterLink, MatButtonModule, MatIconModule, MatDialogModule],
   templateUrl: './profile-view.component.html',
   styleUrls: ['./profile-view.component.scss']
 })
@@ -36,6 +37,11 @@ export class ProfileViewComponent implements OnInit {
         }
       });
     }
+  }
+
+  isProfileIncomplete(p: UserDto): boolean {
+    return !p.bio && !p.department && !p.location && !p.icebreaker
+      && !(p.hobbies?.length) && !(p.strengths?.length);
   }
 
   editProfile() {

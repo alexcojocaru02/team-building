@@ -11,6 +11,18 @@
     </div>
   </div>
   @if (profile(); as p) {
+  @if (isProfileIncomplete(p)) {
+    <div class="tw:rounded-lg tw:bg-amber-50 tw:border tw:border-amber-200 tw:p-4 tw:mb-6 tw:flex tw:items-center tw:gap-3 tw:flex-wrap tw:justify-between">
+      <div class="tw:flex tw:items-center tw:gap-3">
+        <mat-icon style="color: #d97706;">badge</mat-icon>
+        <div>
+          <p class="tw:font-semibold tw:text-amber-900">Your profile is incomplete</p>
+          <p class="tw:text-sm tw:text-amber-700">Add a bio, hobbies and strengths so your teammates can get to know you better.</p>
+        </div>
+      </div>
+      <button mat-flat-button color="primary" type="button" (click)="editProfile()">Complete profile</button>
+    </div>
+  }
   <div class="tw:bg-white tw:rounded-lg tw:shadow-md tw:p-6 tw:mb-6">
     <div class="tw:flex tw:items-start tw:justify-between tw:mb-6">
       <div class="tw:flex tw:items-center tw:gap-4">

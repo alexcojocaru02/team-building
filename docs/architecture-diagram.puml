@@ -1,0 +1,26 @@
+@startuml TeamConnect-Architecture
+
+title TeamConnect - General Architecture (High-Level)
+
+actor User
+
+package "Frontend" {
+  [Angular App\n(UI)] as Angular
+}
+
+package "Backend" {
+  [TeamConnect.Api\n(ASP.NET Core)] as API
+}
+
+database "MongoDB\n(TeamConnectDb)" as DB
+
+cloud "SMTP Server\n(Gmail)" as SMTP
+cloud "Jira\n(future integration)" as Jira
+
+User --> Angular
+Angular --> API : HTTPS / REST API + JWT
+API --> DB : MongoDB Driver
+API --> SMTP : Email notifications
+API ..> Jira : planned
+
+@enduml
