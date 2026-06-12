@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
 using TeamConnect.Api.Modules.Feedback;
+using TeamConnect.Api.Modules.Teams;
 using TeamConnect.Api.Shared.DTOs;
 using TeamConnect.Api.Shared.Models;
 using TeamConnect.Api.Shared.Repositories;
@@ -33,9 +34,13 @@ public class FeedbackControllerTests : IClassFixture<MongoFixture>
     }
 
     private FeedbackController BuildController() =>
-        new FeedbackController(new FeedbackService(
-            new FeedbackRepository(_fixture.Context),
-            new UserRepository(_fixture.Context)));
+        new FeedbackController(
+            new FeedbackService(
+                new FeedbackRepository(_fixture.Context),
+                new UserRepository(_fixture.Context)),
+            new TeamsService(
+                new TeamRepository(_fixture.Context),
+                new UserRepository(_fixture.Context)));
 
     private static (User sender, User recipient) MakeTeammates(string teamId) => (
         new User { Id = MongoDB.Bson.ObjectId.GenerateNewId().ToString(), Email = $"s-{teamId}@ex.com", TeamIds = new List<string> { teamId } },
