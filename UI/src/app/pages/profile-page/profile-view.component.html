@@ -26,10 +26,7 @@
   <div class="tw:bg-white tw:rounded-lg tw:shadow-md tw:p-6 tw:mb-6">
     <div class="tw:flex tw:items-start tw:justify-between tw:mb-6">
       <div class="tw:flex tw:items-center tw:gap-4">
-        <div class="tw:w-16 tw:h-16 tw:rounded-full tw:flex tw:items-center tw:justify-center tw:text-white tw:text-xl tw:font-bold tw:shrink-0"
-          [style.background-color]="getAvatarColor(p.fullName || p.email)">
-          {{ getInitials(p.fullName || p.email) }}
-        </div>
+        <app-user-avatar [name]="p.fullName || p.email" [size]="64" />
         <div>
           <h2 class="tw:text-2xl tw:font-semibold">{{ p.fullName }}</h2>
           <p class="tw:text-gray-600">{{ p.email }}</p>

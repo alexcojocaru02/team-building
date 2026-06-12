@@ -18,6 +18,7 @@ export const routes: Routes = [
       { path: 'home', component: HomePage, canActivate: [authGuard] },
       { path: 'feed', component: FeedPage, canActivate: [authGuard] },
       { path: 'teams/:teamId/feedback', component: FeedbackPage, canActivate: [authGuard] },
+      { path: 'teams/:teamId/members', loadComponent: () => import('./pages/team-members-page/team-members-page').then(m => m.TeamMembersPage), canActivate: [authGuard] },
       { path: 'teams/:teamId/activities', loadComponent: () => import('./pages/team-activities-page/team-activities-page').then(m => m.TeamActivitiesPage), canActivate: [authGuard] },
       { path: 'teams/:teamId/dashboard', component: CohesionDashboard, canActivate: [authGuard] },
       { path: 'teams/:teamId/leaderboard', loadComponent: () => import('./pages/gamification-page/gamification-page').then(m => m.GamificationPage), canActivate: [authGuard] },

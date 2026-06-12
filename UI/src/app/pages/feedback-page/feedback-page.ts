@@ -13,6 +13,7 @@ import { UsersService, UserSummaryDto } from '../../services/users.service';
 import { TeamDetailDto } from '../../models/auth.models';
 import { SendFeedbackDialogComponent } from './send-feedback-dialog';
 import { ColleagueProfileDialogComponent } from '../../shared/colleague-profile-dialog.component';
+import { UserAvatarComponent } from '../../shared/user-avatar.component';
 
 @Component({
   selector: 'app-feedback-page',
@@ -25,6 +26,7 @@ import { ColleagueProfileDialogComponent } from '../../shared/colleague-profile-
     MatDividerModule,
     MatSnackBarModule,
     MatDialogModule,
+    UserAvatarComponent,
   ],
   templateUrl: './feedback-page.html',
   styleUrl: './feedback-page.scss',
@@ -152,11 +154,4 @@ export class FeedbackPage implements OnInit {
     });
   }
 
-  getInitials(name?: string): string {
-    if (!name) return '?';
-    const parts = name.trim().split(/\s+/);
-    return parts.length >= 2
-      ? (parts[0][0] + parts[1][0]).toUpperCase()
-      : name.slice(0, 2).toUpperCase();
-  }
 }

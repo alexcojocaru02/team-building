@@ -16,6 +16,7 @@ import { TeamActivitiesService, TeamActivityDto } from '../../services/team-acti
 import { TeamDetailDto, UserDto } from '../../models/auth.models';
 import { ICONS } from '../../shared/icons';
 import { ColleagueProfileDialogComponent } from '../../shared/colleague-profile-dialog.component';
+import { UserAvatarComponent } from '../../shared/user-avatar.component';
 
 export interface TeamSummary {
   team: TeamDetailDto;
@@ -26,7 +27,7 @@ export interface TeamSummary {
 @Component({
   selector: 'app-home-page',
   standalone: true,
-  imports: [CommonModule, RouterModule, MatButtonModule, MatIconModule, MatDialogModule],
+  imports: [CommonModule, RouterModule, MatButtonModule, MatIconModule, MatDialogModule, UserAvatarComponent],
   templateUrl: './home-page.html',
   styleUrl: './home-page.scss'
 })
@@ -39,12 +40,6 @@ export class HomePage implements OnInit {
   private teamActivitiesService = inject(TeamActivitiesService);
   private sanitizer = inject(DomSanitizer);
   private dialog = inject(MatDialog);
-
-  private avatarPalette = [
-    '#0ea5e9', '#2563eb', '#4f46e5', '#7c3aed', '#9333ea',
-    '#c026d3', '#db2777', '#e11d48', '#dc2626', '#ea580c',
-    '#d97706', '#65a30d', '#16a34a', '#0d9488',
-  ];
 
   currentUser = this.authService.currentUser;
 
@@ -146,22 +141,6 @@ export class HomePage implements OnInit {
 
   activityTypeLabel(activityType: string): string {
     return activityType.toLowerCase() === 'syncmeeting' ? 'Meeting' : activityType;
-  }
-
-  getInitials(name?: string): string {
-    if (!name) return '?';
-    const parts = name.trim().split(/\s+/);
-    return parts.length >= 2
-      ? (parts[0][0] + parts[1][0]).toUpperCase()
-      : name.slice(0, 2).toUpperCase();
-  }
-
-  getAvatarColor(seed: string): string {
-    let hash = 0;
-    for (let i = 0; i < seed.length; i++) {
-      hash = seed.charCodeAt(i) + ((hash << 5) - hash);
-    }
-    return this.avatarPalette[Math.abs(hash) % this.avatarPalette.length];
   }
 
   toneClass(tone: string): string {

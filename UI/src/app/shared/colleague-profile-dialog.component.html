@@ -12,15 +12,7 @@
     <p style="color: #dc2626; margin: 0;">{{ errorMessage() }}</p>
   } @else if (profile(); as p) {
     <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 20px;">
-      @if (p.avatarUrl) {
-        <div style="width: 56px; height: 56px; border-radius: 50%; overflow: hidden; flex-shrink: 0;">
-          <img [src]="p.avatarUrl" alt="Avatar" style="width: 100%; height: 100%; object-fit: cover;" />
-        </div>
-      } @else {
-        <div style="width: 56px; height: 56px; border-radius: 50%; background: #f1f5f9; color: #475569; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.25rem; flex-shrink: 0;">
-          {{ (p.fullName || p.email).charAt(0).toUpperCase() }}
-        </div>
-      }
+      <app-user-avatar [name]="p.fullName || p.email" [size]="56" />
       <div>
         <p style="font-weight: 600; color: #0f172a; margin: 0;">{{ p.fullName || p.email }}</p>
         <p style="font-size: 0.8125rem; color: #64748b; margin: 2px 0 0;">{{ p.email }}</p>

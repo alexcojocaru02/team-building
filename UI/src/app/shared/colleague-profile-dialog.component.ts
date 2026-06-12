@@ -6,6 +6,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { AuthService } from '../services/auth.service';
 import { UsersService } from '../services/users.service';
 import { UserDto } from '../models/auth.models';
+import { UserAvatarComponent } from './user-avatar.component';
 
 export interface ColleagueProfileDialogData {
   userId: string;
@@ -14,7 +15,7 @@ export interface ColleagueProfileDialogData {
 @Component({
   selector: 'app-colleague-profile-dialog',
   standalone: true,
-  imports: [CommonModule, MatDialogModule, MatButtonModule, MatIconModule],
+  imports: [CommonModule, MatDialogModule, MatButtonModule, MatIconModule, UserAvatarComponent],
   templateUrl: './colleague-profile-dialog.component.html',
   styleUrl: './colleague-profile-dialog.component.scss',
 })

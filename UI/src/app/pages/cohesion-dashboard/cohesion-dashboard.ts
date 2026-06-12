@@ -15,11 +15,12 @@ import { GamificationService, LeaderboardEntryDto } from '../../services/gamific
 import { TeamActivitiesService, TeamActivitySummaryDto } from '../../services/team-activities.service';
 import { FeedbackService, FeedbackDto } from '../../services/feedback.service';
 import { TeamDetailDto, TeamJoinRequestDto } from '../../models/auth.models';
+import { UserAvatarComponent } from '../../shared/user-avatar.component';
 
 @Component({
   selector: 'app-cohesion-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule, MatButtonModule, MatIconModule, MatSnackBarModule, MatDialogModule],
+  imports: [CommonModule, RouterModule, MatButtonModule, MatIconModule, MatSnackBarModule, MatDialogModule, UserAvatarComponent],
   templateUrl: './cohesion-dashboard.html',
   styleUrl: './cohesion-dashboard.scss',
 })
@@ -33,12 +34,6 @@ export class CohesionDashboard implements OnInit {
   private snackBar = inject(MatSnackBar);
   private route = inject(ActivatedRoute);
   private dialog = inject(MatDialog);
-
-  private avatarPalette = [
-    '#0ea5e9', '#2563eb', '#4f46e5', '#7c3aed', '#9333ea',
-    '#c026d3', '#db2777', '#e11d48', '#dc2626', '#ea580c',
-    '#d97706', '#65a30d', '#16a34a', '#0d9488',
-  ];
 
   cohesionData = signal<CohesionDashboardDto | null>(null);
   members = signal<LeaderboardEntryDto[]>([]);
@@ -203,21 +198,5 @@ export class CohesionDashboard implements OnInit {
 
   getPercentage(value: number, total: number): number {
     return total > 0 ? Math.round((value / total) * 100) : 0;
-  }
-
-  getInitials(name?: string): string {
-    if (!name) return '?';
-    const parts = name.trim().split(/\s+/).filter(Boolean);
-    return parts.length >= 2
-      ? (parts[0][0] + parts[1][0]).toUpperCase()
-      : name.slice(0, 2).toUpperCase();
-  }
-
-  getAvatarColor(seed: string): string {
-    let hash = 0;
-    for (let i = 0; i < seed.length; i++) {
-      hash = seed.charCodeAt(i) + ((hash << 5) - hash);
-    }
-    return this.avatarPalette[Math.abs(hash) % this.avatarPalette.length];
   }
 }

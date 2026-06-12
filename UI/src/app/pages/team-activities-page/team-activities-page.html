@@ -216,9 +216,7 @@
                 (click)="openProfile(activity.createdByUserId)"
                 (keydown.enter)="openProfile(activity.createdByUserId)"
               >
-                <div class="tw:flex tw:h-10 tw:w-10 tw:items-center tw:justify-center tw:rounded-full tw:text-sm tw:font-semibold tw:text-white" [style.background-color]="getAvatarColor(activity.createdByUserFullName || activity.createdByUserEmail || activity.createdByUserId)">
-                  {{ getInitials(activity.createdByUserFullName || activity.createdByUserEmail || activity.createdByUserId) }}
-                </div>
+                <app-user-avatar [name]="activity.createdByUserFullName || activity.createdByUserEmail || activity.createdByUserId" [size]="40" />
                 <div>
                   <p class="tw:text-sm tw:font-semibold tw:text-slate-900 hover:tw:underline">{{ displayName(activity.createdByUserId, activity.createdByUserFullName, activity.createdByUserEmail) }}</p>
                   <p class="tw:text-xs tw:text-slate-500">{{ activity.createdAt | date: 'medium' }}</p>

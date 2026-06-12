@@ -24,9 +24,7 @@
     <!-- Compose box -->
     <div class="feed-card tw:mb-4">
       <div class="tw:flex tw:items-start tw:gap-3">
-        <div class="avatar avatar--md" [style.background-color]="getAvatarColor(currentUser()?.fullName || currentUser()?.email)">
-          {{ getInitials(currentUser()?.fullName || currentUser()?.email) }}
-        </div>
+        <app-user-avatar [name]="currentUser()?.fullName || currentUser()?.email" [size]="44" />
         <form (ngSubmit)="submitPost()" class="tw:flex-1">
           @if (!composeExpanded()) {
             <div
@@ -116,12 +114,7 @@
                 (click)="openProfile(post.authorId)"
                 (keydown.enter)="openProfile(post.authorId)"
               >
-                <div
-                  class="avatar avatar--md"
-                  [style.background-color]="getAvatarColor(post.authorFullName || post.authorEmail || post.authorId)"
-                >
-                  {{ getInitials(post.authorFullName || post.authorEmail || post.authorId) }}
-                </div>
+                <app-user-avatar [name]="post.authorFullName || post.authorEmail || post.authorId" [size]="44" />
                 <div>
                   <p class="tw:text-sm tw:font-semibold tw:text-slate-900 tw:leading-tight hover:tw:underline">
                     {{ displayName(post.authorId, post.authorFullName, post.authorEmail) }}
@@ -203,14 +196,13 @@
                 @for (comment of post.recentComments; track comment.id) {
                   <div class="tw:flex tw:items-start tw:gap-2.5">
                     <div
-                      class="avatar avatar--sm tw:shrink-0 tw:cursor-pointer"
+                      class="tw:shrink-0 tw:cursor-pointer"
                       role="button"
                       tabindex="0"
                       (click)="openProfile(comment.authorId)"
                       (keydown.enter)="openProfile(comment.authorId)"
-                      [style.background-color]="getAvatarColor(comment.authorFullName || comment.authorEmail || comment.authorId)"
                     >
-                      {{ getInitials(comment.authorFullName || comment.authorEmail || comment.authorId) }}
+                      <app-user-avatar [name]="comment.authorFullName || comment.authorEmail || comment.authorId" [size]="32" />
                     </div>
                     <div class="comment-bubble">
                       <span
@@ -230,9 +222,7 @@
 
                 <!-- Comment input -->
                 <form (ngSubmit)="submitComment(post)" class="tw:flex tw:items-center tw:gap-2 tw:mt-2">
-                  <div class="avatar avatar--sm tw:shrink-0" [style.background-color]="getAvatarColor(currentUser()?.fullName || currentUser()?.email)">
-                    {{ getInitials(currentUser()?.fullName || currentUser()?.email) }}
-                  </div>
+                  <app-user-avatar [name]="currentUser()?.fullName || currentUser()?.email" [size]="32" class="tw:shrink-0" />
                   <div class="comment-input-wrap">
                     <input
                       [ngModel]="getCommentDraft(post.id)"

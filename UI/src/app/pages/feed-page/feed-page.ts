@@ -12,11 +12,12 @@ import { FeedService, FeedPostDto, CreateFeedPostDto } from '../../services/feed
 import { AuthService } from '../../services/auth.service';
 import { ConfirmDialogComponent } from '../teams-page/confirm-dialog.component';
 import { ColleagueProfileDialogComponent } from '../../shared/colleague-profile-dialog.component';
+import { UserAvatarComponent } from '../../shared/user-avatar.component';
 
 @Component({
   selector: 'app-feed-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, MatButtonModule, MatIconModule, MatDividerModule, MatMenuModule, MatDialogModule, MatSnackBarModule],
+  imports: [CommonModule, FormsModule, RouterModule, MatButtonModule, MatIconModule, MatDividerModule, MatMenuModule, MatDialogModule, MatSnackBarModule, UserAvatarComponent],
   templateUrl: './feed-page.html',
   styleUrl: './feed-page.scss',
 })
@@ -25,22 +26,6 @@ export class FeedPage implements OnInit {
   private authService = inject(AuthService);
   private dialog = inject(MatDialog);
   private snackBar = inject(MatSnackBar);
-  private avatarPalette = [
-    '#0ea5e9',
-    '#2563eb',
-    '#4f46e5',
-    '#7c3aed',
-    '#9333ea',
-    '#c026d3',
-    '#db2777',
-    '#e11d48',
-    '#dc2626',
-    '#ea580c',
-    '#d97706',
-    '#65a30d',
-    '#16a34a',
-    '#0d9488',
-  ];
 
   posts = signal<FeedPostDto[]>([]);
   isLoading = signal(true);
@@ -215,29 +200,4 @@ export class FeedPage implements OnInit {
     });
   }
 
-  getInitials(value: string | null | undefined): string {
-    const trimmed = (value || '').trim();
-    if (!trimmed) return 'U';
-
-    const parts = trimmed.split(/\s+/).filter(Boolean);
-    if (parts.length >= 2) {
-      return (parts[0][0] + parts[1][0]).toUpperCase();
-    }
-
-    return trimmed.slice(0, 2).toUpperCase();
-  }
-
-  getAvatarColor(value: string | null | undefined): string {
-    const key = (value || '').trim().toLowerCase();
-    if (!key) return this.avatarPalette[0];
-
-    let hash = 0;
-    for (let i = 0; i < key.length; i++) {
-      hash = (hash << 5) - hash + key.charCodeAt(i);
-      hash |= 0;
-    }
-
-    const index = Math.abs(hash) % this.avatarPalette.length;
-    return this.avatarPalette[index];
-  }
 }

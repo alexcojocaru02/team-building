@@ -222,7 +222,7 @@
                 (click)="openProfile(feedback.fromUserId)"
                 (keydown.enter)="openProfile(feedback.fromUserId)"
               >
-                <div class="avatar">{{ getInitials(feedback.fromUserFullName || feedback.fromUserEmail) }}</div>
+                <app-user-avatar [name]="feedback.fromUserFullName || feedback.fromUserEmail" [size]="36" />
                 <div>
                   <p style="font-weight: 600; color: #0f172a; margin: 0; font-size: 0.9375rem;" class="hover-underline">
                     {{ feedback.fromUserFullName || feedback.fromUserEmail || feedback.fromUserId }}

@@ -20,6 +20,7 @@ import { TeamDetailDto, UserDto } from '../../models/auth.models';
 import { CreateTeamActivityDialogComponent } from './create-team-activity-dialog.component';
 import { SyncMeetingDialogComponent, SyncMeetingDialogResult } from './sync-meeting-dialog.component';
 import { ColleagueProfileDialogComponent } from '../../shared/colleague-profile-dialog.component';
+import { UserAvatarComponent } from '../../shared/user-avatar.component';
 
 type ActivityFilter = 'open' | 'closed' | 'all';
 type ActivityCategoryFilter = 'all' | 'meeting' | 'async';
@@ -41,6 +42,7 @@ type ActivityCategoryFilter = 'all' | 'meeting' | 'async';
     MatInputModule,
     MatIconModule,
     MatTooltipModule,
+    UserAvatarComponent,
   ],
   templateUrl: './team-activities-page.html',
   styleUrls: ['./team-activities-page.scss'],
@@ -456,37 +458,6 @@ export class TeamActivitiesPage implements OnInit {
       maxWidth: '95vw',
       data: { userId }
     });
-  }
-
-  getInitials(value: string | null | undefined): string {
-    const trimmed = (value || '').trim();
-    if (!trimmed) return 'U';
-
-    const parts = trimmed.split(/\s+/).filter(Boolean);
-    if (parts.length >= 2) {
-      return (parts[0][0] + parts[1][0]).toUpperCase();
-    }
-
-    return trimmed.slice(0, 2).toUpperCase();
-  }
-
-  getAvatarColor(value: string | null | undefined): string {
-    const palette = [
-      '#0f766e', '#0ea5e9', '#2563eb', '#4f46e5', '#7c3aed',
-      '#c026d3', '#db2777', '#ea580c', '#d97706', '#16a34a'
-    ];
-
-    const key = (value || '').trim().toLowerCase();
-    if (!key) return palette[0];
-
-    let hash = 0;
-    for (let i = 0; i < key.length; i++) {
-      hash = (hash << 5) - hash + key.charCodeAt(i);
-      hash |= 0;
-    }
-
-    const index = Math.abs(hash) % palette.length;
-    return palette[index];
   }
 
   private getErrorMessage(error: unknown, fallback: string): string {
