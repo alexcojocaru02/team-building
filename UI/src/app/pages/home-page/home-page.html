@@ -1,10 +1,20 @@
-<section class="tw:min-h-screen tw:bg-gradient-to-br tw:from-blue-50 tw:to-indigo-100 tw:p-6">
-  <div class="tw:max-w-6xl tw:mx-auto">
+<section class="tw:min-h-screen tw:bg-[#f4f6f8] tw:px-4 tw:py-6 sm:tw:px-6 lg:tw:px-8">
+  <div class="tw:mx-auto tw:w-full tw:max-w-5xl">
     <!-- Header -->
-    <div class="tw:flex tw:items-center tw:justify-between tw:mb-12">
+    <div class="tw:mb-6 tw:flex tw:items-center tw:justify-between tw:gap-4 tw:flex-wrap">
       <div>
-        <h1 class="tw:text-4xl tw:font-bold tw:text-gray-900">Welcome to TeamConnect</h1>
-        <p class="tw:text-gray-600 tw:mt-2">Build stronger teams through feedback and collaboration</p>
+        <h1 class="tw:text-2xl tw:font-semibold tw:tracking-tight tw:text-slate-900 sm:tw:text-3xl">
+          Welcome back{{ currentUser()?.fullName ? ', ' + currentUser()?.fullName : '' }}!
+        </h1>
+        <p class="tw:text-sm tw:text-slate-500 tw:mt-1">
+          @if (hasMultipleTeams()) {
+            Here's a summary across your {{ teamSummaries().length }} teams.
+          } @else if (hasTeams()) {
+            Here's what's happening with <span class="tw:font-semibold tw:text-slate-700">{{ teamSummaries()[0].team.name }}</span> today.
+          } @else {
+            Build stronger teams through feedback and collaboration.
+          }
+        </p>
       </div>
       <button
         mat-flat-button
@@ -16,68 +26,151 @@
       </button>
     </div>
 
-    <!-- Main Navigation Cards -->
-    <div class="tw:grid tw:grid-cols-1 tw:md:grid-cols-2 tw:lg:grid-cols-3 tw:gap-6">
-      <!-- Feed Card -->
-      <a
-        routerLink="/feed"
-        class="tw:bg-white tw:rounded-2xl tw:shadow-lg tw:hover:shadow-xl tw:p-8 tw:transition tw:transform tw:hover:-translate-y-1 tw:cursor-pointer tw:flex tw:flex-col tw:justify-between tw:h-full"
-      >
-        <div>
-          <div class="tw:mb-4" [innerHTML]="icons.feed"></div>
-          <h2 class="tw:text-2xl tw:font-bold tw:text-gray-900 tw:mb-2">Feed</h2>
-          <p class="tw:text-gray-600">
-            Share posts, updates, and stay connected with your team.
-          </p>
-        </div>
-        <div class="tw:text-blue-600 tw:font-semibold tw:mt-4">Explore →</div>
-      </a>
-
-      <!-- Feedback Card -->
-      <a
-        routerLink="/teams"
-        class="tw:bg-white tw:rounded-2xl tw:shadow-lg tw:hover:shadow-xl tw:p-8 tw:transition tw:transform tw:hover:-translate-y-1 tw:cursor-pointer tw:flex tw:flex-col tw:justify-between tw:h-full"
-      >
-        <div>
-          <div class="tw:mb-4" [innerHTML]="icons.feedback"></div>
-          <h2 class="tw:text-2xl tw:font-bold tw:text-gray-900 tw:mb-2">Feedback</h2>
-          <p class="tw:text-gray-600">
-            Send constructive feedback and see what others think of you.
-          </p>
-        </div>
-        <div class="tw:text-blue-600 tw:font-semibold tw:mt-4">Give Feedback →</div>
-      </a>
-
-      <!-- Dashboard Card -->
-      <a
-        routerLink="/teams"
-        class="tw:bg-white tw:rounded-2xl tw:shadow-lg tw:hover:shadow-xl tw:p-8 tw:transition tw:transform tw:hover:-translate-y-1 tw:cursor-pointer tw:flex tw:flex-col tw:justify-between tw:h-full"
-      >
-        <div>
-          <div class="tw:mb-4" [innerHTML]="icons.dashboard"></div>
-          <h2 class="tw:text-2xl tw:font-bold tw:text-gray-900 tw:mb-2">Cohesion Dashboard</h2>
-          <p class="tw:text-gray-600">
-            View team cohesion metrics and feedback statistics.
-          </p>
-        </div>
-        <div class="tw:text-blue-600 tw:font-semibold tw:mt-4">View Dashboard →</div>
-      </a>
-    </div>
-
-    <!-- Quick Stats Section -->
-    <div class="tw:mt-12 tw:bg-white tw:rounded-2xl tw:shadow-lg tw:p-8">
-      <h3 class="tw:text-xl tw:font-bold tw:text-gray-900 tw:mb-6">About TeamConnect</h3>
-      <div class="tw:grid tw:grid-cols-1 tw:md:grid-cols-3 tw:gap-6">
-        <div>
-          <p class="tw:text-gray-600 tw:text-sm">TeamConnect helps remote teams build stronger connections through transparent feedback and collaborative engagement.</p>
-        </div>
-        <div>
-          <p class="tw:text-gray-600 tw:text-sm">Share your thoughts on the Feed, give feedback to teammates, and track team cohesion metrics in real-time.</p>
-        </div>
-        <div>
-          <p class="tw:text-gray-600 tw:text-sm">Built for academic research on team dynamics, but designed with practical features every team needs.</p>
-        </div>
+    <!-- Quick Stats -->
+    <div class="tw:grid tw:grid-cols-2 tw:lg:grid-cols-4 tw:gap-4 tw:mb-6">
+      <div class="tw:rounded-3xl tw:bg-white tw:p-4 tw:shadow-lg tw:shadow-slate-200/50 tw:ring-1 tw:ring-slate-200/70">
+        <p class="tw:text-xs tw:uppercase tw:tracking-wide tw:text-slate-500">Total Points</p>
+        <div class="tw:mt-2 tw:text-3xl tw:font-semibold" style="color: var(--tc-primary);">{{ totalPoints() }}</div>
+      </div>
+      <div class="tw:rounded-3xl tw:bg-white tw:p-4 tw:shadow-lg tw:shadow-slate-200/50 tw:ring-1 tw:ring-slate-200/70">
+        <p class="tw:text-xs tw:uppercase tw:tracking-wide tw:text-slate-500">Teams</p>
+        <div class="tw:mt-2 tw:text-3xl tw:font-semibold tw:text-slate-900">{{ teamSummaries().length }}</div>
+      </div>
+      <div class="tw:rounded-3xl tw:bg-white tw:p-4 tw:shadow-lg tw:shadow-slate-200/50 tw:ring-1 tw:ring-slate-200/70">
+        <p class="tw:text-xs tw:uppercase tw:tracking-wide tw:text-slate-500">Feedback Received</p>
+        <div class="tw:mt-2 tw:text-3xl tw:font-semibold tw:text-slate-900">{{ receivedFeedback().length }}</div>
+      </div>
+      <div class="tw:rounded-3xl tw:bg-white tw:p-4 tw:shadow-lg tw:shadow-slate-200/50 tw:ring-1 tw:ring-slate-200/70">
+        <p class="tw:text-xs tw:uppercase tw:tracking-wide tw:text-slate-500">Pending Activities</p>
+        <div class="tw:mt-2 tw:text-3xl tw:font-semibold tw:text-slate-900">{{ pendingActivities().length }}</div>
       </div>
     </div>
+
+    <!-- Profile completion nudge -->
+    @if (isProfileIncomplete()) {
+      <div class="tw:rounded-3xl tw:bg-white tw:p-4 tw:shadow-lg tw:shadow-slate-200/50 tw:ring-1 tw:ring-slate-200/70 tw:mb-6 tw:flex tw:items-center tw:justify-between tw:gap-4 tw:flex-wrap">
+        <div class="tw:flex tw:items-center tw:gap-3">
+          <mat-icon style="color: var(--tc-primary);">badge</mat-icon>
+          <div>
+            <p class="tw:font-semibold tw:text-slate-800 tw:text-sm">Complete your profile</p>
+            <p class="tw:text-sm tw:text-slate-500">Add a bio, your interests and strengths so your teammates can get to know you better.</p>
+          </div>
+        </div>
+        <a mat-flat-button routerLink="/profile/edit" style="background-color: var(--tc-primary); color: white;">Complete profile</a>
+      </div>
+    }
+
+    @if (isLoading()) {
+      <div class="tw:flex tw:justify-center tw:py-8">
+        <p class="tw:text-sm tw:text-slate-500">Loading your dashboard...</p>
+      </div>
+    }
+
+    @if (!isLoading()) {
+
+      <div class="tw:grid tw:grid-cols-1 tw:lg:grid-cols-2 tw:gap-6 tw:mb-6">
+        <!-- Pending Activities -->
+        <div class="tw:rounded-3xl tw:bg-white tw:p-4 tw:shadow-lg tw:shadow-slate-200/50 tw:ring-1 tw:ring-slate-200/70">
+          <div class="tw:flex tw:items-center tw:justify-between tw:mb-4">
+            <h3 class="tw:text-base tw:font-semibold tw:text-slate-900">Activities awaiting you</h3>
+          </div>
+
+          @if (upcomingActivities().length === 0) {
+            <p class="tw:text-sm tw:text-slate-500">You're all caught up — no pending activities right now.</p>
+          }
+
+          <div class="tw:space-y-3">
+            @for (activity of upcomingActivities(); track activity.id) {
+              <a
+                [routerLink]="['/teams', activity.teamId, 'activities']"
+                class="tw:block tw:rounded-2xl tw:bg-slate-50 hover:tw:bg-slate-100 tw:p-3 tw:transition"
+              >
+                <div class="tw:flex tw:items-center tw:justify-between tw:gap-2">
+                  <p class="tw:font-medium tw:text-slate-800 tw:text-sm">{{ activity.title }}</p>
+                  <span class="badge badge--category">
+                    {{ activityTypeLabel(activity.activityType) }}
+                  </span>
+                </div>
+                @if (activity.scheduledEndAt) {
+                  <p class="tw:text-xs tw:text-slate-500 tw:mt-1">Due {{ activity.scheduledEndAt | date: 'medium' }}</p>
+                }
+              </a>
+            }
+          </div>
+        </div>
+
+        <!-- Recent Feedback -->
+        <div class="tw:rounded-3xl tw:bg-white tw:p-4 tw:shadow-lg tw:shadow-slate-200/50 tw:ring-1 tw:ring-slate-200/70">
+          <div class="tw:flex tw:items-center tw:justify-between tw:mb-4">
+            <h3 class="tw:text-base tw:font-semibold tw:text-slate-900">Recent feedback for you</h3>
+            @if (primaryTeamId()) {
+              <a [routerLink]="['/teams', primaryTeamId(), 'feedback']" class="tw:text-sm tw:font-semibold tw:text-[#2E8B57] hover:tw:underline">View all</a>
+            }
+          </div>
+
+          @if (recentFeedback().length === 0) {
+            <p class="tw:text-sm tw:text-slate-500">No feedback yet — encourage your teammates to share some!</p>
+          }
+
+          <div class="tw:space-y-3">
+            @for (item of recentFeedback(); track item.id) {
+              <div class="tw:rounded-2xl tw:bg-slate-50 tw:p-3">
+                <div class="tw:flex tw:items-center tw:justify-between tw:gap-2">
+                  <p
+                    class="tw:text-sm tw:font-semibold tw:text-slate-800 tw:cursor-pointer hover:tw:underline"
+                    role="button"
+                    tabindex="0"
+                    (click)="openProfile(item.fromUserId)"
+                    (keydown.enter)="openProfile(item.fromUserId)"
+                  >{{ item.fromUserFullName || item.fromUserEmail }}</p>
+                  <span class="tw:rounded-full tw:text-xs tw:font-medium tw:px-2 tw:py-0.5" [ngClass]="toneClass(item.tone)">{{ item.tone }}</span>
+                </div>
+                <p class="tw:text-sm tw:text-slate-600 tw:mt-1 tw:line-clamp-2">{{ item.message }}</p>
+                <p class="tw:text-xs tw:text-slate-400 tw:mt-1">{{ item.category }} · {{ item.createdAt | date: 'short' }}</p>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Feed Activity -->
+      <div class="tw:rounded-3xl tw:bg-white tw:p-4 tw:shadow-lg tw:shadow-slate-200/50 tw:ring-1 tw:ring-slate-200/70 tw:mb-6">
+        <div class="tw:flex tw:items-center tw:justify-between tw:mb-4">
+          <h3 class="tw:text-base tw:font-semibold tw:text-slate-900">Latest from the feed</h3>
+          <a routerLink="/feed" class="tw:text-sm tw:font-semibold tw:text-[#2E8B57] hover:tw:underline">View all</a>
+        </div>
+
+        @if (latestPosts().length === 0) {
+          <p class="tw:text-sm tw:text-slate-500">No posts yet — be the first to share something!</p>
+        }
+
+        <div class="tw:space-y-3">
+          @for (post of latestPosts(); track post.id) {
+            <div class="tw:flex tw:items-start tw:gap-3 tw:rounded-2xl tw:bg-slate-50 tw:p-3">
+              <div
+                class="tw:cursor-pointer"
+                role="button"
+                tabindex="0"
+                (click)="openProfile(post.authorId)"
+                (keydown.enter)="openProfile(post.authorId)"
+              >
+                <app-user-avatar [name]="post.authorFullName || post.authorEmail" [size]="36" />
+              </div>
+              <div class="tw:min-w-0">
+                <p
+                  class="tw:text-sm tw:font-semibold tw:text-slate-800 tw:cursor-pointer hover:tw:underline tw:inline-block"
+                  role="button"
+                  tabindex="0"
+                  (click)="openProfile(post.authorId)"
+                  (keydown.enter)="openProfile(post.authorId)"
+                >{{ post.authorFullName || post.authorEmail }}</p>
+                <p class="tw:text-sm tw:text-slate-600 tw:line-clamp-2">{{ post.content }}</p>
+                <p class="tw:text-xs tw:text-slate-400 tw:mt-1">{{ post.createdAt | date: 'short' }} · {{ post.likesCount }} likes · {{ post.commentsCount }} comments</p>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    }
   </div>
 </section>

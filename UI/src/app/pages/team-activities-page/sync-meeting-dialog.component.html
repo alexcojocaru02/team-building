@@ -1,0 +1,98 @@
+<div class="tw:p-6 tw:max-w-full">
+  <div class="tw:mb-1 tw:flex tw:items-center tw:gap-2">
+    <mat-icon class="tw:text-sky-600">groups</mat-icon>
+    <h2 class="tw:text-2xl tw:font-semibold">{{ activity.title }}</h2>
+  </div>
+  <p class="tw:text-sm tw:text-slate-500 tw:mb-5">Team meeting</p>
+
+  <div class="tw:space-y-3 tw:mb-5">
+    <div class="tw:flex tw:items-center tw:gap-3 tw:rounded-2xl tw:bg-slate-500/[0.08] tw:px-4 tw:py-3">
+      <mat-icon class="tw:text-slate-500">schedule</mat-icon>
+      <div>
+        <p class="tw:text-xs tw:uppercase tw:tracking-wide tw:text-slate-500">When</p>
+        <p class="tw:text-sm tw:font-medium tw:text-slate-800">
+          @if (activity.scheduledAt) {
+            {{ activity.scheduledAt | date: 'medium' }}
+            @if (activity.scheduledEndAt) {
+              – {{ activity.scheduledEndAt | date: (sameDay(activity.scheduledAt, activity.scheduledEndAt) ? 'shortTime' : 'medium') }}
+            }
+          } @else {
+            Not scheduled
+          }
+        </p>
+      </div>
+    </div>
+
+    @if (activity.meetingLink) {
+      <div class="tw:flex tw:items-center tw:gap-3 tw:rounded-2xl tw:bg-slate-500/[0.08] tw:px-4 tw:py-3">
+        <mat-icon class="tw:text-slate-500">videocam</mat-icon>
+        <div class="tw:min-w-0 tw:flex-1">
+          <p class="tw:text-xs tw:uppercase tw:tracking-wide tw:text-slate-500">Meeting link</p>
+          <p class="tw:truncate tw:text-sm tw:font-medium tw:text-sky-700">{{ activity.meetingLink }}</p>
+        </div>
+        <button mat-flat-button color="primary" type="button" class="tw:!rounded-2xl" (click)="joinMeeting()">
+          Join
+        </button>
+      </div>
+    }
+
+    <div class="tw:rounded-2xl tw:bg-slate-500/[0.08] tw:px-4 tw:py-3">
+      <p class="tw:text-xs tw:uppercase tw:tracking-wide tw:text-slate-500 tw:mb-1">Description</p>
+      <p class="tw:whitespace-pre-wrap tw:text-sm tw:leading-6 tw:text-slate-700">{{ activity.description }}</p>
+    </div>
+
+    <div class="tw:flex tw:items-center tw:gap-2">
+      <mat-chip color="primary">{{ activity.points }} pts</mat-chip>
+      <mat-chip [color]="activity.status === 'Open' ? 'accent' : undefined">{{ activity.status }}</mat-chip>
+      <mat-chip class="tw:!bg-emerald-50 tw:!text-emerald-700">{{ activity.acceptedCount }} accepted</mat-chip>
+      <mat-chip class="tw:!bg-rose-50 tw:!text-rose-700">{{ activity.declinedCount }} declined</mat-chip>
+    </div>
+  </div>
+
+  @if (activity.status === 'Open') {
+    <div class="tw:mb-5">
+      <p class="tw:mb-2 tw:text-sm tw:font-medium tw:text-slate-700">Will you attend?</p>
+      <div class="tw:flex tw:gap-2">
+        @if (activity.currentUserRsvpStatus === 'Accepted') {
+          <button mat-flat-button color="primary" type="button" class="tw:!rounded-2xl tw:!px-5" (click)="rsvp('Accepted')">
+            <mat-icon>check</mat-icon>
+            Accept
+          </button>
+        } @else {
+          <button mat-stroked-button type="button" class="tw:!rounded-2xl tw:!px-5" (click)="rsvp('Accepted')">
+            <mat-icon>check</mat-icon>
+            Accept
+          </button>
+        }
+
+        @if (activity.currentUserRsvpStatus === 'Declined') {
+          <button mat-flat-button color="warn" type="button" class="tw:!rounded-2xl tw:!px-5" (click)="rsvp('Declined')">
+            <mat-icon>close</mat-icon>
+            Decline
+          </button>
+        } @else {
+          <button mat-stroked-button type="button" class="tw:!rounded-2xl tw:!px-5" (click)="rsvp('Declined')">
+            <mat-icon>close</mat-icon>
+            Decline
+          </button>
+        }
+      </div>
+      @if (activity.currentUserRsvpStatus && activity.currentUserRsvpStatus !== 'Pending') {
+        <p class="tw:mt-2 tw:text-xs tw:text-slate-500">
+          You responded: <span class="tw:font-semibold">{{ activity.currentUserRsvpStatus }}</span>
+        </p>
+      }
+    </div>
+  } @else {
+    <div class="tw:mb-5 tw:rounded-2xl tw:bg-emerald-50 tw:px-4 tw:py-3 tw:text-sm tw:text-emerald-700">
+      This meeting has ended or was closed.
+    </div>
+  }
+
+  <div class="tw:flex tw:justify-end tw:gap-2">
+    @if (canManage && activity.status === 'Open') {
+      <button mat-stroked-button type="button" (click)="closeMeeting()">Close meeting</button>
+    }
+    <button mat-button type="button" (click)="close()">Done</button>
+  </div>
+</div>

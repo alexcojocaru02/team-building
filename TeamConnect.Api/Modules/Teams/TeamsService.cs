@@ -1,4 +1,5 @@
 using TeamConnect.Api.Modules.Auth;
+using TeamConnect.Api.Modules.TeamActivities;
 using TeamConnect.Api.Shared.DTOs;
 using TeamConnect.Api.Shared.Models;
 using TeamConnect.Api.Shared.Repositories;
@@ -11,6 +12,7 @@ namespace TeamConnect.Api.Modules.Teams
         private readonly ITeamRepository _teamRepository;
         private readonly IUserRepository _userRepository;
         private readonly ITeamJoinRequestRepository? _joinRequestRepository;
+        private readonly ITeamActivityRepository? _teamActivityRepository;
         private readonly JwtService? _jwtService;
         private readonly INotificationService? _notificationService;
 
@@ -18,12 +20,14 @@ namespace TeamConnect.Api.Modules.Teams
             ITeamRepository teamRepository,
             IUserRepository userRepository,
             ITeamJoinRequestRepository? joinRequestRepository = null,
+            ITeamActivityRepository? teamActivityRepository = null,
             JwtService? jwtService = null,
             INotificationService? notificationService = null)
         {
             _teamRepository = teamRepository;
             _userRepository = userRepository;
             _joinRequestRepository = joinRequestRepository;
+            _teamActivityRepository = teamActivityRepository;
             _jwtService = jwtService;
             _notificationService = notificationService;
         }
@@ -140,6 +144,8 @@ namespace TeamConnect.Api.Modules.Teams
             await _userRepository.RemoveTeamFromAllUsersAsync(id);
             if (_joinRequestRepository != null)
                 await _joinRequestRepository.DeleteByTeamIdAsync(id);
+            if (_teamActivityRepository != null)
+                await _teamActivityRepository.DeleteByTeamIdAsync(id);
             return true;
         }
 

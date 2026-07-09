@@ -7,6 +7,7 @@ namespace TeamConnect.Api.Shared.DTOs
         public string? UserEmail { get; set; }
         public string? TextResponse { get; set; }
         public int? SelectedOptionIndex { get; set; }
+        public string? RsvpStatus { get; set; }
         public DateTime SubmittedAt { get; set; }
     }
 }

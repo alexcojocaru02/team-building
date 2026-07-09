@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { CohesionDashboard } from './growth-page';
+import { CohesionDashboard } from './cohesion-dashboard';
 
 describe('CohesionDashboard', () => {
   let component: CohesionDashboard;

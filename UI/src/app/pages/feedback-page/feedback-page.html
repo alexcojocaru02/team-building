@@ -1,146 +1,251 @@
-<section class="tw:min-h-screen tw:bg-gradient-to-br tw:from-blue-50 tw:to-indigo-100 tw:p-6">
-  <div class="tw:max-w-2xl tw:mx-auto">
+<div class="feedback-page">
+  <div style="max-width: 700px; margin: 0 auto;">
+
     <!-- Header -->
-    <div class="tw:flex tw:items-center tw:mb-8">
-      <button mat-icon-button type="button" routerLink="/" class="tw:mr-4" aria-label="Back to home">
-        <svg class="tw:w-6 tw:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-        </svg>
-      </button>
-      <h1 class="tw:text-3xl tw:font-bold tw:text-gray-800">Feedback</h1>
-    </div>
-
-    <!-- Tabs -->
-    <div class="tw:flex tw:gap-4 tw:mb-6">
-      <button
-        mat-button
-        type="button"
-        (click)="activeTab.set('send')"
-        [class.tw:border-b-2]="activeTab() === 'send'"
-        [class.tw:border-blue-600]="activeTab() === 'send'"
-        [class.tw:text-blue-600]="activeTab() === 'send'"
-        class="tw:pb-2 tw:font-semibold tw:text-gray-600 tw:transition"
-      >
-        Send Feedback
-      </button>
-      <button
-        mat-button
-        type="button"
-        (click)="activeTab.set('received')"
-        [class.tw:border-b-2]="activeTab() === 'received'"
-        [class.tw:border-blue-600]="activeTab() === 'received'"
-        [class.tw:text-blue-600]="activeTab() === 'received'"
-        class="tw:pb-2 tw:font-semibold tw:text-gray-600 tw:transition"
-      >
-        Received Feedback
-      </button>
-    </div>
-
-    <!-- Error Message -->
-    @if (errorMessage()) {
-      <div class="tw:mb-6 tw:p-4 tw:bg-red-50 tw:border tw:border-red-200 tw:rounded-lg">
-        <p class="tw:text-red-600">{{ errorMessage() }}</p>
-      </div>
-    }
-
-    <!-- Success Message -->
-    @if (successMessage()) {
-      <div class="tw:mb-6 tw:p-4 tw:bg-green-50 tw:border tw:border-green-200 tw:rounded-lg">
-        <p class="tw:text-green-600">{{ successMessage() }}</p>
-      </div>
-    }
-
-    <!-- Send Feedback Tab -->
-    @if (activeTab() === 'send') {
-      <div class="tw:bg-white tw:rounded-2xl tw:shadow-lg tw:p-6">
-        <h2 class="tw:text-lg tw:font-semibold tw:text-gray-800 tw:mb-4">Share feedback with a colleague</h2>
-        <form (ngSubmit)="submitFeedback()" class="tw:space-y-4">
-          <!-- Select recipient -->
-          <div>
-            <label class="tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:mb-1">
-              Select colleague
-            </label>
-            @if (users().length === 0) {
-              <p class="tw:text-sm tw:text-gray-500 tw:mb-2">No colleagues available yet.</p>
-            }
-            <select
-              [ngModel]="toUserId()"
-              (ngModelChange)="toUserId.set($event)"
-              name="toUserId"
-              required
-              [disabled]="users().length === 0"
-              class="tw:w-full tw:px-4 tw:py-2 tw:border tw:border-gray-300 tw:rounded-lg tw:focus:ring-2 tw:focus:ring-blue-500 tw:focus:border-transparent tw:outline-none"
-            >
-              <option value="">-- Choose a colleague --</option>
-              @for (user of users(); track user.id) {
-                <option [value]="user.id">{{ user.fullName || user.email }}</option>
-              }
-            </select>
-          </div>
-
-          <!-- Feedback message -->
-          <div>
-            <label class="tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:mb-1">
-              Your feedback
-            </label>
-            <textarea
-              [ngModel]="feedbackMessage()"
-              (ngModelChange)="feedbackMessage.set($event)"
-              name="message"
-              placeholder="Share constructive feedback..."
-              rows="5"
-              required
-              class="tw:w-full tw:px-4 tw:py-3 tw:border tw:border-gray-300 tw:rounded-lg tw:focus:ring-2 tw:focus:ring-blue-500 tw:focus:border-transparent tw:outline-none tw:resize-none"
-            ></textarea>
-          </div>
-
-          <!-- Submit button -->
-          <div class="tw:flex tw:justify-end">
-            <button
-              mat-flat-button
-              color="primary"
-              type="submit"
-              [disabled]="isSubmitting() || !toUserId() || !feedbackMessage().trim()"
-              class="tw:disabled:opacity-50 tw:disabled:cursor-not-allowed"
-            >
-              {{ isSubmitting() ? 'Sending...' : 'Send Feedback' }}
-            </button>
-          </div>
-        </form>
-      </div>
-    }
-
-    <!-- Received Feedback Tab -->
-    @if (activeTab() === 'received') {
-      <div>
-        @if (isLoadingFeedback()) {
-          <div class="tw:flex tw:justify-center tw:py-12">
-            <div class="tw:text-gray-600">Loading feedback...</div>
-          </div>
-        }
-
-        @if (!isLoadingFeedback()) {
-          @if (receivedFeedback().length === 0) {
-            <div class="tw:bg-white tw:rounded-2xl tw:shadow-lg tw:p-8 tw:text-center">
-              <p class="tw:text-gray-500">No feedback received yet.</p>
-            </div>
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px;">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <button mat-icon-button type="button" routerLink="/" aria-label="Back to home">
+          <mat-icon>arrow_back</mat-icon>
+        </button>
+        <div>
+          <h1 style="font-size: 1.5rem; font-weight: 700; color: #0f172a; margin: 0;">Feedback</h1>
+          @if (team()) {
+            <p style="font-size: 0.8125rem; color: #64748b; margin: 0;">
+              Team: <strong style="color: #334155;">{{ team()!.name }}</strong>
+            </p>
           }
+        </div>
+      </div>
+      <button
+        mat-flat-button
+        color="primary"
+        style="border-radius: 24px; font-weight: 600;"
+        (click)="openSendDialog()"
+      >
+        Give Feedback
+      </button>
+    </div>
 
-          <div class="tw:space-y-4">
-            @for (feedback of receivedFeedback(); track feedback.id) {
-              <div class="tw:bg-white tw:rounded-2xl tw:shadow-lg tw:p-6">
-                <div class="tw:flex tw:items-start tw:justify-between tw:mb-3">
-                  <div>
-                    <p class="tw:font-semibold tw:text-gray-900">From: {{ feedback.fromUserFullName || feedback.fromUserEmail || feedback.fromUserId }}</p>
-                    <p class="tw:text-sm tw:text-gray-500">{{ feedback.createdAt | date: 'short' }}</p>
-                  </div>
+    <!-- Overview section — only when there's data -->
+    @if (!isLoadingFeedback() && receivedFeedback().length > 0) {
+
+      <!-- Tone stat cards -->
+      <div class="overview-grid" style="margin-bottom: 20px;" data-testid="stat-cards">
+        <div class="stat-card" data-testid="stat-card-total">
+          <div class="stat-icon" style="background: #ede9fe; color: #6d28d9;">
+            <mat-icon>forum</mat-icon>
+          </div>
+          <div>
+            <p class="stat-value">{{ receivedFeedback().length }}</p>
+            <p class="stat-label">Total</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background: #d1fae5; color: #065f46;">
+            <mat-icon>thumb_up</mat-icon>
+          </div>
+          <div>
+            <p class="stat-value">{{ toneCount('Positive') }}</p>
+            <p class="stat-label">Positive</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background: #dbeafe; color: #1e40af;">
+            <mat-icon>build</mat-icon>
+          </div>
+          <div>
+            <p class="stat-value">{{ toneCount('Constructive') }}</p>
+            <p class="stat-label">Constructive</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background: #ffedd5; color: #9a3412;">
+            <mat-icon>priority_high</mat-icon>
+          </div>
+          <div>
+            <p class="stat-value">{{ toneCount('Critical') }}</p>
+            <p class="stat-label">Critical</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Category breakdown with per-tone counts -->
+      <div class="feedback-card" style="margin-bottom: 24px;">
+        <p style="font-size: 0.875rem; font-weight: 600; color: #374151; margin: 0 0 16px 0;">By category</p>
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+          @for (cat of categories; track cat.value) {
+            @if (categoryCount(cat.value) > 0) {
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <p style="font-size: 0.8125rem; color: #64748b; margin: 0; width: 116px; flex-shrink: 0;">{{ cat.label }}</p>
+                <!-- Stacked bar -->
+                <div style="flex: 1; background: #f1f5f9; border-radius: 6px; height: 8px; overflow: hidden; display: flex;">
+                  @if (categoryToneCount(cat.value, 'Positive') > 0) {
+                    <div
+                      [style.flex]="categoryToneCount(cat.value, 'Positive')"
+                      style="background: #34d399; height: 100%;"
+                      [title]="categoryToneCount(cat.value, 'Positive') + ' positive'"
+                    ></div>
+                  }
+                  @if (categoryToneCount(cat.value, 'Constructive') > 0) {
+                    <div
+                      [style.flex]="categoryToneCount(cat.value, 'Constructive')"
+                      style="background: #60a5fa; height: 100%;"
+                      [title]="categoryToneCount(cat.value, 'Constructive') + ' constructive'"
+                    ></div>
+                  }
+                  @if (categoryToneCount(cat.value, 'Critical') > 0) {
+                    <div
+                      [style.flex]="categoryToneCount(cat.value, 'Critical')"
+                      style="background: #fb923c; height: 100%;"
+                      [title]="categoryToneCount(cat.value, 'Critical') + ' critical'"
+                    ></div>
+                  }
                 </div>
-                <p class="tw:text-gray-700">{{ feedback.message }}</p>
+                <!-- Tone mini-badges -->
+                <div style="display: flex; gap: 4px; flex-shrink: 0;">
+                  @if (categoryToneCount(cat.value, 'Positive') > 0) {
+                    <span class="mini-badge mini-badge--positive">{{ categoryToneCount(cat.value, 'Positive') }}</span>
+                  }
+                  @if (categoryToneCount(cat.value, 'Constructive') > 0) {
+                    <span class="mini-badge mini-badge--constructive">{{ categoryToneCount(cat.value, 'Constructive') }}</span>
+                  }
+                  @if (categoryToneCount(cat.value, 'Critical') > 0) {
+                    <span class="mini-badge mini-badge--critical">{{ categoryToneCount(cat.value, 'Critical') }}</span>
+                  }
+                </div>
               </div>
             }
+          }
+        </div>
+        <!-- Legend -->
+        <div style="display: flex; gap: 16px; margin-top: 14px; padding-top: 14px; border-top: 1px solid #f1f5f9;">
+          <div style="display: flex; align-items: center; gap: 5px;">
+            <div style="width: 10px; height: 10px; border-radius: 2px; background: #34d399;"></div>
+            <span style="font-size: 0.75rem; color: #64748b;">Positive</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 5px;">
+            <div style="width: 10px; height: 10px; border-radius: 2px; background: #60a5fa;"></div>
+            <span style="font-size: 0.75rem; color: #64748b;">Constructive</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 5px;">
+            <div style="width: 10px; height: 10px; border-radius: 2px; background: #fb923c;"></div>
+            <span style="font-size: 0.75rem; color: #64748b;">Critical</span>
+          </div>
+        </div>
+      </div>
+
+    }
+
+    <!-- List heading + tone filter -->
+    <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; flex-wrap: wrap;">
+      <p style="font-size: 1rem; font-weight: 600; color: #0f172a; margin: 0;">Received feedback</p>
+      @if (!isLoadingFeedback() && receivedFeedback().length > 0) {
+        <div style="display: flex; gap: 6px; flex-wrap: wrap;" data-testid="tone-filter-chips">
+          <button
+            class="filter-chip"
+            [class.filter-chip--active]="selectedTone() === null"
+            (click)="selectedTone.set(null)"
+            data-testid="filter-chip-all"
+          >All</button>
+          <button
+            class="filter-chip filter-chip--positive"
+            [class.filter-chip--active]="selectedTone() === 'Positive'"
+            (click)="toggleToneFilter('Positive')"
+            data-testid="filter-chip-positive"
+          >Positive</button>
+          <button
+            class="filter-chip filter-chip--constructive"
+            [class.filter-chip--active]="selectedTone() === 'Constructive'"
+            (click)="toggleToneFilter('Constructive')"
+            data-testid="filter-chip-constructive"
+          >Constructive</button>
+          <button
+            class="filter-chip filter-chip--critical"
+            [class.filter-chip--active]="selectedTone() === 'Critical'"
+            (click)="toggleToneFilter('Critical')"
+            data-testid="filter-chip-critical"
+          >Critical</button>
+        </div>
+      }
+    </div>
+
+    <!-- Skeleton loader -->
+    @if (isLoadingFeedback()) {
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        @for (i of [1, 2, 3]; track i) {
+          <div class="received-item" style="animation: pulse 1.5s infinite;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+              <div style="height: 12px; width: 140px; background: #e2e8f0; border-radius: 6px;"></div>
+              <div style="display: flex; gap: 8px;">
+                <div style="height: 20px; width: 72px; background: #f1f5f9; border-radius: 12px;"></div>
+                <div style="height: 20px; width: 60px; background: #f1f5f9; border-radius: 12px;"></div>
+              </div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+              <div style="height: 12px; width: 100%; background: #f1f5f9; border-radius: 6px;"></div>
+              <div style="height: 12px; width: 75%; background: #f1f5f9; border-radius: 6px;"></div>
+            </div>
           </div>
         }
       </div>
     }
+
+    <!-- Empty state -->
+    @if (!isLoadingFeedback() && receivedFeedback().length === 0) {
+      <div class="feedback-card" style="text-align: center; padding: 48px 24px;">
+        <mat-icon style="font-size: 52px; width: 52px; height: 52px; color: #cbd5e1; margin-bottom: 12px; display: block;">inbox</mat-icon>
+        <p style="font-size: 1rem; font-weight: 600; color: #374151; margin: 0 0 6px;">No feedback yet</p>
+        <p style="font-size: 0.875rem; color: #64748b; margin: 0 0 20px;">When colleagues send you feedback, it will appear here.</p>
+        <button mat-stroked-button color="primary" style="border-radius: 24px;" (click)="openSendDialog()">
+          Be the first — give feedback
+        </button>
+      </div>
+    }
+
+    <!-- Filter empty state -->
+    @if (!isLoadingFeedback() && receivedFeedback().length > 0 && filteredFeedback().length === 0) {
+      <div class="feedback-card" style="text-align: center; padding: 32px 24px;">
+        <p style="font-size: 0.9375rem; color: #64748b; margin: 0;">No {{ selectedTone()?.toLowerCase() }} feedback received yet.</p>
+      </div>
+    }
+
+    <!-- Feedback list -->
+    @if (!isLoadingFeedback() && filteredFeedback().length > 0) {
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        @for (feedback of filteredFeedback(); track feedback.id) {
+          <article class="received-item">
+            <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 10px;">
+              <div
+                style="display: flex; align-items: center; gap: 10px; cursor: pointer;"
+                role="button"
+                tabindex="0"
+                (click)="openProfile(feedback.fromUserId)"
+                (keydown.enter)="openProfile(feedback.fromUserId)"
+              >
+                <app-user-avatar [name]="feedback.fromUserFullName || feedback.fromUserEmail" [size]="36" />
+                <div>
+                  <p style="font-weight: 600; color: #0f172a; margin: 0; font-size: 0.9375rem;" class="hover-underline">
+                    {{ feedback.fromUserFullName || feedback.fromUserEmail || feedback.fromUserId }}
+                  </p>
+                  <p style="font-size: 0.75rem; color: #94a3b8; margin: 2px 0 0;">{{ feedback.createdAt | date: 'MMM d, y · h:mm a' }}</p>
+                </div>
+              </div>
+              <div style="display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; flex-shrink: 0;">
+                <span class="badge badge--category">{{ getCategoryLabel(feedback.category) }}</span>
+                <span
+                  class="badge"
+                  [class.badge--positive]="feedback.tone === 'Positive'"
+                  [class.badge--constructive]="feedback.tone === 'Constructive'"
+                  [class.badge--critical]="feedback.tone === 'Critical'"
+                >{{ feedback.tone }}</span>
+              </div>
+            </div>
+            <mat-divider style="margin-bottom: 10px;"></mat-divider>
+            <p style="font-size: 0.9375rem; color: #334155; line-height: 1.65; margin: 0;">{{ feedback.message }}</p>
+          </article>
+        }
+      </div>
+    }
+
   </div>
-</section>
+</div>

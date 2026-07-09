@@ -35,5 +35,8 @@ namespace TeamConnect.Api.Modules.TeamActivities
 
         public Task CompleteAsync(TeamActivity activity) =>
             _context.TeamActivities.ReplaceOneAsync(a => a.Id == activity.Id, activity);
+
+        public Task DeleteByTeamIdAsync(string teamId) =>
+            _context.TeamActivities.DeleteManyAsync(a => a.TeamId == teamId);
     }
 }

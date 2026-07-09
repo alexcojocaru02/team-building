@@ -1,4 +1,4 @@
-<section class="tw:min-h-screen tw:bg-[radial-gradient(circle_at_top,_#e0f2fe,_#eef2ff_45%,_#f8fafc)] tw:px-4 tw:py-6 sm:tw:px-6 lg:tw:px-8">
+<section class="tw:min-h-screen tw:bg-[#f4f6f8] tw:px-4 tw:py-6 sm:tw:px-6 lg:tw:px-8">
   <div class="tw:mx-auto tw:w-full tw:max-w-3xl">
     <div class="tw:mb-6 tw:flex tw:items-center tw:justify-between tw:gap-4">
       <div class="tw:flex tw:items-center tw:gap-3">
@@ -9,11 +9,18 @@
         </button>
         <div>
           <h1 class="tw:text-2xl tw:font-bold tw:tracking-tight tw:text-slate-900 sm:tw:text-3xl">Team Activities</h1>
-          <p class="tw:text-sm tw:text-slate-500">Async prompts, polls, and lightweight team challenges</p>
         </div>
       </div>
 
       <div class="tw:flex tw:flex-wrap tw:items-center tw:justify-end tw:gap-3">
+        <span
+          class="tw:inline-flex tw:items-center tw:leading-none tw:gap-1.5 tw:rounded-full tw:border tw:px-3 tw:py-1 tw:text-xs tw:font-medium"
+          style="border-color: var(--tc-primary); background: color-mix(in srgb, var(--tc-primary) 12%, white); color: var(--tc-primary);"
+        >
+          <mat-icon class="tw:shrink-0" inline="true" style="font-size: 16px; height: 16px; width: 16px; line-height: 16px;">stars</mat-icon>
+          <span>Earn 10 pts for every activity you complete</span>
+        </span>
+
         <span class="tw:hidden sm:tw:inline-flex tw:rounded-full tw:bg-white/80 tw:px-3 tw:py-1 tw:text-xs tw:font-medium tw:text-slate-600 tw:ring-1 tw:ring-slate-200">
           {{ visibleActivities().length }} activities
         </span>
@@ -33,7 +40,13 @@
             <p class="tw:text-sm tw:font-semibold tw:text-slate-700">Activity summary</p>
             <p class="tw:text-xs tw:text-slate-500">Overview of team activity metrics</p>
           </div>
-          <button mat-icon-button type="button" (click)="toggleSummary()" aria-label="Toggle summary">
+          <button
+            mat-icon-button
+            type="button"
+            (click)="toggleSummary()"
+            aria-label="Toggle summary"
+            [matTooltip]="summaryCollapsed() ? 'Show activity summary metrics' : 'Hide activity summary metrics'"
+          >
             <mat-icon>{{ summaryCollapsed() ? 'keyboard_arrow_down' : 'keyboard_arrow_up' }}</mat-icon>
           </button>
         </div>
@@ -73,7 +86,7 @@
         <div class="tw:flex tw:flex-wrap tw:items-center tw:justify-between tw:gap-3">
           <div>
             <h2 class="tw:text-xl tw:font-semibold tw:text-slate-900">Create activity</h2>
-            <p class="tw:text-sm tw:text-slate-500">Use a prompt, poll, trivia item, or mini-challenge for {{ getTeamName(selectedTeamId()) }}</p>
+            <p class="tw:text-sm tw:text-slate-500">Use a prompt, poll, trivia item, mini-challenge, or team meeting for {{ getTeamName(selectedTeamId()) }}</p>
             <p class="tw:mt-1 tw:text-xs tw:text-slate-400">Only the team owner or an admin can create and close activities.</p>
           </div>
 
@@ -84,11 +97,21 @@
       </div>
     }
 
-    <mat-button-toggle-group [value]="activityFilter()" (change)="setActivityFilter($event.value)" aria-label="Activity filter" class="tw:mb-4 tw:flex tw:flex-wrap">
-      <mat-button-toggle value="open">Open</mat-button-toggle>
-      <mat-button-toggle value="closed">Completed</mat-button-toggle>
-      <mat-button-toggle value="all">All</mat-button-toggle>
-    </mat-button-toggle-group>
+    <div class="tw:mb-4 tw:flex tw:flex-wrap tw:items-center tw:gap-3">
+      @if (canManageSelectedTeam()) {
+        <mat-button-toggle-group [value]="activityFilter()" (change)="setActivityFilter($event.value)" aria-label="Activity status filter" class="tw:flex tw:flex-wrap">
+          <mat-button-toggle value="open">Open</mat-button-toggle>
+          <mat-button-toggle value="closed">Completed</mat-button-toggle>
+          <mat-button-toggle value="all">All</mat-button-toggle>
+        </mat-button-toggle-group>
+      }
+
+      <mat-button-toggle-group [value]="activityCategoryFilter()" (change)="setActivityCategoryFilter($event.value)" aria-label="Activity category filter" class="tw:flex tw:flex-wrap">
+        <mat-button-toggle value="all">All types</mat-button-toggle>
+        <mat-button-toggle value="meeting">Meetings</mat-button-toggle>
+        <mat-button-toggle value="async">Async activities</mat-button-toggle>
+      </mat-button-toggle-group>
+    </div>
 
     @if (isLoadingActivities()) {
       <div class="tw:space-y-4">
@@ -131,65 +154,147 @@
             <div class="tw:mb-3 tw:flex tw:items-center tw:justify-between">
               <div class="tw:flex tw:items-center tw:gap-3">
                 <h3 class="tw:text-lg tw:font-semibold tw:text-slate-900">{{ activity.title }}</h3>
-                <div class="tw:flex tw:items-center tw:gap-2 tw:ml-3">
-                  <mat-chip>{{ activity.activityType }}</mat-chip>
-                  <mat-chip color="primary">{{ activity.points }} pts</mat-chip>
-                  <mat-chip [color]="activity.status === 'Open' ? 'accent' : undefined" [class.open-status]="activity.status === 'Open'">{{ activity.status }}</mat-chip>
-                  <span class="tw-text-sm tw:ml-2 tw:px-2 tw:py-0.5 tw:rounded-full" [ngClass]="activity.hasCurrentUserResponded ? 'tw-bg-emerald-100 tw-text-emerald-700' : 'tw-bg-slate-100 tw-text-slate-600'">{{ activity.hasCurrentUserResponded ? 'Responded' : 'Pending' }}</span>
+                <div class="tw:flex tw:flex-wrap tw:items-center tw:gap-2 tw:ml-3">
+                  <span class="badge badge--category">{{ activityTypeLabel(activity.activityType) }}</span>
+                  <span class="badge" [class.badge--positive]="activity.status === 'Open'" [class.badge--category]="activity.status !== 'Open'">{{ activity.status }}</span>
                 </div>
               </div>
 
               <div class="tw:flex tw:items-center tw:gap-2">
-                <button mat-icon-button type="button" aria-label="Toggle activity" (click)="toggleActivityCollapse(activity.id)">
+                <span class="badge" [class.badge--positive]="activity.hasCurrentUserResponded" [class.badge--constructive]="!activity.hasCurrentUserResponded">{{ activity.hasCurrentUserResponded ? 'Responded' : 'Pending' }}</span>
+                <button
+                  mat-icon-button
+                  type="button"
+                  aria-label="Toggle activity"
+                  [matTooltip]="isActivityCollapsed(activity.id) ? 'Show full activity details and responses' : 'Collapse activity details'"
+                  (click)="toggleActivityCollapse(activity.id)"
+                >
                   <mat-icon>{{ isActivityCollapsed(activity.id) ? 'keyboard_arrow_down' : 'keyboard_arrow_up' }}</mat-icon>
                 </button>
               </div>
             </div>
 
+            <p
+              class="tw:mt-1 tw:whitespace-pre-wrap tw:text-[15px] tw:leading-6 tw:text-slate-700"
+              [class.tw:line-clamp-2]="isActivityCollapsed(activity.id)"
+            >{{ activity.description }}</p>
+
+            @if (isActivityCollapsed(activity.id)) {
+              <div class="tw:mt-3 tw:flex tw:flex-wrap tw:items-center tw:gap-x-4 tw:gap-y-1 tw:text-xs tw:text-slate-500">
+                @if (activity.activityType.toLowerCase() === 'syncmeeting') {
+                  <span>
+                    <span class="tw:font-medium tw:text-slate-700">When:</span>
+                    @if (activity.scheduledAt) {
+                      {{ activity.scheduledAt | date: 'medium' }}
+                    } @else {
+                      Not scheduled
+                    }
+                  </span>
+                  <span>
+                    <span class="tw:font-medium tw:text-slate-700">Your RSVP:</span>
+                    {{ activity.currentUserRsvpStatus && activity.currentUserRsvpStatus !== 'Pending' ? activity.currentUserRsvpStatus : 'Not responded' }}
+                  </span>
+                } @else {
+                  <span>
+                    <span class="tw:font-medium tw:text-slate-700">Due:</span>
+                    {{ activity.scheduledEndAt ? (activity.scheduledEndAt | date: 'medium') : 'No due date' }}
+                  </span>
+                  <span>
+                    <span class="tw:font-medium tw:text-slate-700">Your status:</span>
+                    {{ activity.hasCurrentUserResponded ? 'Responded' : 'Pending' }}
+                  </span>
+                }
+              </div>
+            }
+
             @if (!isActivityCollapsed(activity.id)) {
             <div>
-              <div class="tw:flex tw:items-center tw:gap-3 tw:mb-3">
-                <div class="tw:flex tw:h-10 tw:w-10 tw:items-center tw:justify-center tw:rounded-full tw:text-sm tw:font-semibold tw:text-white" [style.background-color]="getAvatarColor(activity.createdByUserFullName || activity.createdByUserEmail || activity.createdByUserId)">
-                  {{ getInitials(activity.createdByUserFullName || activity.createdByUserEmail || activity.createdByUserId) }}
-                </div>
+              <div
+                class="tw:mt-3 tw:flex tw:items-center tw:gap-3 tw:mb-3 tw:cursor-pointer"
+                role="button"
+                tabindex="0"
+                (click)="openProfile(activity.createdByUserId)"
+                (keydown.enter)="openProfile(activity.createdByUserId)"
+              >
+                <app-user-avatar [name]="activity.createdByUserFullName || activity.createdByUserEmail || activity.createdByUserId" [size]="40" />
                 <div>
-                  <p class="tw:text-sm tw:font-semibold tw:text-slate-900">{{ activity.createdByUserFullName || activity.createdByUserEmail || activity.createdByUserId }}</p>
+                  <p class="tw:text-sm tw:font-semibold tw:text-slate-900 hover:tw:underline">{{ displayName(activity.createdByUserId, activity.createdByUserFullName, activity.createdByUserEmail) }}</p>
                   <p class="tw:text-xs tw:text-slate-500">{{ activity.createdAt | date: 'medium' }}</p>
                 </div>
               </div>
 
-              <p class="tw:mt-2 tw:whitespace-pre-wrap tw:text-[15px] tw:leading-6 tw:text-slate-700">{{ activity.description }}</p>
-
-              <div class="tw:mt-4 tw:grid tw:grid-cols-2 tw:gap-3 sm:tw:grid-cols-4">
-              <div class="tw:rounded-2xl tw:bg-slate-50 tw:p-3">
-                <p class="tw:text-[11px] tw:uppercase tw:tracking-wide tw:text-slate-500">Responses</p>
-                <p class="tw:mt-1 tw:text-lg tw:font-semibold tw:text-slate-900">{{ activity.responsesCount }}</p>
+              @if (activity.activityType.toLowerCase() === 'syncmeeting') {
+                <div class="tw:mt-4 tw:grid tw:grid-cols-2 tw:gap-3 sm:tw:grid-cols-3">
+                  <div class="tw:rounded-2xl tw:bg-slate-50 tw:p-3">
+                    <p class="tw:text-[11px] tw:uppercase tw:tracking-wide tw:text-slate-500">When</p>
+                    <p class="tw:mt-1 tw:text-sm tw:font-medium tw:text-slate-800">
+                      @if (activity.scheduledAt) {
+                        {{ activity.scheduledAt | date: 'medium' }}
+                        @if (activity.scheduledEndAt) {
+                          – {{ activity.scheduledEndAt | date: (sameDay(activity.scheduledAt, activity.scheduledEndAt) ? 'shortTime' : 'medium') }}
+                        }
+                      } @else {
+                        Not scheduled
+                      }
+                    </p>
+                  </div>
+                  <div class="tw:rounded-2xl tw:bg-slate-50 tw:p-3">
+                    <p class="tw:text-[11px] tw:uppercase tw:tracking-wide tw:text-slate-500">RSVPs</p>
+                    <p class="tw:mt-1 tw:text-sm tw:font-medium tw:text-slate-800">{{ activity.acceptedCount }} accepted · {{ activity.declinedCount }} declined</p>
+                  </div>
+                  <div class="tw:rounded-2xl tw:bg-slate-50 tw:p-3">
+                    <p class="tw:text-[11px] tw:uppercase tw:tracking-wide tw:text-slate-500">Your RSVP</p>
+                    <p class="tw:mt-1 tw:text-sm tw:font-medium tw:text-slate-800">{{ activity.currentUserRsvpStatus && activity.currentUserRsvpStatus !== 'Pending' ? activity.currentUserRsvpStatus : 'Not responded' }}</p>
+                  </div>
+                </div>
+              } @else {
+                <div class="tw:mt-4 tw:grid tw:grid-cols-2 tw:gap-3 sm:tw:grid-cols-4">
+                <div class="tw:rounded-2xl tw:bg-slate-50 tw:p-3">
+                  <p class="tw:text-[11px] tw:uppercase tw:tracking-wide tw:text-slate-500">Responses</p>
+                  <p class="tw:mt-1 tw:text-lg tw:font-semibold tw:text-slate-900">{{ activity.responsesCount }}</p>
+                </div>
+                <div class="tw:rounded-2xl tw:bg-slate-50 tw:p-3">
+                  <p class="tw:text-[11px] tw:uppercase tw:tracking-wide tw:text-slate-500">Participants</p>
+                  <p class="tw:mt-1 tw:text-lg tw:font-semibold tw:text-slate-900">{{ activity.participantCount }}</p>
+                </div>
+                <div class="tw:rounded-2xl tw:bg-slate-50 tw:p-3">
+                  <p class="tw:text-[11px] tw:uppercase tw:tracking-wide tw:text-slate-500">Due</p>
+                  <p class="tw:mt-1 tw:text-sm tw:font-medium tw:text-slate-800">{{ activity.scheduledEndAt ? (activity.scheduledEndAt | date: 'medium') : 'No due date' }}</p>
+                </div>
+                <div class="tw:rounded-2xl tw:bg-slate-50 tw:p-3">
+                  <p class="tw:text-[11px] tw:uppercase tw:tracking-wide tw:text-slate-500">Your status</p>
+                  <p class="tw:mt-1 tw:text-sm tw:font-medium tw:text-slate-800">{{ activity.hasCurrentUserResponded ? 'Responded' : 'Pending' }}</p>
+                </div>
               </div>
-              <div class="tw:rounded-2xl tw:bg-slate-50 tw:p-3">
-                <p class="tw:text-[11px] tw:uppercase tw:tracking-wide tw:text-slate-500">Participants</p>
-                <p class="tw:mt-1 tw:text-lg tw:font-semibold tw:text-slate-900">{{ activity.participantCount }}</p>
-              </div>
-              <div class="tw:rounded-2xl tw:bg-slate-50 tw:p-3">
-                <p class="tw:text-[11px] tw:uppercase tw:tracking-wide tw:text-slate-500">Due</p>
-                <p class="tw:mt-1 tw:text-sm tw:font-medium tw:text-slate-800">{{ activity.dueAt ? (activity.dueAt | date: 'medium') : 'No due date' }}</p>
-              </div>
-              <div class="tw:rounded-2xl tw:bg-slate-50 tw:p-3">
-                <p class="tw:text-[11px] tw:uppercase tw:tracking-wide tw:text-slate-500">Your status</p>
-                <p class="tw:mt-1 tw:text-sm tw:font-medium tw:text-slate-800">{{ activity.hasCurrentUserResponded ? 'Responded' : 'Pending' }}</p>
-              </div>
-            </div>
+              }
             </div>
             }
 
             @if (activity.recentResponses.length > 0) {
               <div class="tw:mt-4 tw:space-y-2 tw:border-t tw:border-slate-100 tw:pt-4">
-                <p class="tw:text-sm tw:font-semibold tw:text-slate-800">Recent responses</p>
+                <p class="tw:text-sm tw:font-medium tw:text-slate-600">Recent responses</p>
                 <div class="tw:grid tw:grid-cols-1 tw:gap-2 md:tw:grid-cols-3">
                   @for (response of activity.recentResponses; track response.userId + '-' + response.submittedAt) {
                     <div class="tw:rounded-2xl tw:bg-slate-50 tw:px-3 tw:py-2 tw:text-sm tw:text-slate-700">
-                      <div class="tw:mb-1 tw:flex tw:items-center tw:gap-2">
-                        <span class="tw:font-semibold tw:text-slate-900">{{ response.userFullName || response.userEmail || response.userId }}</span>
-                        <span class="tw:text-[11px] tw:text-slate-400">{{ response.submittedAt | date: 'short' }}</span>
+                      <div class="tw:mb-1 tw:flex tw:items-center tw:justify-between tw:gap-2">
+                        <div class="tw:flex tw:items-center tw:gap-2">
+                          <span
+                            class="tw:font-medium tw:text-slate-700 tw:cursor-pointer hover:tw:underline"
+                            role="button"
+                            tabindex="0"
+                            (click)="openProfile(response.userId)"
+                            (keydown.enter)="openProfile(response.userId)"
+                          >{{ displayName(response.userId, response.userFullName, response.userEmail) }}</span>
+                          <span class="tw:text-[11px] tw:text-slate-400">{{ response.submittedAt | date: 'short' }}</span>
+                        </div>
+                        @if (activity.activityType.toLowerCase() === 'syncmeeting' && response.rsvpStatus) {
+                          <mat-icon
+                            class="tw:!text-base"
+                            [style.color]="response.rsvpStatus === 'Accepted' ? '#059669' : response.rsvpStatus === 'Declined' ? '#dc2626' : '#94a3b8'"
+                            [attr.aria-label]="response.rsvpStatus"
+                            [matTooltip]="response.rsvpStatus"
+                          >{{ response.rsvpStatus === 'Accepted' ? 'event_available' : response.rsvpStatus === 'Declined' ? 'event_busy' : 'help_outline' }}</mat-icon>
+                        }
                       </div>
                       @if (response.textResponse) {
                         <p class="tw:whitespace-pre-wrap tw:leading-5">{{ response.textResponse }}</p>
@@ -202,7 +307,23 @@
               </div>
             }
 
-            @if (activity.status === 'Open') {
+            @if (activity.activityType.toLowerCase() === 'syncmeeting') {
+              <div class="tw:mt-4 tw:border-t tw:border-slate-100 tw:pt-4">
+                <div class="tw:flex tw:flex-wrap tw:items-center tw:justify-between tw:gap-3">
+                  <p class="tw:text-xs tw:text-slate-500">
+                    @if (activity.status === 'Open') {
+                      View the meeting details, join the call, or RSVP.
+                    } @else {
+                      This meeting has ended.
+                    }
+                  </p>
+                  <button mat-flat-button color="primary" type="button" class="tw:!rounded-2xl tw:!px-5" (click)="openSyncMeetingDialog(activity)">
+                    <mat-icon>groups</mat-icon>
+                    {{ activity.status === 'Open' ? 'Open meeting details' : 'View meeting details' }}
+                  </button>
+                </div>
+              </div>
+            } @else if (activity.status === 'Open') {
               <div class="tw:mt-4 tw:border-t tw:border-slate-100 tw:pt-4">
                 <form (ngSubmit)="submitResponse(activity)" class="tw:space-y-4">
                   @if (activity.activityType.toLowerCase() === 'poll') {
@@ -228,11 +349,11 @@
                   <div class="tw:flex tw:flex-wrap tw:items-center tw:justify-between tw:gap-3">
                     <p class="tw:text-xs tw:text-slate-500">Save your answer anytime; the leader can close the activity when it is done.</p>
                     <div class="tw:flex tw:gap-2">
-                      <button mat-flat-button color="primary" type="submit" class="tw:!rounded-2xl tw:!px-5 tw:!font-semibold">
+                      <button mat-flat-button color="primary" type="submit" class="tw:!rounded-2xl tw:!px-5">
                         {{ activity.hasCurrentUserResponded ? 'Update response' : 'Submit response' }}
                       </button>
                       @if (canManageSelectedTeam()) {
-                        <button mat-stroked-button type="button" class="tw:!rounded-2xl tw:!px-5 tw:!font-semibold" (click)="completeActivity(activity)">
+                        <button mat-stroked-button type="button" class="tw:!rounded-2xl tw:!px-5" (click)="completeActivity(activity)">
                           Close
                         </button>
                       }

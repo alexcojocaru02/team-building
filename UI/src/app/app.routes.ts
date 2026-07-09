@@ -2,7 +2,7 @@ import { Routes } from '@angular/router';
 import { FeedbackPage } from './pages/feedback-page/feedback-page';
 import { HomePage } from './pages/home-page/home-page';
 import { FeedPage } from './pages/feed-page/feed-page';
-import { CohesionDashboard } from './pages/growth-page/growth-page';
+import { CohesionDashboard } from './pages/cohesion-dashboard/cohesion-dashboard';
 import { LoginPage } from './pages/login-page/login-page';
 import { authGuard } from './guards/auth.guard';
 import { roleGuard } from './guards/role.guard';
@@ -18,8 +18,10 @@ export const routes: Routes = [
       { path: 'home', component: HomePage, canActivate: [authGuard] },
       { path: 'feed', component: FeedPage, canActivate: [authGuard] },
       { path: 'teams/:teamId/feedback', component: FeedbackPage, canActivate: [authGuard] },
+      { path: 'teams/:teamId/members', loadComponent: () => import('./pages/team-members-page/team-members-page').then(m => m.TeamMembersPage), canActivate: [authGuard] },
       { path: 'teams/:teamId/activities', loadComponent: () => import('./pages/team-activities-page/team-activities-page').then(m => m.TeamActivitiesPage), canActivate: [authGuard] },
       { path: 'teams/:teamId/dashboard', component: CohesionDashboard, canActivate: [authGuard] },
+      { path: 'teams/:teamId/leaderboard', loadComponent: () => import('./pages/gamification-page/gamification-page').then(m => m.GamificationPage), canActivate: [authGuard] },
       // Profile routes
       { path: 'profile', loadComponent: () => import('./pages/profile-page/profile-view.component').then(m => m.ProfileViewComponent), canActivate: [authGuard] },
       { path: 'profile/edit', loadComponent: () => import('./pages/profile-page/profile-edit.component').then(m => m.ProfileEditComponent), canActivate: [authGuard] },

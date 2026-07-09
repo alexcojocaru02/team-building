@@ -24,20 +24,35 @@ namespace TeamConnect.Api.Modules.TeamActivities
         {
             var activities = await _activityRepository.GetByTeamIdAsync(teamId);
             if (activities.Count == 0) return new List<TeamActivityDto>();
+            await AutoCloseExpiredSyncMeetingsAsync(activities);
             return await BuildDtosAsync(activities, currentUserId);
+        }
+
+        private static readonly TimeSpan AssumedMeetingDuration = TimeSpan.FromMinutes(60);
+
+        private async Task AutoCloseExpiredSyncMeetingsAsync(List<TeamActivity> activities)
+        {
+            var now = DateTime.UtcNow;
+            var expired = activities.Where(a =>
+                a.ActivityType == ActivityType.SyncMeeting &&
+                string.Equals(a.Status, "Open", StringComparison.OrdinalIgnoreCase) &&
+                a.ScheduledAt.HasValue &&
+                (a.ScheduledEndAt ?? a.ScheduledAt.Value + AssumedMeetingDuration) <= now);
+
+            foreach (var activity in expired)
+            {
+                activity.Status = "Closed";
+                activity.CompletedAt = now;
+                await _activityRepository.CompleteAsync(activity);
+            }
         }
 
         public async Task<TeamActivityDto> Create(string teamId, CreateTeamActivityDto dto, string creatorId)
         {
             var options = NormalizeOptions(dto.Options);
 
-            DateTime? dueAtUtc = null;
-            if (dto.DueAt.HasValue)
-            {
-                dueAtUtc = dto.DueAt.Value.Kind == DateTimeKind.Utc
-                    ? dto.DueAt.Value
-                    : dto.DueAt.Value.ToUniversalTime();
-            }
+            DateTime? scheduledAtUtc = ToUtc(dto.ScheduledAt);
+            DateTime? scheduledEndAtUtc = ToUtc(dto.ScheduledEndAt);
 
             var activity = new TeamActivity
             {
@@ -47,7 +62,9 @@ namespace TeamConnect.Api.Modules.TeamActivities
                 Title = dto.Title.Trim(),
                 Description = dto.Description.Trim(),
                 Options = options,
-                DueAt = dueAtUtc,
+                ScheduledAt = scheduledAtUtc,
+                ScheduledEndAt = scheduledEndAtUtc,
+                MeetingLink = string.IsNullOrWhiteSpace(dto.MeetingLink) ? null : dto.MeetingLink.Trim(),
                 Points = dto.Points > 0 ? dto.Points : 10,
                 Status = "Open",
                 CreatedAt = DateTime.UtcNow
@@ -71,6 +88,7 @@ namespace TeamConnect.Api.Modules.TeamActivities
                 UserId = userId,
                 TextResponse = string.IsNullOrWhiteSpace(dto.TextResponse) ? null : dto.TextResponse.Trim(),
                 SelectedOptionIndex = dto.SelectedOptionIndex,
+                RsvpStatus = dto.RsvpStatus,
                 SubmittedAt = DateTime.UtcNow
             };
 
@@ -179,7 +197,9 @@ namespace TeamConnect.Api.Modules.TeamActivities
                 Description = activity.Description,
                 Options = activity.Options,
                 Points = activity.Points,
-                DueAt = activity.DueAt,
+                ScheduledAt = activity.ScheduledAt,
+                ScheduledEndAt = activity.ScheduledEndAt,
+                MeetingLink = activity.MeetingLink,
                 Status = activity.Status,
                 CreatedAt = activity.CreatedAt,
                 CompletedAt = activity.CompletedAt,
@@ -188,6 +208,9 @@ namespace TeamConnect.Api.Modules.TeamActivities
                 HasCurrentUserResponded = currentUserResponse != null,
                 CurrentUserTextResponse = currentUserResponse?.TextResponse,
                 CurrentUserSelectedOptionIndex = currentUserResponse?.SelectedOptionIndex,
+                CurrentUserRsvpStatus = currentUserResponse?.RsvpStatus?.ToString(),
+                AcceptedCount = activity.Participations.Count(p => p.RsvpStatus == RsvpStatus.Accepted),
+                DeclinedCount = activity.Participations.Count(p => p.RsvpStatus == RsvpStatus.Declined),
                 RecentResponses = activity.Participations
                     .OrderByDescending(p => p.SubmittedAt)
                     .Take(3)
@@ -201,6 +224,7 @@ namespace TeamConnect.Api.Modules.TeamActivities
                             UserEmail = user?.Email ?? "Unknown",
                             TextResponse = p.TextResponse,
                             SelectedOptionIndex = p.SelectedOptionIndex,
+                            RsvpStatus = p.RsvpStatus?.ToString(),
                             SubmittedAt = p.SubmittedAt
                         };
                     })
@@ -210,5 +234,10 @@ namespace TeamConnect.Api.Modules.TeamActivities
 
         private static List<string> NormalizeOptions(List<string> options) =>
             options.Select(o => o?.Trim()).Where(o => !string.IsNullOrWhiteSpace(o)).Select(o => o!).ToList();
+
+        private static DateTime? ToUtc(DateTime? value) =>
+            value.HasValue
+                ? (value.Value.Kind == DateTimeKind.Utc ? value.Value : value.Value.ToUniversalTime())
+                : null;
     }
 }

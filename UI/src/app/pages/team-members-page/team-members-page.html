@@ -1,0 +1,64 @@
+<section class="tw:min-h-screen tw:bg-[#f4f6f8] tw:px-4 tw:py-6 sm:tw:px-6 lg:tw:px-8">
+  <div class="tw:mx-auto tw:w-full tw:max-w-4xl">
+    <!-- Header -->
+    <div class="tw:mb-6 tw:flex tw:items-center tw:gap-3">
+      <button mat-icon-button type="button" routerLink="/" aria-label="Back to home" class="tw:text-slate-600">
+        <svg class="tw:h-5 tw:w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        </svg>
+      </button>
+      <div>
+        <h1 class="tw:text-2xl tw:font-bold tw:tracking-tight tw:text-slate-900 sm:tw:text-3xl">Team Members</h1>
+        @if (team()) {
+          <p class="tw:text-sm tw:text-slate-500">{{ team()?.name }}</p>
+        }
+      </div>
+    </div>
+
+    <!-- Error Message -->
+    @if (errorMessage()) {
+      <div class="tw:mb-6 tw:rounded-2xl tw:border tw:border-rose-200 tw:bg-rose-50 tw:p-4">
+        <p class="tw:text-rose-700">{{ errorMessage() }}</p>
+      </div>
+    }
+
+    <!-- Loading State -->
+    @if (isLoading()) {
+      <div class="tw:flex tw:justify-center tw:py-12">
+        <div class="tw:text-sm tw:text-slate-500">Loading team members...</div>
+      </div>
+    }
+
+    @if (!isLoading() && !errorMessage()) {
+      <div class="tw:rounded-3xl tw:bg-white tw:p-4 tw:shadow-lg tw:shadow-slate-200/50 tw:ring-1 tw:ring-slate-200/70">
+        @if (members().length === 0) {
+          <p class="tw:text-sm tw:text-slate-500">No members in this team yet.</p>
+        }
+
+        <div class="tw:space-y-3">
+          @for (member of members(); track member.id) {
+            <div
+              class="tw:flex tw:items-center tw:gap-3 tw:rounded-2xl tw:bg-slate-50 tw:p-3 tw:cursor-pointer hover:tw:bg-slate-100 tw:transition-colors"
+              role="button"
+              tabindex="0"
+              (click)="openProfile(member.id)"
+              (keydown.enter)="openProfile(member.id)"
+            >
+              <app-user-avatar [name]="member.fullName || member.email" [size]="40" />
+              <div class="tw:min-w-0 tw:flex-1">
+                <p class="tw:text-sm tw:font-semibold tw:text-slate-800">
+                  {{ member.fullName || member.email }}
+                  @if (member.id === currentUserId()) {
+                    <span class="tw:text-xs tw:font-medium tw:text-slate-400">(you)</span>
+                  }
+                </p>
+                <p class="tw:text-xs tw:text-slate-500">{{ member.email }}</p>
+              </div>
+              <span class="tw:text-xs tw:font-medium tw:text-slate-400">{{ member.role }}</span>
+            </div>
+          }
+        </div>
+      </div>
+    }
+  </div>
+</section>

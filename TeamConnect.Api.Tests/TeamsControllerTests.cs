@@ -41,7 +41,7 @@ public class TeamsControllerTests : IClassFixture<MongoFixture>
             new TeamRepository(_fixture.Context),
             new UserRepository(_fixture.Context),
             new TeamJoinRequestRepository(_fixture.Context),
-            BuildJwtService());
+            jwtService: BuildJwtService());
 
     private static JwtService BuildJwtService()
     {

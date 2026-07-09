@@ -10,5 +10,6 @@ namespace TeamConnect.Api.Modules.TeamActivities
         Task InsertAsync(TeamActivity activity);
         Task<TeamActivity?> SubmitResponseAsync(FilterDefinition<TeamActivity> filter, UpdateDefinition<TeamActivity> update);
         Task CompleteAsync(TeamActivity activity);
+        Task DeleteByTeamIdAsync(string teamId);
     }
 }

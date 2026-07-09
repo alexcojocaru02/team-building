@@ -1,3 +1,5 @@
+using TeamConnect.Api.Shared.Models;
+
 namespace TeamConnect.Api.Shared.DTOs
 {
     public class FeedbackResponseDto
@@ -6,6 +8,8 @@ namespace TeamConnect.Api.Shared.DTOs
         public string FromUserId { get; set; }
         public string ToUserId { get; set; }
         public string Message { get; set; }
+        public FeedbackCategory Category { get; set; }
+        public FeedbackTone Tone { get; set; }
         public DateTime CreatedAt { get; set; }
         public string FromUserFullName { get; set; }
         public string FromUserEmail { get; set; }

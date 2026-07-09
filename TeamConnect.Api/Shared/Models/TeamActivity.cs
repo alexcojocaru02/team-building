@@ -21,7 +21,9 @@ namespace TeamConnect.Api.Shared.Models
         public string Description { get; set; } = string.Empty;
         public List<string> Options { get; set; } = new();
         public int Points { get; set; }
-        public DateTime? DueAt { get; set; }
+        public DateTime? ScheduledAt { get; set; }
+        public DateTime? ScheduledEndAt { get; set; }
+        public string? MeetingLink { get; set; }
         public string Status { get; set; } = "Open";
         public DateTime CreatedAt { get; set; }
         public DateTime? CompletedAt { get; set; }
@@ -35,6 +37,9 @@ namespace TeamConnect.Api.Shared.Models
 
         public string? TextResponse { get; set; }
         public int? SelectedOptionIndex { get; set; }
+
+        [BsonRepresentation(BsonType.String)]
+        public RsvpStatus? RsvpStatus { get; set; }
         public DateTime SubmittedAt { get; set; }
     }
 }

@@ -1,0 +1,251 @@
+<section class="tw:min-h-screen tw:bg-[#f4f6f8] tw:px-4 tw:py-6 sm:tw:px-6 lg:tw:px-8">
+  <div class="tw:mx-auto tw:w-full tw:max-w-4xl">
+    <!-- Header -->
+    <div class="tw:mb-6 tw:flex tw:items-center tw:gap-3">
+      <button mat-icon-button type="button" routerLink="/" aria-label="Back to home" class="tw:text-slate-600">
+        <svg class="tw:h-5 tw:w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        </svg>
+      </button>
+      <div>
+        <h1 class="tw:text-2xl tw:font-bold tw:tracking-tight tw:text-slate-900 sm:tw:text-3xl">Team Cohesion Dashboard</h1>
+        @if (team()) {
+          <p class="tw:text-sm tw:text-slate-500">{{ team()?.name }}</p>
+        }
+      </div>
+    </div>
+
+    <!-- Error Message -->
+    @if (errorMessage()) {
+      <div class="tw:mb-6 tw:rounded-2xl tw:border tw:border-rose-200 tw:bg-rose-50 tw:p-4">
+        <p class="tw:text-rose-700">{{ errorMessage() }}</p>
+      </div>
+    }
+
+    <!-- Loading State -->
+    @if (isLoading()) {
+      <div class="tw:flex tw:justify-center tw:py-12">
+        <div class="tw:text-sm tw:text-slate-500">Loading cohesion data...</div>
+      </div>
+    }
+
+    @if (joinRequests().length > 0) {
+      <div class="tw:rounded-3xl tw:bg-white tw:p-4 tw:shadow-lg tw:shadow-slate-200/50 tw:ring-1 tw:ring-slate-200/70 tw:mb-6">
+        <h2 class="tw:text-base tw:font-bold tw:text-slate-900 tw:mb-4">Pending Join Requests</h2>
+        <div class="tw:space-y-3">
+          @for (req of joinRequests(); track req.id) {
+          <div class="tw:flex tw:items-center tw:justify-between tw:rounded-2xl tw:bg-slate-50 tw:p-3">
+            <div>
+              <p class="tw:font-medium tw:text-slate-800">{{ req.userFullName || '—' }}</p>
+              <p class="tw:text-sm tw:text-slate-500">{{ req.userEmail }}</p>
+              <p class="tw:text-xs tw:text-slate-400">{{ req.createdAt | date: 'short' }}</p>
+            </div>
+            <div class="tw:flex tw:gap-2">
+              <button mat-flat-button color="primary" type="button"
+                [disabled]="processingRequestId() === req.id"
+                (click)="approveRequest(req)">
+                Approve
+              </button>
+              <button mat-button color="warn" type="button"
+                [disabled]="processingRequestId() === req.id"
+                (click)="rejectRequest(req)">
+                Reject
+              </button>
+            </div>
+          </div>
+          }
+        </div>
+      </div>
+    }
+
+    @if (!isLoading() && cohesionData()) {
+      <!-- Top Stats -->
+      <div class="tw:grid tw:grid-cols-2 tw:lg:grid-cols-4 tw:gap-4 tw:mb-6">
+        <div class="tw:rounded-3xl tw:bg-white tw:p-4 tw:shadow-lg tw:shadow-slate-200/50 tw:ring-1 tw:ring-slate-200/70">
+          <p class="tw:text-xs tw:uppercase tw:tracking-wide tw:text-slate-500">Total Feedback</p>
+          <div class="tw:mt-2 tw:text-3xl tw:font-bold" style="color: var(--tc-primary);">{{ cohesionData()?.totalFeedbacks || 0 }}</div>
+        </div>
+        <div class="tw:rounded-3xl tw:bg-white tw:p-4 tw:shadow-lg tw:shadow-slate-200/50 tw:ring-1 tw:ring-slate-200/70">
+          <p class="tw:text-xs tw:uppercase tw:tracking-wide tw:text-slate-500">Team Members</p>
+          <div class="tw:mt-2 tw:text-3xl tw:font-bold tw:text-slate-900">{{ members().length }}</div>
+        </div>
+        <div class="tw:rounded-3xl tw:bg-white tw:p-4 tw:shadow-lg tw:shadow-slate-200/50 tw:ring-1 tw:ring-slate-200/70">
+          <p class="tw:text-xs tw:uppercase tw:tracking-wide tw:text-slate-500">Participation Rate</p>
+          <div class="tw:mt-2 tw:text-3xl tw:font-bold tw:text-slate-900">{{ activitySummary()?.participationRate || 0 }}%</div>
+        </div>
+        <div class="tw:rounded-3xl tw:bg-white tw:p-4 tw:shadow-lg tw:shadow-slate-200/50 tw:ring-1 tw:ring-slate-200/70">
+          <p class="tw:text-xs tw:uppercase tw:tracking-wide tw:text-slate-500">Open Activities</p>
+          <div class="tw:mt-2 tw:text-3xl tw:font-bold tw:text-slate-900">{{ activitySummary()?.openActivities || 0 }}</div>
+        </div>
+      </div>
+
+      <div class="tw:grid tw:grid-cols-1 tw:lg:grid-cols-2 tw:gap-6 tw:mb-6">
+        <!-- Top Performers -->
+        <div class="tw:rounded-3xl tw:bg-white tw:p-4 tw:shadow-lg tw:shadow-slate-200/50 tw:ring-1 tw:ring-slate-200/70">
+          <div class="tw:flex tw:items-center tw:gap-2 tw:mb-4">
+            <mat-icon style="color: #d97706;">military_tech</mat-icon>
+            <h2 class="tw:text-base tw:font-bold tw:text-slate-900">Most engaged — consider recognizing</h2>
+          </div>
+
+          @if (topPerformers().length === 0) {
+            <p class="tw:text-sm tw:text-slate-500">No activity data yet.</p>
+          }
+
+          <div class="tw:space-y-3">
+            @for (member of topPerformers(); track member.userId; let i = $index) {
+              <div class="tw:flex tw:items-center tw:gap-3 tw:rounded-2xl tw:bg-slate-50 tw:p-3">
+                <div
+                  class="tw:cursor-pointer"
+                  role="button"
+                  tabindex="0"
+                  (click)="openProfile(member.userId)"
+                  (keydown.enter)="openProfile(member.userId)"
+                >
+                  <app-user-avatar [name]="member.fullName || member.email" [size]="36" />
+                </div>
+                <div class="tw:min-w-0 tw:flex-1">
+                  <p
+                    class="tw:text-sm tw:font-semibold tw:text-slate-800 tw:cursor-pointer hover:tw:underline tw:inline-block"
+                    role="button"
+                    tabindex="0"
+                    (click)="openProfile(member.userId)"
+                    (keydown.enter)="openProfile(member.userId)"
+                  >{{ member.fullName || member.email }}</p>
+                  <p class="tw:text-xs tw:text-slate-500">
+                    {{ member.totalPoints }} pts · {{ member.feedbackGiven }} feedback given · {{ member.feedbackReceived }} received
+                  </p>
+                </div>
+                @if (i === 0) {
+                  <span class="badge badge--positive">Top</span>
+                }
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Needs Attention -->
+        <div class="tw:rounded-3xl tw:bg-white tw:p-4 tw:shadow-lg tw:shadow-slate-200/50 tw:ring-1 tw:ring-slate-200/70">
+          <div class="tw:flex tw:items-center tw:gap-2 tw:mb-4">
+            <mat-icon style="color: #dc2626;">person</mat-icon>
+            <h2 class="tw:text-base tw:font-bold tw:text-slate-900">Could use more support</h2>
+          </div>
+
+          @if (needsAttention().length === 0) {
+            <p class="tw:text-sm tw:text-slate-500">Everyone looks well connected — no one stands out as isolated.</p>
+          }
+
+          <div class="tw:space-y-3">
+            @for (member of needsAttention(); track member.userId) {
+              <div class="tw:flex tw:items-center tw:gap-3 tw:rounded-2xl tw:bg-slate-50 tw:p-3">
+                <div
+                  class="tw:cursor-pointer"
+                  role="button"
+                  tabindex="0"
+                  (click)="openProfile(member.userId)"
+                  (keydown.enter)="openProfile(member.userId)"
+                >
+                  <app-user-avatar [name]="member.fullName || member.email" [size]="36" />
+                </div>
+                <div class="tw:min-w-0 tw:flex-1">
+                  <p
+                    class="tw:text-sm tw:font-semibold tw:text-slate-800 tw:cursor-pointer hover:tw:underline tw:inline-block"
+                    role="button"
+                    tabindex="0"
+                    (click)="openProfile(member.userId)"
+                    (keydown.enter)="openProfile(member.userId)"
+                  >{{ member.fullName || member.email }}</p>
+                  <p class="tw:text-xs tw:text-slate-500">
+                    {{ member.totalPoints }} pts · {{ member.feedbackGiven }} feedback given · {{ member.feedbackReceived }} received
+                  </p>
+                </div>
+                <span class="badge badge--critical">Low engagement</span>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Feedback & Engagement Per Member -->
+      <div class="tw:rounded-3xl tw:bg-white tw:p-4 tw:shadow-lg tw:shadow-slate-200/50 tw:ring-1 tw:ring-slate-200/70">
+        <h2 class="tw:text-base tw:font-bold tw:text-slate-900 tw:mb-4">Engagement by team member</h2>
+
+        @if (members().length === 0) {
+          <div class="tw:text-center tw:py-8">
+            <p class="tw:text-sm tw:text-slate-500">No engagement data available yet.</p>
+          </div>
+        }
+
+        <div class="tw:space-y-5">
+          @for (member of members(); track member.userId) {
+            <div>
+              <div class="tw:flex tw:items-center tw:justify-between tw:gap-2 tw:mb-2">
+                <div class="tw:flex tw:items-center tw:gap-2">
+                  <div
+                    class="tw:cursor-pointer"
+                    role="button"
+                    tabindex="0"
+                    (click)="openProfile(member.userId)"
+                    (keydown.enter)="openProfile(member.userId)"
+                  >
+                    <app-user-avatar [name]="member.fullName || member.email" [size]="28" />
+                  </div>
+                  <p
+                    class="tw:font-semibold tw:text-slate-800 tw:text-sm tw:cursor-pointer hover:tw:underline"
+                    role="button"
+                    tabindex="0"
+                    (click)="openProfile(member.userId)"
+                    (keydown.enter)="openProfile(member.userId)"
+                  >{{ member.fullName || member.email }}</p>
+                </div>
+                <div class="tw:flex tw:items-center tw:gap-3">
+                  <p class="tw:text-sm tw:text-slate-500">
+                    {{ member.totalPoints }} pts · {{ member.feedbackReceived }} feedback received
+                  </p>
+                  @if (canViewMemberFeedback()) {
+                    <button mat-icon-button type="button" class="tw:!w-8 tw:!h-8 tw:!p-0 tw:!flex tw:!items-center tw:!justify-center tw:text-slate-500"
+                      [attr.aria-label]="expandedMemberId() === member.userId ? 'Hide feedback' : 'View feedback'"
+                      (click)="toggleMemberFeedback(member.userId)">
+                      <mat-icon class="tw:!flex tw:!items-center tw:!justify-center tw:!leading-none">{{ expandedMemberId() === member.userId ? 'expand_less' : 'expand_more' }}</mat-icon>
+                    </button>
+                  }
+                </div>
+              </div>
+              <div class="tw:w-full tw:bg-slate-100 tw:rounded-full tw:h-2.5 tw:overflow-hidden">
+                <div
+                  class="tw:h-full tw:transition-all"
+                  style="background: var(--tc-primary);"
+                  [style.width.%]="getPercentage(member.feedbackReceived, cohesionData()?.totalFeedbacks || 1)"
+                ></div>
+              </div>
+
+              @if (canViewMemberFeedback() && expandedMemberId() === member.userId) {
+                <div class="tw:mt-3 tw:rounded-2xl tw:bg-slate-50 tw:p-3 tw:space-y-2">
+                  @if (loadingFeedbackForMemberId() === member.userId) {
+                    <p class="tw:text-sm tw:text-slate-500">Loading feedback...</p>
+                  } @else {
+                    @if ((memberFeedback().get(member.userId) ?? []).length === 0) {
+                      <p class="tw:text-sm tw:text-slate-500">No feedback received yet.</p>
+                    }
+                    @for (item of memberFeedback().get(member.userId); track item.id) {
+                      <div class="tw:rounded-xl tw:bg-white tw:p-3 tw:shadow-sm">
+                        <div class="tw:flex tw:items-center tw:justify-between tw:gap-2 tw:mb-1">
+                          <div class="tw:flex tw:items-center tw:gap-2">
+                            <span class="badge badge--category">{{ item.category }}</span>
+                            <span class="badge" [class]="getFeedbackToneBadgeClass(item.tone)">{{ item.tone }}</span>
+                          </div>
+                          <p class="tw:text-xs tw:text-slate-400">{{ item.createdAt | date: 'short' }}</p>
+                        </div>
+                        <p class="tw:text-sm tw:text-slate-700">{{ item.message }}</p>
+                        <p class="tw:text-xs tw:text-slate-400 tw:mt-1">From {{ item.fromUserFullName || item.fromUserEmail }}</p>
+                      </div>
+                    }
+                  }
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    }
+  </div>
+</section>

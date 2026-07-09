@@ -4,5 +4,6 @@ namespace TeamConnect.Api.Shared.DTOs
     {
         public string? TextResponse { get; set; }
         public int? SelectedOptionIndex { get; set; }
+        public Models.RsvpStatus? RsvpStatus { get; set; }
     }
 }

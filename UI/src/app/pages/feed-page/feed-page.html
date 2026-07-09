@@ -1,22 +1,14 @@
-<section class="tw:min-h-screen tw:bg-[radial-gradient(circle_at_top,_#e0f2fe,_#eef2ff_45%,_#f8fafc)] tw:px-4 tw:py-6 sm:tw:px-6 lg:tw:px-8">
-  <div class="tw:mx-auto tw:w-full tw:max-w-3xl">
-    <div class="tw:mb-6 tw:flex tw:items-center tw:justify-between">
-      <div class="tw:flex tw:items-center tw:gap-3">
-        <button
-          mat-icon-button
-          type="button"
-          routerLink="/"
-          aria-label="Back to home"
-          class="tw:text-slate-600"
-        >
-          <svg class="tw:h-5 tw:w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-          </svg>
-        </button>
-        <div>
-          <h1 class="tw:text-2xl tw:font-bold tw:tracking-tight tw:text-slate-900 sm:tw:text-3xl">Team Feed</h1>
-          <p class="tw:text-sm tw:text-slate-500">Share updates, wins, and blockers with your team</p>
-        </div>
+<section class="feed-page">
+  <div class="tw:mx-auto tw:w-full tw:max-w-2xl">
+
+    <!-- Header -->
+    <div class="tw:mb-6 tw:flex tw:items-center tw:gap-3">
+      <button mat-icon-button type="button" routerLink="/" aria-label="Back to home">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <div class="tw:flex-1">
+        <h1 class="tw:text-2xl tw:font-bold tw:tracking-tight tw:text-slate-900">Team Feed</h1>
+        <p class="tw:text-sm tw:text-slate-500">Share updates, wins, and blockers with your team</p>
       </div>
       <span class="tw:hidden sm:tw:inline-flex tw:rounded-full tw:bg-white/80 tw:px-3 tw:py-1 tw:text-xs tw:font-medium tw:text-slate-600 tw:ring-1 tw:ring-slate-200">
         {{ posts().length }} posts
@@ -24,64 +16,69 @@
     </div>
 
     @if (errorMessage()) {
-      <div class="tw:mb-5 tw:rounded-2xl tw:border tw:border-rose-200 tw:bg-rose-50 tw:p-4 tw:text-rose-700 tw:shadow-sm">
+      <div class="tw:mb-5 tw:rounded-xl tw:border tw:border-rose-200 tw:bg-rose-50 tw:p-4 tw:text-rose-700">
         {{ errorMessage() }}
       </div>
     }
 
-    <div class="tw:mb-6 tw:rounded-3xl tw:bg-white/90 tw:p-5 tw:shadow-lg tw:shadow-slate-200/50 tw:ring-1 tw:ring-slate-200/70">
-      <div class="tw:mb-4 tw:flex tw:items-center tw:gap-3">
-        <div
-          class="tw:flex tw:h-10 tw:w-10 tw:items-center tw:justify-center tw:rounded-full tw:text-sm tw:font-semibold tw:text-white"
-          [style.background-color]="getAvatarColor(currentUser()?.fullName || currentUser()?.email)"
-        >
-          {{ getInitials(currentUser()?.fullName || currentUser()?.email) }}
-        </div>
-        <div>
-          <p class="tw:text-sm tw:font-semibold tw:text-slate-800">{{ currentUser()?.fullName || 'You' }}</p>
-          <p class="tw:text-xs tw:text-slate-500">What is new today?</p>
-        </div>
+    <!-- Compose box -->
+    <div class="feed-card tw:mb-4">
+      <div class="tw:flex tw:items-start tw:gap-3">
+        <app-user-avatar [name]="currentUser()?.fullName || currentUser()?.email" [size]="44" />
+        <form (ngSubmit)="submitPost()" class="tw:flex-1">
+          @if (!composeExpanded()) {
+            <div
+              class="compose-trigger"
+              (click)="composeExpanded.set(true)"
+              role="button"
+              tabindex="0"
+              (keydown.enter)="composeExpanded.set(true)"
+            >
+              Share an update with your team...
+            </div>
+          } @else {
+            <textarea
+              [ngModel]="newPostContent()"
+              (ngModelChange)="newPostContent.set($event)"
+              name="content"
+              rows="4"
+              maxlength="500"
+              placeholder="What's on your mind? Share updates, ask for help, or celebrate a win..."
+              class="compose-textarea"
+              required
+              autofocus
+            ></textarea>
+            <div class="tw:flex tw:items-center tw:justify-between tw:mt-3">
+              <span class="tw:text-xs tw:text-slate-400">{{ newPostContent().length }}/500</span>
+              <div class="tw:flex tw:gap-2">
+                <button mat-button type="button" (click)="composeExpanded.set(false); newPostContent.set('')">
+                  Cancel
+                </button>
+                <button
+                  mat-flat-button
+                  color="primary"
+                  type="submit"
+                  [disabled]="isSubmitting() || !newPostContent().trim()"
+                >
+                  {{ isSubmitting() ? 'Posting...' : 'Post update' }}
+                </button>
+              </div>
+            </div>
+          }
+        </form>
       </div>
-
-      <form (ngSubmit)="submitPost()" class="tw:space-y-3">
-        <textarea
-          [ngModel]="newPostContent()"
-          (ngModelChange)="newPostContent.set($event)"
-          name="content"
-          rows="4"
-          maxlength="500"
-          placeholder="Share an update, ask for help, or celebrate a win..."
-          class="tw:w-full tw:rounded-2xl tw:border tw:border-slate-200 tw:bg-slate-50 tw:px-4 tw:py-3 tw:text-slate-800 placeholder:tw:text-slate-400 tw:outline-none tw:ring-0 tw:transition focus:tw:border-sky-400 focus:tw:bg-white focus:tw:shadow-[0_0_0_4px_rgba(14,165,233,0.15)] tw:resize-none"
-          required
-        ></textarea>
-
-        <div class="tw:flex tw:items-center tw:justify-between">
-          <p class="tw:text-xs tw:text-slate-500">{{ newPostContent().length }}/500</p>
-          <button
-            mat-flat-button
-            color="primary"
-            type="submit"
-            [disabled]="isSubmitting() || !newPostContent().trim()"
-            class="tw:!inline-flex tw:!flex-row tw:items-center tw:justify-center tw:gap-2 tw:text-sm tw:font-semibold disabled:tw:cursor-not-allowed disabled:tw:opacity-50"
-          >
-            <svg class="tw:h-4 tw:w-4 tw:shrink-0 tw:inline-block tw:align-middle" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M13 5l7 7-7 7" />
-            </svg>
-            <span>{{ isSubmitting() ? 'Posting...' : 'Post update' }}</span>
-          </button>
-        </div>
-      </form>
     </div>
 
+    <!-- Skeleton loading -->
     @if (isLoading()) {
-      <div class="tw:space-y-4">
+      <div class="tw:space-y-3">
         @for (i of [1, 2, 3]; track i) {
-          <div class="tw:animate-pulse tw:rounded-3xl tw:bg-white tw:p-5 tw:shadow tw:ring-1 tw:ring-slate-100">
-            <div class="tw:mb-4 tw:flex tw:items-center tw:gap-3">
-              <div class="tw:h-10 tw:w-10 tw:rounded-full tw:bg-slate-200"></div>
+          <div class="feed-card tw:animate-pulse">
+            <div class="tw:flex tw:items-center tw:gap-3 tw:mb-4">
+              <div class="tw:h-11 tw:w-11 tw:rounded-full tw:bg-slate-200"></div>
               <div class="tw:flex-1 tw:space-y-2">
-                <div class="tw:h-3 tw:w-28 tw:rounded tw:bg-slate-200"></div>
-                <div class="tw:h-2 tw:w-20 tw:rounded tw:bg-slate-100"></div>
+                <div class="tw:h-3 tw:w-32 tw:rounded tw:bg-slate-200"></div>
+                <div class="tw:h-2.5 tw:w-24 tw:rounded tw:bg-slate-100"></div>
               </div>
             </div>
             <div class="tw:space-y-2">
@@ -93,118 +90,158 @@
       </div>
     }
 
+    <!-- Empty state -->
     @if (!isLoading() && posts().length === 0) {
-      <div class="tw:rounded-3xl tw:border tw:border-dashed tw:border-slate-300 tw:bg-white/80 tw:p-10 tw:text-center tw:shadow-sm">
-        <p class="tw:mb-2 tw:text-lg tw:font-semibold tw:text-slate-700">No posts yet</p>
-        <p class="tw:text-sm tw:text-slate-500">Start the conversation and help your team stay aligned.</p>
+      <div class="feed-card tw:text-center tw:py-12">
+        <mat-icon class="tw:mb-3" style="font-size: 3rem; width: 3rem; height: 3rem; color: var(--tc-accent);">dynamic_feed</mat-icon>
+        <p class="tw:text-base tw:font-semibold tw:text-slate-700 tw:mb-1">No posts yet</p>
+        <p class="tw:text-sm tw:text-slate-500">Start the conversation — share a win or ask for help.</p>
       </div>
     }
 
+    <!-- Post list -->
     @if (!isLoading() && posts().length > 0) {
-      <div class="tw:space-y-4">
+      <div class="tw:space-y-3">
         @for (post of posts(); track post.id) {
-          <article class="tw:rounded-3xl tw:bg-white tw:p-5 tw:shadow-md tw:shadow-slate-200/60 tw:ring-1 tw:ring-slate-200/60">
-            <div class="tw:mb-3 tw:flex tw:items-start tw:justify-between">
-              <div class="tw:flex tw:items-center tw:gap-3">
-                <div
-                  class="tw:flex tw:h-10 tw:w-10 tw:items-center tw:justify-center tw:rounded-full tw:text-sm tw:font-semibold tw:text-white"
-                  [style.background-color]="getAvatarColor(post.authorFullName || post.authorEmail || post.authorId)"
-                >
-                  {{ getInitials(post.authorFullName || post.authorEmail || post.authorId) }}
-                </div>
+          <article class="feed-card">
+
+            <!-- Post header -->
+            <div class="tw:flex tw:items-start tw:justify-between tw:mb-3">
+              <div
+                class="tw:flex tw:items-center tw:gap-3 tw:cursor-pointer"
+                role="button"
+                tabindex="0"
+                (click)="openProfile(post.authorId)"
+                (keydown.enter)="openProfile(post.authorId)"
+              >
+                <app-user-avatar [name]="post.authorFullName || post.authorEmail || post.authorId" [size]="44" />
                 <div>
-                  <p class="tw:text-sm tw:font-semibold tw:text-slate-900">{{ post.authorFullName || post.authorEmail || post.authorId }}</p>
-                  <p class="tw:text-xs tw:text-slate-500">{{ post.createdAt | date: 'medium' }}</p>
+                  <p class="tw:text-sm tw:font-semibold tw:text-slate-900 tw:leading-tight hover:tw:underline">
+                    {{ displayName(post.authorId, post.authorFullName, post.authorEmail) }}
+                  </p>
+                  <p class="tw:text-xs tw:text-slate-400 tw:mt-0.5">{{ post.createdAt | date: 'MMM d, y · h:mm a' }}</p>
                 </div>
               </div>
               @if (isPostAuthorOrAdmin(post)) {
                 <button
                   mat-icon-button
                   type="button"
-                  aria-label="Delete post"
-                  class="tw:text-slate-400 hover:tw:text-rose-500 tw:transition-colors"
-                  (click)="requestDeletePost(post)"
+                  aria-label="Post options"
+                  class="tw:text-slate-400"
+                  [matMenuTriggerFor]="postMenu"
                 >
-                  <svg class="tw:h-4 tw:w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                  </svg>
+                  <mat-icon>more_vert</mat-icon>
                 </button>
+                <mat-menu #postMenu="matMenu">
+                  <button mat-menu-item aria-label="Delete post" (click)="requestDeletePost(post)" class="tw:text-rose-600">
+                    <mat-icon color="warn">delete_outline</mat-icon>
+                    <span>Delete post</span>
+                  </button>
+                </mat-menu>
               }
             </div>
 
-            <p class="tw:whitespace-pre-wrap tw:text-[15px] tw:leading-6 tw:text-slate-700">{{ post.content }}</p>
+            <!-- Post content -->
+            <p class="tw:whitespace-pre-wrap tw:text-[15px] tw:leading-relaxed tw:text-slate-800 tw:mb-3">{{ post.content }}</p>
 
-            <div class="tw:mt-4 tw:flex tw:flex-wrap tw:items-center tw:gap-2 tw:border-t tw:border-slate-100 tw:pt-3">
+            <!-- Stats bar -->
+            @if (post.likesCount > 0 || post.commentsCount > 0) {
+              <div class="post-stats">
+                @if (post.likesCount > 0) {
+                  <span class="post-stats__likes">
+                    <span class="post-stats__likes-icon">
+                      <mat-icon>thumb_up</mat-icon>
+                    </span>
+                    {{ post.likesCount }}
+                  </span>
+                }
+                @if (post.commentsCount > 0) {
+                  <span class="tw:ml-auto">
+                    {{ post.commentsCount }} {{ post.commentsCount === 1 ? 'comment' : 'comments' }}
+                  </span>
+                }
+              </div>
+            }
+
+            <!-- Action buttons -->
+            <mat-divider class="tw:my-1"></mat-divider>
+            <div class="post-actions">
               <button
                 mat-button
                 type="button"
                 (click)="toggleLike(post)"
-                class="tw:inline-flex tw:items-center tw:gap-2 tw:text-xs tw:font-medium tw:transition"
-                [ngClass]="post.likedByCurrentUser ? 'tw:bg-sky-50 tw:text-sky-700 tw:ring-1 tw:ring-sky-200' : 'tw:text-slate-600 tw:hover:tw:bg-slate-100'"
+                class="post-actions__btn"
+                [class.post-actions__btn--liked]="post.likedByCurrentUser"
               >
+                <mat-icon>{{ post.likedByCurrentUser ? 'thumb_up' : 'thumb_up_off_alt' }}</mat-icon>
                 <span>{{ post.likedByCurrentUser ? 'Liked' : 'Like' }}</span>
-                <span class="tw:rounded-full tw:bg-white tw:px-2 tw:py-0.5 tw:text-[11px] tw:font-semibold tw:text-slate-500 tw:ring-1 tw:ring-slate-200">
-                  {{ post.likesCount }}
-                </span>
               </button>
 
               <button
                 mat-button
                 type="button"
                 (click)="toggleCommentThread(post.id)"
-                class="tw:inline-flex tw:items-center tw:gap-2 tw:text-xs tw:font-medium tw:transition"
-                [ngClass]="isCommentThreadVisible(post.id) ? 'tw:bg-emerald-50 tw:text-emerald-700 tw:ring-1 tw:ring-emerald-200' : 'tw:text-slate-600 tw:hover:tw:bg-slate-100'"
+                class="post-actions__btn"
+                [class.post-actions__btn--active]="isCommentThreadVisible(post.id)"
               >
-                <span>{{ isCommentThreadVisible(post.id) ? 'Hide comments' : 'Comment' }}</span>
-                <span class="tw:rounded-full tw:bg-white tw:px-2 tw:py-0.5 tw:text-[11px] tw:font-semibold tw:text-slate-500 tw:ring-1 tw:ring-slate-200">
-                  {{ post.commentsCount }}
-                </span>
+                <mat-icon>chat_bubble_outline</mat-icon>
+                <span>Comment</span>
               </button>
             </div>
 
+            <!-- Comment thread -->
             @if (isCommentThreadVisible(post.id)) {
-              <div class="tw:mt-4 tw:space-y-3">
-                @if (post.recentComments.length > 0) {
-                  <div class="tw:space-y-3">
-                    @for (comment of post.recentComments; track comment.id) {
-                      <div class="tw:flex tw:items-start tw:gap-3">
-                        <div
-                          class="tw:flex tw:h-8 tw:w-8 tw:shrink-0 tw:items-center tw:justify-center tw:rounded-full tw:text-[11px] tw:font-semibold tw:text-white"
-                          [style.background-color]="getAvatarColor(comment.authorFullName || comment.authorEmail || comment.authorId)"
-                        >
-                          {{ getInitials(comment.authorFullName || comment.authorEmail || comment.authorId) }}
-                        </div>
-                        <div class="tw:rounded-2xl tw:bg-slate-50 tw:px-3 tw:py-2 tw:text-sm tw:text-slate-700 tw:shadow-sm">
-                          <div class="tw:mb-1 tw:flex tw:items-center tw:gap-2">
-                            <span class="tw:font-semibold tw:text-slate-900">{{ comment.authorFullName || comment.authorEmail || comment.authorId }}</span>
-                            <span class="tw:text-[11px] tw:text-slate-400">{{ comment.createdAt | date: 'short' }}</span>
-                          </div>
-                          <p class="tw:whitespace-pre-wrap tw:leading-5">{{ comment.content }}</p>
-                        </div>
-                      </div>
-                    }
+              <mat-divider class="tw:mb-3"></mat-divider>
+              <div class="tw:space-y-3">
+                @for (comment of post.recentComments; track comment.id) {
+                  <div class="tw:flex tw:items-start tw:gap-2.5">
+                    <div
+                      class="tw:shrink-0 tw:cursor-pointer"
+                      role="button"
+                      tabindex="0"
+                      (click)="openProfile(comment.authorId)"
+                      (keydown.enter)="openProfile(comment.authorId)"
+                    >
+                      <app-user-avatar [name]="comment.authorFullName || comment.authorEmail || comment.authorId" [size]="32" />
+                    </div>
+                    <div class="comment-bubble">
+                      <span
+                        class="tw:font-semibold tw:text-slate-900 tw:text-sm tw:mr-2 tw:cursor-pointer hover:tw:underline"
+                        role="button"
+                        tabindex="0"
+                        (click)="openProfile(comment.authorId)"
+                        (keydown.enter)="openProfile(comment.authorId)"
+                      >
+                        {{ displayName(comment.authorId, comment.authorFullName, comment.authorEmail) }}
+                      </span>
+                      <span class="tw:text-xs tw:text-slate-400">{{ comment.createdAt | date: 'short' }}</span>
+                      <p class="tw:mt-1 tw:text-[13px] tw:leading-5 tw:text-slate-700 tw:whitespace-pre-wrap">{{ comment.content }}</p>
+                    </div>
                   </div>
                 }
 
-                <form (ngSubmit)="submitComment(post)" class="tw:flex tw:items-center tw:gap-2">
-                  <input
-                    [ngModel]="getCommentDraft(post.id)"
-                    (ngModelChange)="setCommentDraft(post.id, $event)"
-                    [name]="'comment-' + post.id"
-                    type="text"
-                    placeholder="Write a comment..."
-                    class="tw:flex-1 tw:rounded-full tw:border tw:border-slate-200 tw:bg-slate-50 tw:px-4 tw:py-2 tw:text-sm tw:text-slate-800 placeholder:tw:text-slate-400 tw:outline-none tw:transition focus:tw:border-sky-400 focus:tw:bg-white"
-                  />
-                  <button
-                    mat-flat-button
-                    color="primary"
-                    type="submit"
-                    class="tw:inline-flex tw:items-center tw:text-sm tw:font-semibold disabled:tw:cursor-not-allowed disabled:tw:opacity-50"
-                    [disabled]="!getCommentDraft(post.id).trim()"
-                  >
-                    Send
-                  </button>
+                <!-- Comment input -->
+                <form (ngSubmit)="submitComment(post)" class="tw:flex tw:items-center tw:gap-2 tw:mt-2">
+                  <app-user-avatar [name]="currentUser()?.fullName || currentUser()?.email" [size]="32" class="tw:shrink-0" />
+                  <div class="comment-input-wrap">
+                    <input
+                      [ngModel]="getCommentDraft(post.id)"
+                      (ngModelChange)="setCommentDraft(post.id, $event)"
+                      [name]="'comment-' + post.id"
+                      type="text"
+                      placeholder="Write a comment..."
+                      class="tw:flex-1 tw:bg-transparent tw:text-sm tw:text-slate-800 placeholder:tw:text-slate-400 tw:outline-none tw:border-none tw:min-w-0"
+                    />
+                    <button
+                      mat-icon-button
+                      type="submit"
+                      [disabled]="!getCommentDraft(post.id).trim()"
+                      class="tw:shrink-0"
+                      style="color: var(--tc-primary); width: 32px; height: 32px;"
+                    >
+                      <mat-icon>send</mat-icon>
+                    </button>
+                  </div>
                 </form>
               </div>
             }
@@ -212,5 +249,6 @@
         }
       </div>
     }
+
   </div>
 </section>

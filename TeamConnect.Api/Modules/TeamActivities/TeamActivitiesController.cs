@@ -63,12 +63,32 @@ namespace TeamConnect.Api.Modules.TeamActivities
             if (dto.ActivityType == ActivityType.Poll && options.Count < 2)
                 return BadRequest("Poll activities require at least two options.");
 
-            if (dto.DueAt.HasValue)
+            if (dto.ActivityType != ActivityType.SyncMeeting && dto.ScheduledEndAt.HasValue)
             {
-                if (dto.DueAt.Value.Kind == DateTimeKind.Unspecified)
-                    return BadRequest("DueAt must include a timezone and be provided in UTC (ISO 8601 with 'Z').");
-                if ((dto.DueAt.Value.Kind == DateTimeKind.Utc ? dto.DueAt.Value : dto.DueAt.Value.ToUniversalTime()) <= DateTime.UtcNow)
-                    return BadRequest("DueAt must be in the future.");
+                if (dto.ScheduledEndAt.Value.Kind == DateTimeKind.Unspecified)
+                    return BadRequest("ScheduledEndAt must include a timezone and be provided in UTC (ISO 8601 with 'Z').");
+                if ((dto.ScheduledEndAt.Value.Kind == DateTimeKind.Utc ? dto.ScheduledEndAt.Value : dto.ScheduledEndAt.Value.ToUniversalTime()) <= DateTime.UtcNow)
+                    return BadRequest("Due date must be in the future.");
+            }
+
+            if (dto.ActivityType == ActivityType.SyncMeeting)
+            {
+                if (string.IsNullOrWhiteSpace(dto.MeetingLink))
+                    return BadRequest("Meeting link is required for sync meetings.");
+                if (!dto.ScheduledAt.HasValue)
+                    return BadRequest("Scheduled date and time is required for sync meetings.");
+                if (dto.ScheduledAt.Value.Kind == DateTimeKind.Unspecified)
+                    return BadRequest("ScheduledAt must include a timezone and be provided in UTC (ISO 8601 with 'Z').");
+                var scheduledStartUtc = dto.ScheduledAt.Value.Kind == DateTimeKind.Utc ? dto.ScheduledAt.Value : dto.ScheduledAt.Value.ToUniversalTime();
+                if (scheduledStartUtc <= DateTime.UtcNow)
+                    return BadRequest("Scheduled date and time must be in the future.");
+                if (!dto.ScheduledEndAt.HasValue)
+                    return BadRequest("Scheduled end date and time is required for sync meetings.");
+                if (dto.ScheduledEndAt.Value.Kind == DateTimeKind.Unspecified)
+                    return BadRequest("ScheduledEndAt must include a timezone and be provided in UTC (ISO 8601 with 'Z').");
+                var scheduledEndUtc = dto.ScheduledEndAt.Value.Kind == DateTimeKind.Utc ? dto.ScheduledEndAt.Value : dto.ScheduledEndAt.Value.ToUniversalTime();
+                if (scheduledEndUtc <= scheduledStartUtc)
+                    return BadRequest("Scheduled end time must be after the start time.");
             }
 
             dto.Options = options;
@@ -100,6 +120,11 @@ namespace TeamConnect.Api.Modules.TeamActivities
                     return BadRequest("A poll option must be selected.");
                 if (dto.SelectedOptionIndex.Value < 0 || dto.SelectedOptionIndex.Value >= activity.Options.Count)
                     return BadRequest("Selected option is invalid.");
+            }
+            else if (activity.ActivityType == ActivityType.SyncMeeting)
+            {
+                if (!dto.RsvpStatus.HasValue || dto.RsvpStatus.Value == RsvpStatus.Pending)
+                    return BadRequest("An RSVP response (Accepted or Declined) is required.");
             }
             else
             {

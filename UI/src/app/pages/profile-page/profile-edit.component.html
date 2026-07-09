@@ -12,11 +12,6 @@
     </div>
 
     <div class="tw:mb-4">
-      <label class="tw:block tw:text-sm tw:font-medium tw:mb-2">Avatar URL</label>
-      <input type="url" [ngModel]="formData().avatarUrl" (ngModelChange)="updateField('avatarUrl', $event)" name="avatarUrl" placeholder="https://..." class="tw:w-full tw:px-3 tw:py-2 tw:border tw:border-gray-300 tw:rounded" />
-    </div>
-
-    <div class="tw:mb-4">
       <label class="tw:block tw:text-sm tw:font-medium tw:mb-2">Bio</label>
       <textarea [ngModel]="formData().bio" (ngModelChange)="updateField('bio', $event)" name="bio" placeholder="Tell us about yourself" class="tw:w-full tw:px-3 tw:py-2 tw:border tw:border-gray-300 tw:rounded" rows="3"></textarea>
     </div>

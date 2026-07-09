@@ -4,7 +4,6 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule, ActivatedRoute } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
-import { MatChipsModule } from '@angular/material/chips';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatRadioModule } from '@angular/material/radio';
@@ -12,14 +11,19 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AuthService } from '../../services/auth.service';
 import { UsersService } from '../../services/users.service';
 import { TeamActivitiesService, CreateTeamActivityDto, SubmitTeamActivityResponseDto, TeamActivityDto, TeamActivitySummaryDto } from '../../services/team-activities.service';
 import { TeamDetailDto, UserDto } from '../../models/auth.models';
 import { CreateTeamActivityDialogComponent } from './create-team-activity-dialog.component';
+import { SyncMeetingDialogComponent, SyncMeetingDialogResult } from './sync-meeting-dialog.component';
+import { ColleagueProfileDialogComponent } from '../../shared/colleague-profile-dialog.component';
+import { UserAvatarComponent } from '../../shared/user-avatar.component';
 
 type ActivityFilter = 'open' | 'closed' | 'all';
+type ActivityCategoryFilter = 'all' | 'meeting' | 'async';
 
 @Component({
   selector: 'app-team-activities-page',
@@ -30,7 +34,6 @@ type ActivityFilter = 'open' | 'closed' | 'all';
     RouterModule,
     MatButtonModule,
     MatButtonToggleModule,
-    MatChipsModule,
     MatDialogModule,
     MatFormFieldModule,
     MatRadioModule,
@@ -38,6 +41,8 @@ type ActivityFilter = 'open' | 'closed' | 'all';
     MatSnackBarModule,
     MatInputModule,
     MatIconModule,
+    MatTooltipModule,
+    UserAvatarComponent,
   ],
   templateUrl: './team-activities-page.html',
   styleUrls: ['./team-activities-page.scss'],
@@ -58,12 +63,13 @@ export class TeamActivitiesPage implements OnInit {
   activities = signal<TeamActivityDto[]>([]);
   summary = signal<TeamActivitySummaryDto | null>(null);
   // Controls whether the summary cards are collapsed
-  summaryCollapsed = signal(false);
+  summaryCollapsed = signal(true);
   isLoadingTeams = signal(true);
   isLoadingActivities = signal(false);
   isSubmitting = signal(false);
   selectedTeamId = signal('');
   activityFilter = signal<ActivityFilter>('open');
+  activityCategoryFilter = signal<ActivityCategoryFilter>('all');
   private teamDataRequestId = 0;
 
   responseDrafts = signal<Record<string, string>>({});
@@ -100,14 +106,21 @@ export class TeamActivitiesPage implements OnInit {
   });
 
   visibleActivities = computed(() => {
-    const filter = this.activityFilter();
+    const filter = this.canManageSelectedTeam() ? this.activityFilter() : 'open';
+    const categoryFilter = this.activityCategoryFilter();
     const items = this.activities();
 
-    const filtered = filter === 'all'
+    const statusFiltered = filter === 'all'
       ? items
       : filter === 'closed'
         ? items.filter(activity => activity.status === 'Closed')
         : items.filter(activity => activity.status === 'Open');
+
+    const filtered = categoryFilter === 'all'
+      ? statusFiltered
+      : categoryFilter === 'meeting'
+        ? statusFiltered.filter(activity => activity.activityType.toLowerCase() === 'syncmeeting')
+        : statusFiltered.filter(activity => activity.activityType.toLowerCase() !== 'syncmeeting');
 
     return [...filtered].sort((left, right) => {
       const leftResponded = left.hasCurrentUserResponded ? 1 : 0;
@@ -155,6 +168,52 @@ export class TeamActivitiesPage implements OnInit {
       }
 
       this.createActivity(result);
+    });
+  }
+
+  sameDay(start?: string | null, end?: string | null): boolean {
+    if (!start || !end) return false;
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+    return startDate.getFullYear() === endDate.getFullYear()
+      && startDate.getMonth() === endDate.getMonth()
+      && startDate.getDate() === endDate.getDate();
+  }
+
+  openSyncMeetingDialog(activity: TeamActivityDto): void {
+    const dialogRef = this.dialog.open(SyncMeetingDialogComponent, {
+      width: '560px',
+      maxWidth: '95vw',
+      data: {
+        activity,
+        canManage: this.canManageSelectedTeam()
+      }
+    });
+
+    dialogRef.afterClosed().pipe(takeUntilDestroyed(this.destroyRef)).subscribe((result?: SyncMeetingDialogResult) => {
+      if (!result) return;
+
+      if (result.action === 'rsvp') {
+        this.submitRsvp(activity, result.rsvpStatus);
+      } else if (result.action === 'close') {
+        this.completeActivity(activity);
+      }
+    });
+  }
+
+  private submitRsvp(activity: TeamActivityDto, rsvpStatus: 'Accepted' | 'Declined'): void {
+    const teamId = this.selectedTeamId();
+    if (!teamId) return;
+
+    this.teamActivitiesService.respondToActivity(teamId, activity.id, { rsvpStatus }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (updated) => {
+        this.activities.update(items => items.map(item => item.id === updated.id ? updated : item));
+        this.showSnackBar(`RSVP recorded: ${rsvpStatus}.`);
+      },
+      error: (error) => {
+        this.showSnackBar(this.getErrorMessage(error, 'Failed to submit RSVP.'), true);
+        console.error('Error submitting RSVP:', error);
+      }
     });
   }
 
@@ -225,7 +284,7 @@ export class TeamActivitiesPage implements OnInit {
         this.activityCollapsed.update(map => {
           const copy = { ...map };
           for (const a of activities) {
-            if (!(a.id in copy)) copy[a.id] = !!a.hasCurrentUserResponded;
+            if (!(a.id in copy)) copy[a.id] = true;
             if (a.hasCurrentUserResponded) copy[a.id] = true;
           }
           return copy;
@@ -344,6 +403,15 @@ export class TeamActivitiesPage implements OnInit {
     });
   }
 
+  activityTypeLabel(activityType: string): string {
+    return activityType.toLowerCase() === 'syncmeeting' ? 'Meeting' : activityType;
+  }
+
+  displayName(userId: string, fullName: string | null | undefined, email: string | null | undefined): string {
+    if (userId === this.currentUser()?.id) return 'You';
+    return fullName || email || userId;
+  }
+
   getTeamName(teamId: string): string {
     return this.teams().find(team => team.id === teamId)?.name ?? 'Selected team';
   }
@@ -368,6 +436,10 @@ export class TeamActivitiesPage implements OnInit {
     this.activityFilter.set(filter);
   }
 
+  setActivityCategoryFilter(filter: ActivityCategoryFilter): void {
+    this.activityCategoryFilter.set(filter);
+  }
+
   isActivityCollapsed(activityId: string): boolean {
     return !!this.activityCollapsed()[activityId];
   }
@@ -380,35 +452,12 @@ export class TeamActivitiesPage implements OnInit {
     this.summaryCollapsed.update(v => !v);
   }
 
-  getInitials(value: string | null | undefined): string {
-    const trimmed = (value || '').trim();
-    if (!trimmed) return 'U';
-
-    const parts = trimmed.split(/\s+/).filter(Boolean);
-    if (parts.length >= 2) {
-      return (parts[0][0] + parts[1][0]).toUpperCase();
-    }
-
-    return trimmed.slice(0, 2).toUpperCase();
-  }
-
-  getAvatarColor(value: string | null | undefined): string {
-    const palette = [
-      '#0f766e', '#0ea5e9', '#2563eb', '#4f46e5', '#7c3aed',
-      '#c026d3', '#db2777', '#ea580c', '#d97706', '#16a34a'
-    ];
-
-    const key = (value || '').trim().toLowerCase();
-    if (!key) return palette[0];
-
-    let hash = 0;
-    for (let i = 0; i < key.length; i++) {
-      hash = (hash << 5) - hash + key.charCodeAt(i);
-      hash |= 0;
-    }
-
-    const index = Math.abs(hash) % palette.length;
-    return palette[index];
+  openProfile(userId: string): void {
+    this.dialog.open(ColleagueProfileDialogComponent, {
+      width: '480px',
+      maxWidth: '95vw',
+      data: { userId }
+    });
   }
 
   private getErrorMessage(error: unknown, fallback: string): string {
